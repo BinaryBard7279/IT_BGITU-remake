@@ -1,4 +1,4 @@
-version: '3.8' 
+version: '3.8'
 
 services:
   app:
@@ -40,13 +40,14 @@ services:
     networks:
       - itnet
 
-  adminer:
-    image: adminer:latest
+  pgadmin:
+    image: dpage/pgadmin4:latest
     restart: always
     environment:
-      ADMINER_DEFAULT_SERVER: db
-    depends_on:
-      - db
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: StrongPass123
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
     networks:
       - itnet
 
@@ -54,6 +55,7 @@ volumes:
   postgres_data:
   caddy_data:
   caddy_config:
+  pgadmin_data:
 
 networks:
   itnet:

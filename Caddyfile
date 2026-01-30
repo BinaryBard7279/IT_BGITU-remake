@@ -6,5 +6,5 @@ admin.vinogradovnikita.ru {
     basicauth {
         admin $2a$04$9c8OMNev8LNYkqcavBu2kOIjT0sQ4OMNHgvMBQi3hPnC0CGxMtX6i
     }
-    reverse_proxy adminer:8080
+    reverse_proxy pgadmin:80
 }
