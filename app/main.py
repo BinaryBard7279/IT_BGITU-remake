@@ -1,22 +1,17 @@
-import os
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
 import uvicorn
+from contextlib import asynccontextmanager
+from app.database import create_tables, engine
 
-# Читаем переменные окружения (которые прилетели из .env)
-DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASS = os.getenv("DB_PASS", "postgres")
-DB_NAME = os.getenv("DB_NAME", "postgres")
-DB_HOST = "db"  # Имя сервиса в docker-compose
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await create_tables()
+    yield
+    await engine.dispose()
 
-DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:5432/{DB_NAME}"
-
-app = FastAPI()
-
-# Создаем движок (echo=True покажет SQL-запросы в логах)
-engine = create_async_engine(DATABASE_URL, echo=True)
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
