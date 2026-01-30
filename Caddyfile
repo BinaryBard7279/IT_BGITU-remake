@@ -1,3 +1,10 @@
 vinogradovnikita.ru, www.vinogradovnikita.ru {
     reverse_proxy app:8000
 }
+
+admin.vinogradovnikita.ru {
+    basicauth {
+        admin JDJhJDE0JHBqczk5b210RzFVeTAxZzAwU3ZPT2VGak9yQWdSRXRlTUt1cDFGNlEyOGkzL21QWW9jZVRP
+    }
+    reverse_proxy adminer:8080
+}
