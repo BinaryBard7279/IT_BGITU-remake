@@ -7,7 +7,7 @@ services:
     expose:
       - "8000"
     env_file:
-      - .env
+      - .env  # <-- Это будет .env на сервере, созданный из secrets
     depends_on:
       - db
     networks:
@@ -33,7 +33,7 @@ services:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER}
+      POSTGRES_USER: ${DB_USER} # Читает из .env на сервере
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
     volumes:
@@ -48,7 +48,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: StrongPass123
     volumes:
-      - pgadmin_data:/var/lib/pgadmin  
+      - pgadmin_data:/var/lib/pgadmin
     networks:
       - itnet
 
@@ -56,7 +56,7 @@ volumes:
   postgres_data:
   caddy_data:
   caddy_config:
-  pgadmin_data: 
+  pgadmin_data:
 
 networks:
   itnet:
