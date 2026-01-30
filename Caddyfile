@@ -4,7 +4,7 @@ vinogradovnikita.ru, www.vinogradovnikita.ru {
 
 admin.vinogradovnikita.ru {
     basicauth {
-        admin JDJhJDE0JHBqczk5b210RzFVeTAxZzAwU3ZPT2VGak9yQWdSRXRlTUt1cDFGNlEyOGkzL21QWW9jZVRP
+        admin $2a$04$9c8OMNev8LNYkqcavBu2kOIjT0sQ4OMNHgvMBQi3hPnC0CGxMtX6i
     }
     reverse_proxy adminer:8080
 }
