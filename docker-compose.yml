@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: binarybard7279/it-bgitu:latest  
+    image: binarybard7279/it-bgitu:latest
     restart: always
     expose:
       - "8000"
@@ -10,6 +10,8 @@ services:
       - .env
     depends_on:
       - db
+    networks:
+      - itnet
 
   caddy:
     image: caddy:latest
@@ -23,6 +25,9 @@ services:
       - caddy_config:/config
     depends_on:
       - app
+      - pgadmin
+    networks:
+      - itnet
 
   db:
     image: postgres:15
@@ -32,11 +37,27 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - postgres_data:/var/lib/postgresql/data  
-    ports:
-      - "5432:5432"
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - itnet
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: StrongPass123
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin  
+    networks:
+      - itnet
 
 volumes:
   postgres_data:
   caddy_data:
   caddy_config:
+  pgadmin_data: 
+
+networks:
+  itnet:
+    driver: bridge

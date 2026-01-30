@@ -6,4 +6,8 @@ asyncpg
 python-dotenv    
 asyncpg
 sqlalchemy
+<<<<<<< HEAD
 jose
+=======
+asyncpg==0.29.0
+>>>>>>> 3b18b2f682196b044e627622c3b91c73b344f63e
