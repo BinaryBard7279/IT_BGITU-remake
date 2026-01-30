@@ -25,7 +25,7 @@ services:
       - caddy_config:/config
     depends_on:
       - app
-      - pgadmin  
+      - pgadmin
     networks:
       - itnet
 
@@ -37,7 +37,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - postgres_/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - itnet
 
@@ -48,7 +48,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: StrongPass123
     volumes:
-      - pgadmin_/var/lib/pgadmin
+      - pgadmin_data:/var/lib/pgadmin  
     networks:
       - itnet
 
@@ -56,7 +56,7 @@ volumes:
   postgres_data:
   caddy_data:
   caddy_config:
-  pgadmin_data:
+  pgadmin_data: 
 
 networks:
   itnet:
