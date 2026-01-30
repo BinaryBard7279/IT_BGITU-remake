@@ -13,6 +13,7 @@ DB_NAME = os.getenv("DB_NAME", "postgres")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
 
+# Исправлено: / вместо :
 DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 print(f"Connecting to DB at: {DATABASE_URL}")
@@ -38,12 +39,30 @@ async def create_tables():
 async def startup():
     await create_tables()
 
-# --- УПРОЩЁННЫЙ ENDPOINT ---
+# --- ВЕРНУЛИ JAVASCRIPT ---
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
-    return "<h1>Работает (Local)</h1><p>Без JS.</p>"
+    return """
+    <html>
+        <head><title>Test Page</title></head>
+        <body style="font-family: sans-serif; padding: 20px;">
+            <h1>Работает</h1>
+            <div id="status">Connecting to DB...</div>
+            <script>
+                fetch('/api/health')
+                    .then(r => r.json())
+                    .then(data => {
+                        document.getElementById('status').innerText = 
+                            data.db_status ? 
+                            'Бд работает Result: ' + data.math_result : 
+                            'Error: ' + data.error;
+                    })
+                    .catch(e => document.getElementById('status').innerText = '❌ API Error');
+            </script>
+        </body>
+    </html>
+    """
 
-# --- УПРОЩЁННЫЙ HEALTH CHECK ---
 @app.get("/api/health")
 async def health_check():
     try:
