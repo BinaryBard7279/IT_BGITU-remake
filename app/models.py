@@ -9,6 +9,9 @@ class User(Base):
     name = Column(String, index=True)
     email = Column(String, unique=True, index=True)
 
-# Сюда потом добавишь:
+# Сюда потом добавишь :
 # class News(Base): ...
 # class Event(Base): ...
+# пидор пидор
+
+
