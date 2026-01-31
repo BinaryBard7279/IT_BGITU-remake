@@ -46,15 +46,22 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             cd /root/it-bgitu
-
-            # Создаём .env файл, используя значения из GitHub Secrets
-            # И добавляем правильные DB_HOST и DB_PORT для сервера
+            
+            # Генерация .env (оставляем как было)
             echo "DB_USER=${{ secrets.DB_USER }}" > .env
             echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-            echo "DB_HOST=db" >> .env  # <-- ВАЖНО для подключения к контейнеру db
-            echo "DB_PORT=5432" >> .env # <-- ВАЖНО, стандартный порт PostgreSQL
-
+            echo "DB_HOST=db" >> .env
+            echo "DB_PORT=5432" >> .env
+            
+            # Обновляем контейнеры
             docker compose pull
             docker compose up -d --remove-orphans
+            
+            # --- МАГИЯ ЗДЕСЬ ---
+            # Ждем пару секунд, пока база поднимется
+            sleep 5
+            # Запускаем миграции ВНУТРИ контейнера
+            docker compose exec -T app alembic upgrade head
+            
             docker image prune -f

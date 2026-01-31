@@ -1,5 +1,11 @@
-# main.py
 import os
+import sys
+from dotenv import load_dotenv
+
+
+load_dotenv(".env.local")
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -7,19 +13,22 @@ from sqlalchemy import text, Column, Integer, String
 from sqlalchemy.orm import declarative_base, sessionmaker
 import uvicorn
 
+# Получаем настройки БД
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASS = os.getenv("DB_PASS", "postgres")
 DB_NAME = os.getenv("DB_NAME", "postgres")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
 
-# Исправлено: / вместо :
 DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-print(f"Connecting to DB at: {DATABASE_URL}")
+print(f"--- CONFIG ---")
+print(f"DB HOST: {DB_HOST}")
+print(f"DB NAME: {DB_NAME}")
+print(f"Connecting URL (hidden pass): postgresql+asyncpg://{DB_USER}:***@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+print(f"--------------")
 
 app = FastAPI()
-
 Base = declarative_base()
 
 class User(Base):
@@ -31,15 +40,7 @@ class User(Base):
 engine = create_async_engine(DATABASE_URL, echo=True)
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-async def create_tables():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
 
-@app.on_event("startup")
-async def startup():
-    await create_tables()
-
-# --- ВЕРНУЛИ JAVASCRIPT ---
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     return """
@@ -47,6 +48,7 @@ async def read_root():
         <head><title>Test Page</title></head>
         <body style="font-family: sans-serif; padding: 20px;">
             <h1>Работает</h1>
+            <p>Версия с Alembic migrations</p>
             <div id="status">Connecting to DB...</div>
             <script>
                 fetch('/api/health')
@@ -54,10 +56,14 @@ async def read_root():
                     .then(data => {
                         document.getElementById('status').innerText = 
                             data.db_status ? 
-                            'Бд работает Result: ' + data.math_result : 
+                            'БД работает! 100+55 = ' + data.math_result : 
                             'Error: ' + data.error;
+                        document.getElementById('status').style.color = data.db_status ? 'green' : 'red';
                     })
-                    .catch(e => document.getElementById('status').innerText = '❌ API Error');
+                    .catch(e => {
+                        document.getElementById('status').innerText = '❌ API Error';
+                        document.getElementById('status').style.color = 'red';
+                    });
             </script>
         </body>
     </html>
