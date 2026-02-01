@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from app.models import Base
 
@@ -7,6 +7,7 @@ class Track(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False, unique=True)
+    
     directions = relationship("Direction", back_populates="track", cascade="all, delete-orphan")
 
 class Direction(Base):
