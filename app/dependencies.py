@@ -9,7 +9,7 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ) -> int:
     """
-    Зависимость для получения текущего пользователя из JWT токена
+    Зависимость для получения текущего пользователя из JWT токена.
     """
     token = credentials.credentials
     user_id = jwt_manager.get_user_id_from_token(token)

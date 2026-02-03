@@ -1,10 +1,13 @@
-from .feature import (FeatureBase, FeatureCreate, FeatureUpdate, FeatureRead as Feature)
-from .plan import (TrackBase, TrackCreate, TrackUpdate, Track,DirectionBase, DirectionCreate, DirectionUpdate, Direction, DisciplineBase, DisciplineCreate, DisciplineUpdate, Discipline, Direction_Disciplines, Track_Directions)
+# app/schemas/__init__.py
+from .feature import (FeatureBase, FeatureCreate, FeatureUpdate, Feature)
+
+from .plan import (TrackBase, TrackCreate, TrackUpdate, Track, DirectionBase, DirectionCreate, DirectionUpdate, Direction, DisciplineBase, DisciplineCreate, DisciplineUpdate, Discipline, Direction_Disciplines, Track_Directions)
 from .speciality import (SpecialityBase, SpecialityCreate, SpecialityUpdate, Speciality, Speciality_Features)
 from .subject import (SubjectBase, SubjectCreate, SubjectUpdate, Subject)
 from .teacher import (TeacherBase, TeacherCreate, TeacherUpdate, Teacher)
 from .user import (UserBase, User)
-from .auth import (Token, TokenData, LoginRequest, RegisterRequest, RefreshTokenRequest, PasswordResetRequest, PasswordChangeRequest)
+from .auth import (Token, TokenData, LoginRequest)
+
 from .health_check import HealthCheck
 
 __all__ = [
@@ -30,10 +33,9 @@ __all__ = [
     # User
     'UserBase', 'User',
 
-    # Auth
-    'Token', 'TokenData', 'LoginRequest', 'RegisterRequest',
-    'RefreshTokenRequest', 'PasswordResetRequest', 'PasswordChangeRequest',
+    # Auth - только то, что осталось
+    'Token', 'TokenData', 'LoginRequest',
 
-     # Health Check
+    # Health Check
     'HealthCheck',
 ]

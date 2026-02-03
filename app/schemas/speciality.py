@@ -25,5 +25,5 @@ class Speciality(SpecialityBase):
     model_config = ConfigDict(from_attributes=True)
     id: int = Field(..., gt=0)
 
-class Speciality_Features(Speciality): # получить специальности и особенности
+class Speciality_Features(Speciality):
     features: List[Feature] = []

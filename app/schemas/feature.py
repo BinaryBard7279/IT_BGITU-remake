@@ -14,6 +14,6 @@ class FeatureUpdate(BaseModel):
 class FeatureCreate(FeatureBase):
     pass
 
-class FeatureRead(FeatureBase):
+class Feature(FeatureBase):
     model_config = ConfigDict(from_attributes=True)
     id: int = Field(..., gt=0)

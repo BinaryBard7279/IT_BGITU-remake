@@ -4,7 +4,7 @@ from typing import Optional, Dict, Any
 from jose import JWTError, jwt
 from dotenv import load_dotenv
 
-load_dotenv('.env.local')
+load_dotenv(".env.local")
 
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key-change-me")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
@@ -27,7 +27,7 @@ class JWTManager:
             expire = now + expires_delta
         else:
             expire = now + timedelta(minutes=self.access_token_expire_minutes)
-        
+
         to_encode.update({"exp": expire})
         return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
     
