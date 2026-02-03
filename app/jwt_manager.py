@@ -4,6 +4,7 @@ from typing import Optional, Dict, Any
 from jose import JWTError, jwt
 from dotenv import load_dotenv
 
+load_dotenv(".env.local")
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key-change-me")
