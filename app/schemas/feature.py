@@ -1,17 +1,19 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 
 class FeatureBase(BaseModel):
-    subtitle: str
-    description: str
-    speciality_id: int
+    subtitle: str = Field(..., min_length=1, max_length=225)
+    description: str =  Field(..., min_length=1)
+    speciality_id: int =  Field(..., gt=0)
 
 class FeatureUpdate(BaseModel):
-    subtitle: Optional[str] = None
-    description: Optional[str] = None
-    speciality_id: Optional[int] = None
+    subtitle: Optional[str] = Field(None, min_length=1,  max_length=225)
+    description: Optional[str] = Field(None, min_length=1)
+    speciality_id: Optional[int] = Field(None, gt=0)
 
-class Feature(FeatureBase):
+class FeatureCreate(FeatureBase):
+    pass
+
+class FeatureRead(FeatureBase):
     model_config = ConfigDict(from_attributes=True)
-    id: int
-    speciality_id: int
+    id: int = Field(..., gt=0)

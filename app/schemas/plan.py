@@ -1,32 +1,32 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List
 
 # Track
 class TrackBase(BaseModel):
-    name: str
+    name: str = Field(..., min_length=1, max_length=100)
 
 class TrackCreate(TrackBase):
     pass
 
 class TrackUpdate(BaseModel):
-    name: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
 
 class Track(TrackBase):
     model_config = ConfigDict(from_attributes=True)
-    id: int
+    id: int = Field(..., gt=0)
 
 
 # Direction
 class DirectionBase(BaseModel):
-    name: str
-    track_id: int
+    name: str = Field(..., min_length=1, max_length=100)
+    track_id: int = Field(..., gt=0)
 
 class DirectionCreate(DirectionBase):
     pass
 
 class DirectionUpdate(BaseModel):
-    name: Optional[str] = None
-    track_id: Optional[int] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    track_id: Optional[int] = Field(None, gt=0)
 
 class Direction(DirectionBase):
     model_config = ConfigDict(from_attributes=True)
@@ -35,24 +35,24 @@ class Direction(DirectionBase):
 
 # Discipline
 class DisciplineBase(BaseModel):
-    name: str
-    start_term: int
-    end_term: int
-    direction_id: int
+    name: str = Field(..., min_length=1, max_length=225)
+    start_term: int = Field(..., ge=1, le=12)
+    end_term: int = Field(..., ge=1, le=12)
+    direction_id: int = Field(..., gt=0)
 
 class DisciplineCreate(DisciplineBase):
     pass
 
 class DisciplineUpdate(BaseModel):
-    name: Optional[str] = None
-    start_term: Optional[int] = None
-    end_term: Optional[int] = None
-    direction_id: Optional[int] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=200)
+    start_term: Optional[int] = Field(None, ge=1, le=12)
+    end_term: Optional[int] = Field(None, ge=1, le=12)
+    direction_id: Optional[int] = Field(None, gt=0)
 
 # шаблон для ответов API
 class Discipline(DisciplineBase):
     model_config = ConfigDict(from_attributes=True)
-    id: int
+    id: int = Field(..., gt=0)
 
 
 # для вывода вложенных данных
