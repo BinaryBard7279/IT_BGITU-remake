@@ -15,7 +15,7 @@ class TokenData(BaseModel):
 
 class LoginRequest(BaseModel):
     email: EmailStr = Field(..., max_length=255)
-    password: str = Field(..., min_length=1, max_length=225)
+    password: str = Field(..., min_length=6, max_length=225)
 
 class RegisterRequest(BaseModel):
     username: str = Field(..., min_length=1, max_length=100)
@@ -30,4 +30,4 @@ class PasswordResetRequest(BaseModel):
 
 class PasswordChangeRequest(BaseModel):
     current_password: str = Field(..., min_length=1, max_length=225)
-    new_password: str = Field(..., min_length=8, max_length=225)
+    new_password: str = Field(..., min_length=6, max_length=225)
