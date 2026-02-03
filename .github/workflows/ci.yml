@@ -28,6 +28,7 @@ jobs:
           # alembic check работает начиная с версии 1.9.0
           alembic check || echo "⚠️ ВНИМАНИЕ: Похоже, вы забыли создать миграцию! (Или alembic check не поддерживается, пропускаем)"
 
+  # 2. Сборка и отправка образа
   build-and-push:
     needs: check-code  
     runs-on: ubuntu-latest
@@ -47,6 +48,7 @@ jobs:
           push: true
           tags: binarybard7279/it-bgitu:latest
 
+  # 3. Деплой на сервер
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
@@ -59,19 +61,25 @@ jobs:
           script: |
             cd /root/it-bgitu
             
-            # Обновляем .env
+            # 1. Создаем/перезаписываем .env файл с секретами базы
             echo "DB_USER=${{ secrets.DB_USER }}" > .env
             echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
             echo "DB_HOST=db" >> .env
             echo "DB_PORT=5432" >> .env
             
-            # Деплой
+            # 2. ДОБАВЛЯЕМ СЕКРЕТЫ ДЛЯ JWT (Без них jwt_manager.py упадет)
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+            echo "ALGORITHM=${{ secrets.ALGORITHM }}" >> .env
+            echo "ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}" >> .env
+            
+            # 3. Деплой
             docker compose pull
             docker compose up -d --remove-orphans
             
-            # Миграции
+            # 4. Миграции
             sleep 5
             docker compose exec -T app alembic upgrade head
             
+            # 5. Очистка старых образов
             docker image prune -f
