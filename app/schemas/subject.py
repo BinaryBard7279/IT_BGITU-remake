@@ -9,7 +9,7 @@ class SubjectCreate(SubjectBase):
     pass
 
 class SubjectUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=225)
+    name: Optional[str] = Field(None, max_length=225)
     description: Optional[str] = Field(None, min_length=1)
 
 class Subject(SubjectBase):

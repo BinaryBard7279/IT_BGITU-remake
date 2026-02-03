@@ -1,4 +1,3 @@
-# app/schemas/__init__.py
 from .feature import (FeatureBase, FeatureCreate, FeatureUpdate, Feature)
 
 from .plan import (TrackBase, TrackCreate, TrackUpdate, Track, DirectionBase, DirectionCreate, DirectionUpdate, Direction, DisciplineBase, DisciplineCreate, DisciplineUpdate, Discipline, Direction_Disciplines, Track_Directions)

@@ -43,3 +43,4 @@ async def health_check(db: AsyncSession = Depends(get_db)):
     except Exception as e:
         print(f"DB Error: {e}")
         return {"db_status": False, "error": str(e)}
+

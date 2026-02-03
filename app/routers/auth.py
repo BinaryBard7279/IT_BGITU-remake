@@ -8,8 +8,9 @@ from app.schemas.auth import Token, LoginRequest
 from app.security import verify_password, get_password_hash
 from app.jwt_manager import jwt_manager
 
-router = APIRouter(prefix="/admin", tags=["authentication"])
+router = APIRouter(prefix="/admin", tags=["Authentification"])
 
+# Authentification
 @router.get("/")
 async def admin_root():
     return {
@@ -44,6 +45,7 @@ async def login(
     
     return Token(access_token=access_token)
 
+# Password to hash
 @router.post("/hash-password")
 async def hash_password_endpoint(password: str = Form(..., min_length=6)):
     """
