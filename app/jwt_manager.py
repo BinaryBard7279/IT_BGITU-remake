@@ -1,6 +1,6 @@
 import os
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import datetime, timedelta, timezone
+from typing import Optional, Dict, Any
 from jose import JWTError, jwt
 from dotenv import load_dotenv
 
@@ -12,39 +12,32 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
 
 class JWTManager:
     def __init__(self):
+        if not SECRET_KEY or SECRET_KEY == "fallback-secret-key-change-me":
+            raise ValueError("SECRET_KEY не установлен в .env.local!")
+        
         self.secret_key = SECRET_KEY
         self.algorithm = ALGORITHM
         self.access_token_expire_minutes = ACCESS_TOKEN_EXPIRE_MINUTES
     
-    def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None) -> str:
-        """
-        Создает JWT токен
-        """
+    def create_access_token(self, data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
         to_encode = data.copy()
+        now = datetime.now(timezone.utc)
         
         if expires_delta:
-            expire = datetime.utcnow() + expires_delta
+            expire = now + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(minutes=self.access_token_expire_minutes)
+            expire = now + timedelta(minutes=self.access_token_expire_minutes)
         
         to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
-        return encoded_jwt
+        return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
     
-    def verify_token(self, token: str) -> Optional[dict]:
-        """
-        Проверяет JWT токен и возвращает данные, если токен валиден
-        """
+    def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
         try:
-            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
-            return payload
+            return jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
         except JWTError:
             return None
     
     def get_user_id_from_token(self, token: str) -> Optional[int]:
-        """
-        Извлекает ID пользователя из токена
-        """
         payload = self.verify_token(token)
         if payload is None:
             return None
