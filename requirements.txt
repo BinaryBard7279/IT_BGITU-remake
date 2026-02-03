@@ -6,7 +6,6 @@ asyncpg
 python-dotenv    
 asyncpg
 sqlalchemy
-jose
 alembic
 passlib[bcrypt]
 python-jose[cryptography]
