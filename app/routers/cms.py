@@ -9,7 +9,6 @@ from sqlalchemy import func
 from app.database import get_db
 from app.dependencies import get_current_user
 
-from app.models.user import User
 from app.models.speciality import Speciality
 from app.models.feature import Feature
 from app.models.plan import Direction, Discipline
@@ -35,9 +34,9 @@ from app.schemas.plan import (
     Direction_Disciplines
 )
 from app.schemas.teacher import (
-    TeacherBase, 
-    TeacherCreate, 
-    TeacherUpdate, 
+    TeacherBase,
+    TeacherCreate,
+    TeacherUpdate,
     Teacher as TeacherSchema
 )
 from app.schemas.subject import (
@@ -56,7 +55,7 @@ from app.schemas.achievement import (
 from app.security import verify_password, get_password_hash
 from app.jwt_manager import jwt_manager
 
-router = APIRouter(prefix="/amdin/cms", tags=["CMS Panel"])
+router = APIRouter(prefix="/admin/cms", tags=["CMS Panel"])
 
 
 # Subject
@@ -361,7 +360,8 @@ async def speciality_update(
 @router.delete("/speciality/{speciality_id}")
 async def speciality_delete(
     speciality_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
 ):
     """
     Удаление специальности
@@ -467,7 +467,7 @@ async def achive_update(
     
     return achive
 
-@router.delete("/achievement/{achive_id}")
+@router.delete("/achievements/{achive_id}")
 async def achive_delete(
     achive_id: int,
     db: AsyncSession = Depends(get_db),
