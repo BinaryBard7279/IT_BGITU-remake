@@ -48,7 +48,7 @@ from app.schemas.achievement import (
     AchievementUpdate
 )
 
-router = APIRouter()
+router = APIRouter(prefix="/", tags=["Landing"])
 
 @router.get("/") 
 async def read_root():
