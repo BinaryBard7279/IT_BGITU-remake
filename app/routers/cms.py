@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
-import shutil
 
 from app.database import get_db
 from app.dependencies import get_current_user
@@ -11,9 +10,10 @@ from app.dependencies import get_current_user
 from app.models.user import User
 from app.models.speciality import Speciality
 from app.models.feature import Feature
-from app.models.plan import Track, Direction, Discipline
+from app.models.plan import Direction, Discipline
 from app.models.teacher import Teacher
 from app.models.subject import Subject
+from app.models.achievement import Achievement
 
 from app.schemas.speciality import (
     SpecialityCreate, 
@@ -28,10 +28,9 @@ from app.schemas.feature import (
     Feature as FeatureSchema
 )
 from app.schemas.plan import (
-    TrackBase, TrackCreate, TrackUpdate, Track as TrackSchema,
     DirectionBase, DirectionCreate, DirectionUpdate, Direction as DirectionSchema,
     DisciplineBase, DisciplineCreate, DisciplineUpdate, Discipline as DisciplineSchema,
-    Direction_Disciplines, Track_Directions
+    Direction_Disciplines
 )
 from app.schemas.teacher import (
     TeacherBase, 
@@ -44,6 +43,12 @@ from app.schemas.subject import (
     SubjectCreate, 
     SubjectUpdate, 
     Subject as SubjectSchema
+)
+from app.schemas.achievement import (
+    AchievementBase,
+    Achievement as AchievementSchema,
+    AchievementCreate,
+    AchievementUpdate
 )
 
 from app.security import verify_password, get_password_hash
