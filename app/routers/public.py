@@ -13,6 +13,14 @@ async def read_root():
     file_path = os.path.join("app", "templates", "index.html")
     return FileResponse(file_path)
 
+@router.get("/robots.txt", include_in_schema=False)
+async def robots():
+    return FileResponse(os.path.join("app", "static", "robots.txt"))
+
+@router.get("/sitemap.xml", include_in_schema=False)
+async def sitemap():
+    return FileResponse(os.path.join("app", "static", "sitemap.xml"))
+
 @router.get("/api/health")
 async def health_check(db: AsyncSession = Depends(get_db)):
     try:
