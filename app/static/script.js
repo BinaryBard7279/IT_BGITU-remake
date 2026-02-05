@@ -1,8 +1,41 @@
-/* БГИТУ IT-Институт — Final Logic (Safe Names, Smooth Slide, Fixed Physics) */
+/* БГИТУ IT-Институт — Final Logic (With Inertia Scroll) */
 (() => {
   'use strict';
 
-  // Данные (заморожены для производительности) - ИМЕНА БЕЗОПАСНЫЕ
+  // ================= 0. ИНИЦИАЛИЗАЦИЯ LENIS (ИНЕРЦИЯ) =================
+  let lenis; // Объявляем переменную для доступа к ней из навигации
+  
+  if (typeof Lenis !== 'undefined') {
+    lenis = new Lenis({
+      duration: 1.2,        // Длительность инерции (1.2 сек)
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Плавная кривая
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    
+    // Перехват обычных якорей, чтобы они тоже скроллили плавно
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        const targetElem = document.getElementById(targetId);
+        if (targetElem) lenis.scrollTo(targetElem);
+      });
+    });
+  } else {
+    console.warn('Lenis script not loaded. Add it to index.html');
+  }
+
+  // ================= 1. DATA (CONSTANTS) =================
   const DATA = Object.freeze({
     courses: [
       { n: 'Информатика', s: 1, e: 2, c: 'bg-pastel-sky', d: 'Базовые основы программирования и алгоритмического мышления' },
@@ -46,9 +79,9 @@
   const esc = s => s.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]));
   const getById = id => document.getElementById(id);
 
-  // === RENDER ===
+  // ================= 2. RENDER LOGIC =================
   
-  // 1. Directions (FIXED: Smooth Carousel with Transform)
+  // Directions Carousel
   const dTrack = getById('directionsTrack');
   const dDots = getById('directionsDots');
   if (dTrack) {
@@ -82,7 +115,7 @@
     getById('directionsNext')?.addEventListener('click', () => set(idx + 1));
   }
 
-  // 2. Roadmap
+  // Roadmap
   const rGrid = getById('roadmap-grid');
   const rTip = getById('course-tooltip');
   if (rGrid) {
@@ -107,11 +140,11 @@
     rGrid.addEventListener('mouseleave', () => rTip.style.display = 'none');
   }
 
-  // 3. Achievements
+  // Achievements
   const aGrid = getById('achievementsGrid');
   if(aGrid) aGrid.innerHTML = DATA.achievements.map(a => `<div class="achievement-card ${a.b} reveal"><div class="achievement-header"><span class="achievement-tag ${a.c}">${a.g}</span></div><h3 class="achievement-title">${esc(a.t)}</h3><p class="achievement-desc">${esc(a.d)}</p></div>`).join('');
 
-  // 4. Faculty (FIXED: Smooth Slide Button)
+  // Faculty Physics
   const fTrack = getById('facultyTrack');
   if (fTrack) {
     const innerHtml = DATA.faculty.map(p => `
@@ -128,7 +161,7 @@
 
     const startPhysics = () => {
       const inner = fTrack.firstElementChild;
-      let off = 0, max = 0, isD = false, start, startOff, last, vel = 0, raf;
+      let off = 0, max = 0, isD = false, start, startOff, last, vel = 0, rafP;
       const upd = () => { max = Math.max(0, inner.scrollWidth - fTrack.clientWidth); if(off>max) off=max; inner.style.transform = `translateX(-${off}px)`; };
       new ResizeObserver(upd).observe(fTrack);
       
@@ -145,7 +178,7 @@
         vel*=0.89; off-=vel*1.2;
         if(off<0){off=0;vel=0} else if(off>max){off=max;vel=0}
         inner.style.transform = `translateX(-${off}px)`;
-        raf = requestAnimationFrame(inertia);
+        rafP = requestAnimationFrame(inertia);
       };
       
       const end = () => {
@@ -155,7 +188,7 @@
         else inertia();
       };
       
-      const startDrag = x => { cancelAnimationFrame(raf); fTrack.classList.add('faculty-dragging'); fTrack.classList.remove('faculty-inertia'); isD=true; start=last=x; startOff=off; vel=0; };
+      const startDrag = x => { cancelAnimationFrame(rafP); fTrack.classList.add('faculty-dragging'); fTrack.classList.remove('faculty-inertia'); isD=true; start=last=x; startOff=off; vel=0; };
 
       fTrack.addEventListener('mousedown', e => { e.preventDefault(); startDrag(e.pageX); });
       window.addEventListener('mousemove', e => move(e.pageX));
@@ -168,10 +201,7 @@
       const scroll = d => {
         const w = inner.firstElementChild ? inner.firstElementChild.offsetWidth + 24 : 300;
         off = Math.max(0, Math.min(max, off + d * w));
-        
-        // ВАЖНО: Разрешаем плавный переход, убирая класс инерции
         fTrack.classList.remove('faculty-inertia');
-        
         inner.style.transform = `translateX(-${off}px)`;
         startOff = off; last = off;
       };
@@ -184,7 +214,7 @@
     }).observe(fTrack);
   }
 
-  // === GLOBAL UI & ANIMATIONS ===
+  // ================= 3. GLOBAL UI =================
   const yearEl = getById('current-year');
   if(yearEl) yearEl.textContent = new Date().getFullYear();
   
@@ -194,8 +224,7 @@
   const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}}), {threshold:0.1, rootMargin:'0px 0px -50px 0px'});
   document.querySelectorAll('.reveal').forEach(e => obs.observe(e));
 
-  const staggerSelector = '.disciplines-grid, .features-grid, .faculty-track-inner';
-  document.querySelectorAll(staggerSelector).forEach(container => {
+  document.querySelectorAll('.disciplines-grid, .features-grid, .faculty-track-inner').forEach(container => {
     const children = container.querySelectorAll('[data-stagger], .faculty-card');
     children.forEach((el, i) => {
       const delay = container.classList.contains('faculty-track-inner') ? 0.05 : 0.1;
@@ -203,7 +232,6 @@
     });
   });
 
-  // Form & Nav & ScrollSpy & FAQ
   const form = getById('applyForm');
   const msg = getById('formSuccess');
   if(form) form.addEventListener('submit', e => {
@@ -214,18 +242,27 @@
     setTimeout(() => { btn.textContent=txt; btn.disabled=false; form.reset(); msg.style.display='flex'; setTimeout(()=>msg.style.display='none',5000); }, 1000);
   });
 
+  // NAV: Updated to use Lenis for smooth scroll
   const nav = document.querySelector('.header-nav');
-  const links = document.querySelectorAll('.nav-link');
   if(nav) nav.addEventListener('click', e => {
-    if(e.target.classList.contains('nav-link')) getById(e.target.dataset.target)?.scrollIntoView({behavior:'smooth'});
+    if(e.target.classList.contains('nav-link')) {
+        const targetId = e.target.dataset.target;
+        const targetElem = getById(targetId);
+        if(targetElem) {
+            if(lenis) lenis.scrollTo(targetElem); // Используем инерционный скролл
+            else targetElem.scrollIntoView({behavior:'smooth'}); // Фолбек
+        }
+    }
   });
 
+  // ScrollSpy
   let tick = false;
+  const links = document.querySelectorAll('.nav-link');
   window.addEventListener('scroll', () => {
     if(!tick) {
       window.requestAnimationFrame(() => {
         const curr = ['roadmap','faculty','features','disciplines','directions'].find(id => {
-           const el = getById(id); return el && window.scrollY >= el.offsetTop - 200;
+           const el = getById(id); return el && window.scrollY >= el.offsetTop - 300;
         });
         links.forEach(l => l.classList.toggle('active', l.dataset.target === curr));
         tick = false;
@@ -234,6 +271,7 @@
     }
   }, {passive:true});
 
+  // FAQ
   document.querySelector('.faq-column')?.addEventListener('click', e => {
     const btn = e.target.closest('.faq-question');
     if(!btn) return;
