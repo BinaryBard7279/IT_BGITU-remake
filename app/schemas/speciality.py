@@ -8,8 +8,7 @@ class SpecialityBase(BaseModel):
     term: int = Field(..., ge=1, le=10)
     direction: str = Field(..., min_length=1, max_length=100)
     description: str = Field(..., min_length=1)
-    image_url: str
-
+    
 class SpecialityCreate(SpecialityBase):
     pass
 
@@ -19,7 +18,6 @@ class SpecialityUpdate(BaseModel):
     term: Optional[int] = Field(None, ge=1, le=10)
     direction: Optional[str] = Field(None, min_length=1, max_length=100)
     description: Optional[str] = Field(None, min_length=1)
-    image_url: Optional[str] = None
 
 class Speciality(SpecialityBase):
     model_config = ConfigDict(from_attributes=True)
