@@ -1,4 +1,4 @@
-/* БГИТУ IT-Институт — Extreme Optimized JS + Full Animations (Sanitized) */
+/* БГИТУ IT-Институт — Updated JS (No Stars, No Badges, Smooth Carousel) */
 (() => {
   'use strict';
 
@@ -40,8 +40,7 @@
   const ICONS = {
     q: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>',
     t: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
-    f: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
-    a: '<svg class="achievement-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.3 6.9L21 12l-5.7 2.1L13 21l-2.3-6.9L5 12l5.7-2.1L13 3z"/></svg>'
+    f: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>'
   };
 
   const esc = s => s.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]));
@@ -49,14 +48,14 @@
 
   // === RENDER ===
   
-  // 1. Directions
+  // 1. Directions (УБРАН badge, УБРАН класс reveal)
   const dTrack = getById('directionsTrack');
   const dDots = getById('directionsDots');
   if (dTrack) {
     dTrack.innerHTML = DATA.directions.map(d => `
       <div class="direction-slide">
-        <div class="direction-card reveal"> 
-          <div class="direction-card-head"><h3 class="direction-title">${esc(d.t)}</h3><span class="direction-badge">IT</span></div>
+        <div class="direction-card"> 
+          <div class="direction-card-head"><h3 class="direction-title">${esc(d.t)}</h3></div>
           <div class="direction-attrs">
             <div class="direction-attr"><span class="direction-attr-icon">${ICONS.q}</span><div><span class="direction-attr-label">Квалификация</span><span class="direction-attr-value">${esc(d.q)}</span></div></div>
             <div class="direction-attr"><span class="direction-attr-icon">${ICONS.t}</span><div><span class="direction-attr-label">Срок</span><span class="direction-attr-value">${esc(d.tm)}</span></div></div>
@@ -105,9 +104,9 @@
     rGrid.addEventListener('mouseleave', () => rTip.style.display = 'none');
   }
 
-  // 3. Achievements
+  // 3. Achievements (УБРАНА иконка звезды)
   const aGrid = getById('achievementsGrid');
-  if(aGrid) aGrid.innerHTML = DATA.achievements.map(a => `<div class="achievement-card ${a.b} reveal"><div class="achievement-header"><span class="achievement-tag ${a.c}">${a.g}</span>${ICONS.a}</div><h3 class="achievement-title">${esc(a.t)}</h3><p class="achievement-desc">${esc(a.d)}</p></div>`).join('');
+  if(aGrid) aGrid.innerHTML = DATA.achievements.map(a => `<div class="achievement-card ${a.b} reveal"><div class="achievement-header"><span class="achievement-tag ${a.c}">${a.g}</span></div><h3 class="achievement-title">${esc(a.t)}</h3><p class="achievement-desc">${esc(a.d)}</p></div>`).join('');
 
 
   // 4. Faculty
@@ -187,7 +186,7 @@
 
   const staggerSelector = '.disciplines-grid, .features-grid, .directions-carousel, .faculty-track-inner';
   document.querySelectorAll(staggerSelector).forEach(container => {
-    const children = container.querySelectorAll('[data-stagger], .direction-card, .faculty-card');
+    const children = container.querySelectorAll('[data-stagger], .faculty-card');
     children.forEach((el, i) => {
       const delay = container.classList.contains('faculty-track-inner') ? 0.05 : 0.1;
       el.style.animationDelay = `${delay * (i + 1)}s`;

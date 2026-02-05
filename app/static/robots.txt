@@ -1,7 +1,1 @@
-User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /api/
-
-Sitemap: https://vinogradovnikita.ru/sitemap.xml
-Host: https://vinogradovnikita.ru
+User-agent: * Disallow: /
