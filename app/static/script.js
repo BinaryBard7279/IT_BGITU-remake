@@ -1,4 +1,4 @@
-/* БГИТУ IT-Институт — Extreme Optimized JS + Full Animations */
+/* БГИТУ IT-Институт — Extreme Optimized JS + Full Animations (Sanitized) */
 (() => {
   'use strict';
 
@@ -22,13 +22,13 @@
       { t: 'Программная инженерия', q: 'Бакалавр', tm: '4 года', f: 'Программная инженерия', d: 'Полный цикл разработки ПО: от архитектуры до DevOps.' }
     ],
     faculty: [
-      { n: 'Анна Смирнова', c: 'Noosft', s: ['Кибербезопасность', 'Защита сетей', 'Криптография'] },
-      { n: 'Протасов П.Н.', c: 'Директор ООО «СОФТСОЛ»', s: ['Java', 'ООП', 'Enterprise'] },
-      { n: 'Кондратенко С.В.', c: 'Директор ООО «НООСОФТ»', s: ['JavaScript', 'Frontend', 'React'] },
-      { n: 'Иванов И.И.', c: 'TechSoft', s: ['Java', 'Backend архитектура'] },
-      { n: 'Петрова А.С.', c: 'DataCorp', s: ['Аналитика данных', 'Python'] },
-      { n: 'Сидоров В.К.', c: 'SoftSol', s: ['1С-разработка', 'Бизнес-аналитика'] },
-      { n: 'Козлова М.А.', c: 'ГК Иннотех', s: ['Frontend', 'JavaScript'] }
+      { n: 'Волков Артем Дмитриевич', c: 'Техно-Сфера', s: ['Кибербезопасность', 'Защита сетей', 'Криптография'] },
+      { n: 'Лебедева Виктория Игоревна', c: 'ИТ-Альянс', s: ['Java', 'ООП', 'Enterprise'] },
+      { n: 'Романов Максим Сергеевич', c: 'Спектр Софт', s: ['JavaScript', 'Frontend', 'React'] },
+      { n: 'Соловьева Екатерина Павловна', c: 'ИнноТех', s: ['Java', 'Backend архитектура'] },
+      { n: 'Орлов Никита Александрович', c: 'ДатаЛаб', s: ['Аналитика данных', 'Python'] },
+      { n: 'Морозова Дарья Викторовна', c: 'ПрофРазработка', s: ['Системный анализ', 'Бизнес-аналитика'] },
+      { n: 'Павлов Андрей Николаевич', c: 'Глобал Системы', s: ['Frontend', 'JavaScript', 'TypeScript'] }
     ],
     achievements: [
       { t: 'II место в Первенстве РФ', d: 'Серебро на нац. первенстве по спорт. программированию.', g: 'Спорт.прог', c: 'bg-pastel-sky', b: 'border-sky' },
@@ -49,11 +49,10 @@
 
   // === RENDER ===
   
-  // 1. Directions (Слайдер направлений)
+  // 1. Directions
   const dTrack = getById('directionsTrack');
   const dDots = getById('directionsDots');
   if (dTrack) {
-    // ДОБАВЛЕН КЛАСС 'reveal' к карточке
     dTrack.innerHTML = DATA.directions.map(d => `
       <div class="direction-slide">
         <div class="direction-card reveal"> 
@@ -68,7 +67,6 @@
       </div>`).join('');
     dDots.innerHTML = DATA.directions.map(() => `<button class="directions-dot"></button>`).join('');
     
-    // Logic
     const slides = dTrack.children, dots = dDots.children;
     let idx = 0;
     const set = i => {
@@ -82,7 +80,7 @@
     set(0);
   }
 
-  // 2. Roadmap (Учебный план)
+  // 2. Roadmap
   const rGrid = getById('roadmap-grid');
   const rTip = getById('course-tooltip');
   if (rGrid) {
@@ -107,15 +105,14 @@
     rGrid.addEventListener('mouseleave', () => rTip.style.display = 'none');
   }
 
-  // 3. Achievements (Достижения)
+  // 3. Achievements
   const aGrid = getById('achievementsGrid');
   if(aGrid) aGrid.innerHTML = DATA.achievements.map(a => `<div class="achievement-card ${a.b} reveal"><div class="achievement-header"><span class="achievement-tag ${a.c}">${a.g}</span>${ICONS.a}</div><h3 class="achievement-title">${esc(a.t)}</h3><p class="achievement-desc">${esc(a.d)}</p></div>`).join('');
 
 
-  // 4. Faculty (Лента преподавателей)
+  // 4. Faculty
   const fTrack = getById('facultyTrack');
   if (fTrack) {
-    // ДОБАВЛЕН КЛАСС 'reveal' к карточке + data-stagger
     const innerHtml = DATA.faculty.map(p => `
       <div class="faculty-card reveal" data-stagger>
         <div class="faculty-photo-placeholder"></div>
@@ -128,14 +125,11 @@
       </div>`).join('');
     fTrack.innerHTML = `<div class="faculty-track-inner">${innerHtml}</div>`;
 
-    // Lazy Physics Init
     const startPhysics = () => {
       const inner = fTrack.firstElementChild;
       let off = 0, max = 0, isD = false, start, startOff, last, vel = 0, raf;
-      
       const upd = () => { max = Math.max(0, inner.scrollWidth - fTrack.clientWidth); if(off>max) off=max; inner.style.transform = `translateX(-${off}px)`; };
       new ResizeObserver(upd).observe(fTrack);
-
       const move = x => {
         if(!isD) return;
         let n = startOff + (start - x);
@@ -143,7 +137,6 @@
         off = n; vel = x - last; last = x;
         inner.style.transform = `translateX(-${off}px)`;
       };
-      
       const inertia = () => {
         if(Math.abs(vel)<0.1) return fTrack.classList.remove('faculty-inertia');
         vel*=0.95; off-=vel*1.5;
@@ -151,14 +144,12 @@
         inner.style.transform = `translateX(-${off}px)`;
         raf = requestAnimationFrame(inertia);
       };
-
       const end = () => {
         if(!isD) return;
         isD = false; fTrack.classList.remove('faculty-dragging');
         if(off<0||off>max) { fTrack.classList.add('faculty-inertia'); off=Math.max(0,Math.min(max,off)); inner.style.transform=`translateX(-${off}px)`; }
         else inertia();
       };
-
       const startDrag = x => { cancelAnimationFrame(raf); fTrack.classList.add('faculty-dragging'); fTrack.classList.remove('faculty-inertia'); isD=true; start=last=x; startOff=off; vel=0; };
 
       fTrack.addEventListener('mousedown', e => { e.preventDefault(); startDrag(e.pageX); });
@@ -185,25 +176,19 @@
   }
 
   // === GLOBAL UI & ANIMATIONS ===
-  getById('current-year').textContent = new Date().getFullYear();
+  const yearEl = getById('current-year');
+  if(yearEl) yearEl.textContent = new Date().getFullYear();
   
   const header = getById('header');
   window.addEventListener('scroll', () => requestAnimationFrame(() => header.classList.toggle('scrolled', window.scrollY > 50)), {passive:true});
 
-  // Observer: Делаем элементы видимыми при скролле
   const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}}), {threshold:0.1, rootMargin:'0px 0px -50px 0px'});
-  
-  // Следим за всем, что имеет класс .reveal
   document.querySelectorAll('.reveal').forEach(e => obs.observe(e));
 
-  // Каскадная анимация (Stagger) для сеток, направлений и ленты
-  // ТЕПЕРЬ ОНА РАБОТАЕТ И ДЛЯ НОВЫХ ЭЛЕМЕНТОВ
   const staggerSelector = '.disciplines-grid, .features-grid, .directions-carousel, .faculty-track-inner';
   document.querySelectorAll(staggerSelector).forEach(container => {
-    // Ищем элементы внутри, у которых есть data-stagger или просто карточки
     const children = container.querySelectorAll('[data-stagger], .direction-card, .faculty-card');
     children.forEach((el, i) => {
-      // Для ленты преподавателей делаем задержку меньше, чтобы не ждать долго
       const delay = container.classList.contains('faculty-track-inner') ? 0.05 : 0.1;
       el.style.animationDelay = `${delay * (i + 1)}s`;
     });
