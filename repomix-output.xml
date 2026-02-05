@@ -1,0 +1,2865 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.dockerignore
+.github/workflows/ci.yml
+.gitignore
+alembic.ini
+alembic/env.py
+alembic/README
+alembic/script.py.mako
+alembic/versions/e0f5b3a489f8_create_users_table.py
+alembic/versions/f010c6bcde6b_reorganize_models_structure.py
+app/__init__.py
+app/config.py
+app/database.py
+app/dependencies.py
+app/jwt_manager.py
+app/main.py
+app/models/__init__.py
+app/models/feature.py
+app/models/plan.py
+app/models/speciality.py
+app/models/subject.py
+app/models/teacher.py
+app/models/user.py
+app/routers/__init__.py
+app/routers/auth.py
+app/routers/cms.py
+app/routers/public.py
+app/schemas/__init__.py
+app/schemas/auth.py
+app/schemas/feature.py
+app/schemas/health_check.py
+app/schemas/plan.py
+app/schemas/speciality.py
+app/schemas/subject.py
+app/schemas/teacher.py
+app/schemas/user.py
+app/security.py
+app/static/script.js
+app/static/styles.css
+app/templates/index.html
+Caddyfile
+DEV_GUIDE.md
+docker-compose.yml
+Dockerfile
+README.md
+requirements.txt
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="app/static/script.js">
+/* БГИТУ IT-Институт — Extreme Optimized JS + Full Animations */
+(() => {
+  'use strict';
+
+  // Данные (заморожены для производительности)
+  const DATA = Object.freeze({
+    courses: [
+      { n: 'Информатика', s: 1, e: 2, c: 'bg-pastel-sky', d: 'Базовые основы программирования и алгоритмического мышления' },
+      { n: 'Алгоритмы и структуры', s: 2, e: 3, c: 'bg-pastel-mint', d: 'Фундаментальные алгоритмы, сложность, оптимизация' },
+      { n: 'Frontend-разработка', s: 3, e: 4, c: 'bg-pastel-peach', d: 'HTML, CSS, JS, React и современные фреймворки' },
+      { n: 'Backend (Java/C#)', s: 4, e: 5, c: 'bg-pastel-coral', d: 'Серверная разработка, REST API, микросервисы' },
+      { n: 'Базы данных', s: 4, e: 6, c: 'bg-pastel-lavender', d: 'SQL, NoSQL, проектирование и оптимизация БД' },
+      { n: 'ML и ИИ', s: 5, e: 7, c: 'bg-pastel-sage', d: 'Python, нейросети, обработка данных, ML-модели' },
+      { n: 'Мобильная разработка', s: 6, e: 7, c: 'bg-pastel-sky', d: 'Кроссплатформенная и нативная разработка' },
+      { n: 'Дипломный проект', s: 7, e: 8, c: 'bg-pastel-mint', d: 'Реальный проект для компании-партнёра' }
+    ],
+    directions: [
+      { t: 'Кибербезопасность', q: 'Бакалавр', tm: '4 года', f: 'Информатика и ВТ', d: 'Защита систем от кибератак и безопасность данных.' },
+      { t: 'Искусственный интеллект', q: 'Бакалавр', tm: '4 года', f: 'Информатика и ВТ', d: 'Машинное обучение, нейросети, NLP и Big Data.' },
+      { t: 'Автоматизированное проектирование', q: 'Бакалавр', tm: '4 года', f: 'Информатика и ВТ', d: 'Робототехника, CAD-технологии и автоматизация.' },
+      { t: 'Информационные системы', q: 'Бакалавр', tm: '4 года', f: 'ИСиТ', d: 'Проектирование корпоративных систем.' },
+      { t: 'Программная инженерия', q: 'Бакалавр', tm: '4 года', f: 'Программная инженерия', d: 'Полный цикл разработки ПО: от архитектуры до DevOps.' }
+    ],
+    faculty: [
+      { n: 'Анна Смирнова', c: 'Huesoft', s: ['Кибербезопасность', 'Защита сетей', 'Криптография'] },
+      { n: 'Протасов П.Н.', c: 'Директор ООО «СОФТСОЛ»', s: ['Java', 'ООП', 'Enterprise'] },
+      { n: 'Кондратенко С.В.', c: 'Директор ООО «НООСОФТ»', s: ['JavaScript', 'Frontend', 'React'] },
+      { n: 'Иванов И.И.', c: 'TechSoft', s: ['Java', 'Backend архитектура'] },
+      { n: 'Петрова А.С.', c: 'DataCorp', s: ['Аналитика данных', 'Python'] },
+      { n: 'Сидоров В.К.', c: 'SoftSol', s: ['1С-разработка', 'Бизнес-аналитика'] },
+      { n: 'Козлова М.А.', c: 'ГК Иннотех', s: ['Frontend', 'JavaScript'] }
+    ],
+    achievements: [
+      { t: 'II место в Первенстве РФ', d: 'Серебро на нац. первенстве по спорт. программированию.', g: 'Спорт.прог', c: 'bg-pastel-sky', b: 'border-sky' },
+      { t: 'III место «Лесное многоборье»', d: 'Команда магистров в тройке лидеров вузов страны.', g: 'Экология', c: 'bg-pastel-mint', b: 'border-mint' },
+      { t: 'Победы в конкурсе «УМНИК»', d: 'Гранты на реализацию высокотехнологичных проектов.', g: 'Наука', c: 'bg-pastel-lavender', b: 'border-lavender' }
+    ]
+  });
+
+  const ICONS = {
+    q: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>',
+    t: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+    f: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+    a: '<svg class="achievement-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.3 6.9L21 12l-5.7 2.1L13 21l-2.3-6.9L5 12l5.7-2.1L13 3z"/></svg>'
+  };
+
+  const esc = s => s.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]));
+  const getById = id => document.getElementById(id);
+
+  // === RENDER ===
+  
+  // 1. Directions (Слайдер направлений)
+  const dTrack = getById('directionsTrack');
+  const dDots = getById('directionsDots');
+  if (dTrack) {
+    // ДОБАВЛЕН КЛАСС 'reveal' к карточке
+    dTrack.innerHTML = DATA.directions.map(d => `
+      <div class="direction-slide">
+        <div class="direction-card reveal"> 
+          <div class="direction-card-head"><h3 class="direction-title">${esc(d.t)}</h3><span class="direction-badge">IT</span></div>
+          <div class="direction-attrs">
+            <div class="direction-attr"><span class="direction-attr-icon">${ICONS.q}</span><div><span class="direction-attr-label">Квалификация</span><span class="direction-attr-value">${esc(d.q)}</span></div></div>
+            <div class="direction-attr"><span class="direction-attr-icon">${ICONS.t}</span><div><span class="direction-attr-label">Срок</span><span class="direction-attr-value">${esc(d.tm)}</span></div></div>
+            <div class="direction-attr"><span class="direction-attr-icon">${ICONS.f}</span><div><span class="direction-attr-label">Направление</span><span class="direction-attr-value">${esc(d.f)}</span></div></div>
+          </div>
+          <p class="direction-description">${esc(d.d)}</p>
+        </div>
+      </div>`).join('');
+    dDots.innerHTML = DATA.directions.map(() => `<button class="directions-dot"></button>`).join('');
+    
+    // Logic
+    const slides = dTrack.children, dots = dDots.children;
+    let idx = 0;
+    const set = i => {
+      idx = (i + slides.length) % slides.length;
+      [...slides].forEach((s, n) => s.classList.toggle('is-active', n === idx));
+      [...dots].forEach((d, n) => { d.classList.toggle('is-active', n === idx); d.ariaCurrent = n===idx; });
+    };
+    dDots.addEventListener('click', e => e.target.tagName === 'BUTTON' && set([...dots].indexOf(e.target)));
+    getById('directionsPrev')?.addEventListener('click', () => set(idx - 1));
+    getById('directionsNext')?.addEventListener('click', () => set(idx + 1));
+    set(0);
+  }
+
+  // 2. Roadmap (Учебный план)
+  const rGrid = getById('roadmap-grid');
+  const rTip = getById('course-tooltip');
+  if (rGrid) {
+    const cols = { 'bg-pastel-sky':'#bae6fd','bg-pastel-mint':'#a7f3d0','bg-pastel-peach':'#fecaca','bg-pastel-lavender':'#ddd6fe','bg-pastel-coral':'#fda4af','bg-pastel-sage':'#a7f3d0' };
+    rGrid.innerHTML = DATA.courses.map((c, idx) => {
+      let cells = '';
+      for(let i=1; i<=8; i++) {
+        const act = i >= c.s && i <= c.e;
+        cells += `<div class="roadmap-cell ${act?`active ${c.c}`:'inactive'} ${i===c.s?'start':''} ${i===c.e?'end':''}" ${act?`data-i="${idx}"`:''}>${i===c.s?`<span class="roadmap-cell-text">${c.n}</span>`:''}</div>`;
+      }
+      return `<div class="roadmap-row">${cells}</div>`;
+    }).join('');
+
+    rGrid.addEventListener('mousemove', e => {
+      const cell = e.target.closest('.active');
+      if (cell) {
+        const c = DATA.courses[cell.dataset.i];
+        rTip.innerHTML = `<div class="tooltip-icon" style="background:${cols[c.c]}"></div><div class="tooltip-title">${c.n}</div><div class="tooltip-description">${c.d}</div><div class="tooltip-meta">Сем. ${c.s}–${c.e}</div>`;
+        Object.assign(rTip.style, { display: 'block', top: `${e.clientY+15}px`, left: `${e.clientX+15}px` });
+      } else rTip.style.display = 'none';
+    }, { passive: true });
+    rGrid.addEventListener('mouseleave', () => rTip.style.display = 'none');
+  }
+
+  // 3. Achievements (Достижения)
+  const aGrid = getById('achievementsGrid');
+  if(aGrid) aGrid.innerHTML = DATA.achievements.map(a => `<div class="achievement-card ${a.b} reveal"><div class="achievement-header"><span class="achievement-tag ${a.c}">${a.g}</span>${ICONS.a}</div><h3 class="achievement-title">${esc(a.t)}</h3><p class="achievement-desc">${esc(a.d)}</p></div>`).join('');
+
+
+  // 4. Faculty (Лента преподавателей)
+  const fTrack = getById('facultyTrack');
+  if (fTrack) {
+    // ДОБАВЛЕН КЛАСС 'reveal' к карточке + data-stagger
+    const innerHtml = DATA.faculty.map(p => `
+      <div class="faculty-card reveal" data-stagger>
+        <div class="faculty-photo-placeholder"></div>
+        <div class="faculty-info">
+          <h3 class="faculty-name">${esc(p.n)}</h3>
+          <p class="faculty-company">${esc(p.c)}</p>
+          <p class="faculty-disciplines-title">Дисциплины:</p>
+          <ul class="faculty-disciplines">${p.s.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+        </div>
+      </div>`).join('');
+    fTrack.innerHTML = `<div class="faculty-track-inner">${innerHtml}</div>`;
+
+    // Lazy Physics Init
+    const startPhysics = () => {
+      const inner = fTrack.firstElementChild;
+      let off = 0, max = 0, isD = false, start, startOff, last, vel = 0, raf;
+      
+      const upd = () => { max = Math.max(0, inner.scrollWidth - fTrack.clientWidth); if(off>max) off=max; inner.style.transform = `translateX(-${off}px)`; };
+      new ResizeObserver(upd).observe(fTrack);
+
+      const move = x => {
+        if(!isD) return;
+        let n = startOff + (start - x);
+        if(n<0 || n>max) n = startOff + (start-x)*0.5;
+        off = n; vel = x - last; last = x;
+        inner.style.transform = `translateX(-${off}px)`;
+      };
+      
+      const inertia = () => {
+        if(Math.abs(vel)<0.1) return fTrack.classList.remove('faculty-inertia');
+        vel*=0.95; off-=vel*1.5;
+        if(off<0){off=0;vel=0} else if(off>max){off=max;vel=0}
+        inner.style.transform = `translateX(-${off}px)`;
+        raf = requestAnimationFrame(inertia);
+      };
+
+      const end = () => {
+        if(!isD) return;
+        isD = false; fTrack.classList.remove('faculty-dragging');
+        if(off<0||off>max) { fTrack.classList.add('faculty-inertia'); off=Math.max(0,Math.min(max,off)); inner.style.transform=`translateX(-${off}px)`; }
+        else inertia();
+      };
+
+      const startDrag = x => { cancelAnimationFrame(raf); fTrack.classList.add('faculty-dragging'); fTrack.classList.remove('faculty-inertia'); isD=true; start=last=x; startOff=off; vel=0; };
+
+      fTrack.addEventListener('mousedown', e => { e.preventDefault(); startDrag(e.pageX); });
+      window.addEventListener('mousemove', e => move(e.pageX));
+      window.addEventListener('mouseup', end);
+      window.addEventListener('mouseleave', end);
+      fTrack.addEventListener('touchstart', e => startDrag(e.touches[0].pageX), {passive:true});
+      window.addEventListener('touchmove', e => move(e.touches[0].pageX), {passive:false});
+      window.addEventListener('touchend', end);
+
+      const scroll = d => {
+        const w = inner.firstElementChild ? inner.firstElementChild.offsetWidth + 24 : 300;
+        off = Math.max(0, Math.min(max, off + d * w));
+        fTrack.classList.add('faculty-inertia');
+        inner.style.transform = `translateX(-${off}px)`;
+      };
+      getById('facultyPrev')?.addEventListener('click', () => scroll(-1));
+      getById('facultyNext')?.addEventListener('click', () => scroll(1));
+    };
+
+    new IntersectionObserver((entries, obs) => {
+      if (entries[0].isIntersecting) { startPhysics(); obs.disconnect(); }
+    }).observe(fTrack);
+  }
+
+  // === GLOBAL UI & ANIMATIONS ===
+  getById('current-year').textContent = new Date().getFullYear();
+  
+  const header = getById('header');
+  window.addEventListener('scroll', () => requestAnimationFrame(() => header.classList.toggle('scrolled', window.scrollY > 50)), {passive:true});
+
+  // Observer: Делаем элементы видимыми при скролле
+  const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}}), {threshold:0.1, rootMargin:'0px 0px -50px 0px'});
+  
+  // Следим за всем, что имеет класс .reveal
+  document.querySelectorAll('.reveal').forEach(e => obs.observe(e));
+
+  // Каскадная анимация (Stagger) для сеток, направлений и ленты
+  // ТЕПЕРЬ ОНА РАБОТАЕТ И ДЛЯ НОВЫХ ЭЛЕМЕНТОВ
+  const staggerSelector = '.disciplines-grid, .features-grid, .directions-carousel, .faculty-track-inner';
+  document.querySelectorAll(staggerSelector).forEach(container => {
+    // Ищем элементы внутри, у которых есть data-stagger или просто карточки
+    const children = container.querySelectorAll('[data-stagger], .direction-card, .faculty-card');
+    children.forEach((el, i) => {
+      // Для ленты преподавателей делаем задержку меньше, чтобы не ждать долго
+      const delay = container.classList.contains('faculty-track-inner') ? 0.05 : 0.1;
+      el.style.animationDelay = `${delay * (i + 1)}s`;
+    });
+  });
+
+  // Form
+  const form = getById('applyForm');
+  const msg = getById('formSuccess');
+  if(form) form.addEventListener('submit', e => {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    const txt = btn.textContent;
+    btn.disabled=true; btn.textContent='Отправка...';
+    setTimeout(() => { btn.textContent=txt; btn.disabled=false; form.reset(); msg.style.display='flex'; setTimeout(()=>msg.style.display='none',5000); }, 1000);
+  });
+
+  // Nav
+  const nav = document.querySelector('.header-nav');
+  const links = document.querySelectorAll('.nav-link');
+  if(nav) nav.addEventListener('click', e => {
+    if(e.target.classList.contains('nav-link')) getById(e.target.dataset.target)?.scrollIntoView({behavior:'smooth'});
+  });
+
+  // ScrollSpy
+  let tick = false;
+  window.addEventListener('scroll', () => {
+    if(!tick) {
+      window.requestAnimationFrame(() => {
+        const curr = ['roadmap','faculty','features','disciplines','directions'].find(id => {
+           const el = getById(id); return el && window.scrollY >= el.offsetTop - 200;
+        });
+        links.forEach(l => l.classList.toggle('active', l.dataset.target === curr));
+        tick = false;
+      });
+      tick = true;
+    }
+  }, {passive:true});
+
+  // FAQ
+  document.querySelector('.faq-column')?.addEventListener('click', e => {
+    const btn = e.target.closest('.faq-question');
+    if(!btn) return;
+    const item = btn.parentElement, ans = item.querySelector('.faq-answer');
+    if(item.classList.contains('active')) {
+      item.classList.remove('active'); ans.style.maxHeight = null;
+    } else {
+      document.querySelectorAll('.faq-item.active').forEach(i => { i.classList.remove('active'); i.querySelector('.faq-answer').style.maxHeight = null; });
+      item.classList.add('active'); ans.style.maxHeight = ans.scrollHeight + 'px';
+    }
+  });
+
+})();
+</file>
+
+<file path="app/static/styles.css">
+/* БГИТУ IT-Институт — Оптимизированный CSS (Исправленный) */
+
+:root {
+  /* Цвета */
+  --background: hsl(40, 20%, 98%);
+  --foreground: hsl(30, 10%, 15%);
+  
+  --card: hsl(40, 30%, 97%);
+  --card-foreground: hsl(30, 10%, 15%);
+  
+  --primary: hsl(30, 10%, 20%);
+  --primary-foreground: hsl(40, 20%, 98%);
+  
+  --secondary: hsl(40, 15%, 94%);
+  --secondary-foreground: hsl(30, 10%, 20%);
+  
+  --muted: hsl(40, 10%, 92%);
+  --muted-foreground: hsl(30, 8%, 45%);
+  
+  --accent: hsl(40, 25%, 90%);
+  --border: hsl(40, 15%, 88%);
+  
+  --radius: 0.75rem;
+  --transition: 0.3s ease; /* Единая скорость анимаций */
+
+  /* Пастельная палитра */
+  --pastel-sky: hsl(200, 60%, 75%);
+  --pastel-mint: hsl(160, 45%, 70%);
+  --pastel-peach: hsl(25, 70%, 80%);
+  --pastel-lavender: hsl(270, 40%, 78%);
+  --pastel-coral: hsl(10, 65%, 75%);
+  --pastel-sage: hsl(140, 30%, 72%);
+}
+
+/* ================= БАЗА ================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; transition: color 0.2s ease; }
+ul { list-style: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+/* ================= УТИЛИТЫ ================= */
+.container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
+
+.section { padding: 6rem 0; }
+.section-alt { background-color: hsl(40, 15%, 94%, 0.3); }
+
+.text-muted-foreground { color: var(--muted-foreground); }
+.text-foreground { color: var(--foreground); }
+
+/* Фоны */
+.bg-pastel-sky { background-color: var(--pastel-sky); }
+.bg-pastel-mint { background-color: var(--pastel-mint); }
+.bg-pastel-peach { background-color: var(--pastel-peach); }
+.bg-pastel-lavender { background-color: var(--pastel-lavender); }
+.bg-pastel-coral { background-color: var(--pastel-coral); }
+.bg-pastel-sage { background-color: var(--pastel-sage); }
+.bg-secondary { background-color: var(--secondary); }
+
+/* Заголовки секций */
+.section-header { text-align: center; margin-bottom: 4rem; }
+.section-title {
+  font-size: clamp(1.875rem, 4vw, 2.25rem);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.section-description {
+  font-size: 1.125rem;
+  color: var(--muted-foreground);
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+/* Кнопки */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn-primary { background-color: var(--primary); color: var(--primary-foreground); }
+.btn-primary:hover { opacity: 0.9; }
+
+.btn-outline { border: 1px solid var(--border); color: var(--foreground); }
+.btn-outline:hover { background-color: var(--accent); }
+
+.btn-sm { padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
+.btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; }
+.btn-full { width: 100%; }
+
+/* Бейджи */
+.badge {
+  display: inline-flex; padding: 0.25rem 0.625rem;
+  font-size: 0.75rem; font-weight: 500; border-radius: 9999px;
+}
+.badge-secondary { background-color: var(--secondary); color: var(--secondary-foreground); }
+
+/* Анимации */
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+.reveal { opacity: 0; }
+.reveal.visible { animation: fadeInUp 0.6s ease-out forwards; }
+
+.hover-lift { transition: all var(--transition); }
+.hover-lift:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+
+/* Абстракция КАРТОЧКИ (Общий стиль для всех блоков) */
+.direction-card, .discipline-card, .feature-card, .faculty-card, .achievement-card, .faq-item, .timeline-content, .apply-form {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden; /* Безопасность для скруглений */
+}
+/* Абстракция ИКОНКИ (Общий стиль для цветных квадратов) */
+.direction-attr-icon, .discipline-icon, .feature-icon, .tooltip-icon, .footer-square {
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius); /* Используем переменную */
+  flex-shrink: 0;
+}
+
+/* ================= HEADER ================= */
+#header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  padding: 1rem 0; transition: all var(--transition);
+}
+#header.scrolled {
+  background-color: rgba(250, 250, 248, 0.95);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.header-nav { display: flex; align-items: center; justify-content: space-between; }
+.logo { font-size: 1.25rem; font-weight: 600; }
+.logo-accent { color: var(--muted-foreground); font-weight: 400; }
+
+.nav-links { display: none; align-items: center; gap: 2rem; }
+@media (min-width: 768px) { .nav-links { display: flex; } }
+
+.nav-link { font-size: 0.875rem; color: var(--muted-foreground); position: relative; }
+.nav-link::after {
+  content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px;
+  background-color: #737373; transition: width var(--transition);
+}
+.nav-link:hover, .nav-link.active { color: var(--foreground); }
+.nav-link:hover::after { width: 100%; }
+
+.header-cta { display: none; }
+@media (min-width: 640px) { .header-cta { display: inline-flex; } }
+
+/* ================= HERO ================= */
+.hero { min-height: 100vh; display: flex; align-items: center; padding-top: 5rem; padding-bottom: 4rem; }
+.hero-grid { display: grid; gap: 3rem; align-items: center; }
+@media (min-width: 1024px) { .hero-grid { grid-template-columns: 1fr 1fr; } }
+
+.hero-content { display: flex; flex-direction: column; gap: 1.5rem; }
+.hero-title { font-size: clamp(2.5rem, 6vw, 3.75rem); font-weight: 700; line-height: 1.1; }
+.hero-description { font-size: clamp(1.125rem, 2vw, 1.25rem); color: var(--muted-foreground); max-width: 32rem; }
+.hero-buttons { display: flex; flex-wrap: wrap; gap: 1rem; padding-top: 1rem; }
+
+.hero-visual { display: none; justify-content: center; align-items: center; }
+@media (min-width: 1024px) { .hero-visual { display: flex; } }
+
+/* Квадраты Hero (оставляем специфику) */
+.squares-composition { position: relative; width: 24rem; height: 24rem; }
+.square { position: absolute; animation: scaleIn 0.4s ease-out forwards; opacity: 0; }
+.square-1 { top: 0; right: 0; width: 12rem; height: 12rem; border-radius: 1rem; animation-delay: 0.2s; }
+.square-2 { top: 6rem; left: 2rem; width: 8rem; height: 8rem; border-radius: 0.75rem; animation-delay: 0.4s; }
+.square-3 { bottom: 2rem; right: 4rem; width: 9rem; height: 9rem; border-radius: 0.75rem; animation-delay: 0.3s; }
+.square-4 { top: 12rem; right: 1rem; width: 5rem; height: 5rem; border-radius: 0.5rem; animation-delay: 0.5s; }
+.square-5 { bottom: 6rem; left: 0; width: 6rem; height: 6rem; border-radius: 0.5rem; animation-delay: 0.6s; }
+.square-6 { top: 2rem; left: 6rem; width: 3rem; height: 3rem; border-radius: 0.375rem; animation-delay: 0.7s; }
+.square-7 { bottom: 0; right: 12rem; width: 4rem; height: 4rem; border-radius: 0.375rem; animation-delay: 0.8s; }
+
+/* ================= НАПРАВЛЕНИЯ (Carousel) ================= */
+.directions-carousel { position: relative; max-width: 56rem; margin: 0 auto; }
+.directions-track-wrap { position: relative; padding: 0 3rem; }
+.directions-track { overflow: hidden; }
+
+/* Общие стили для стрелок слайдеров (Направления + Преподаватели) */
+.directions-arrow, .faculty-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 2.5rem; height: 2.5rem; border-radius: 50%;
+  background-color: var(--secondary); color: var(--foreground); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.6s ease;
+}
+.directions-arrow:hover, .faculty-arrow:hover {
+  background-color: var(--primary); color: var(--primary-foreground); border-color: var(--primary);
+}
+.directions-prev, .faculty-prev { left: 0; }
+.directions-next, .faculty-next { right: 0; }
+
+.direction-slide { display: none; }
+.direction-slide.is-active { display: block; animation: directionSlideIn 0.55s ease-out forwards; }
+@keyframes directionSlideIn { from { opacity: 0; } to { opacity: 1; } }
+
+.direction-card { padding: 1.75rem; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+.direction-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+.direction-title { font-size: 1.375rem; font-weight: 700; line-height: 1.3; }
+
+.direction-badge {
+  flex-shrink: 0; width: 2rem; height: 2rem; border-radius: 50%;
+  background-color: var(--primary); color: var(--primary-foreground);
+  font-size: 0.6875rem; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* === ИСПРАВЛЕНИЕ: Адаптивная сетка и отступы === */
+.direction-attrs { 
+  display: grid; 
+  /* Колонки не меньше 150px, иначе переносятся */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+  gap: 1rem 1.5rem; 
+  margin-bottom: 1.25rem; 
+}
+
+.direction-attr { display: flex; align-items: flex-start; gap: 0.75rem; }
+.direction-attr-icon { width: 2.25rem; height: 2.25rem; border-radius: 0.5rem; background-color: var(--muted); color: var(--primary); }
+
+.direction-attr-label { 
+  display: block; /* Перенос строки */
+  font-size: 0.75rem; 
+  color: var(--muted-foreground);
+  margin-bottom: 0.15rem;
+}
+
+.direction-attr-value { 
+  display: block; /* Перенос строки */
+  font-size: 0.875rem; 
+  font-weight: 600; 
+  line-height: 1.3;
+}
+.direction-description { font-size: 0.9375rem; color: var(--muted-foreground); margin: 0; }
+
+.directions-dots { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem; }
+.directions-dot {
+  width: 8px; height: 8px; border-radius: 50%; background-color: var(--muted);
+  transition: all 0.2s ease;
+}
+.directions-dot:hover { background-color: var(--muted-foreground); }
+.directions-dot.is-active { background-color: var(--primary); transform: scale(1.2); }
+
+/* ================= ДИСЦИПЛИНЫ И ПРЕИМУЩЕСТВА (Сетки) ================= */
+/* Объединенный грид для двух секций */
+.disciplines-grid, .features-grid { display: grid; gap: 2rem; }
+@media (min-width: 640px) { .disciplines-grid, .features-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .disciplines-grid, .features-grid { grid-template-columns: repeat(3, 1fr); } }
+
+/* Дисциплины */
+.discipline-card { padding: 1.5rem; border-color: hsl(40, 15%, 88%, 0.5); }
+.discipline-icon {
+  width: 4rem; height: 4rem; margin-bottom: 1.25rem;
+  font-size: 1.75rem; transition: transform var(--transition);
+}
+.discipline-card:hover .discipline-icon { transform: scale(1.1) rotate(3deg); }
+.discipline-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+.discipline-description { font-size: 0.875rem; color: var(--muted-foreground); }
+
+/* Преимущества */
+.feature-card { display: flex; gap: 1.25rem; padding: 1.5rem; border-color: hsl(40, 15%, 88%, 0.5); }
+.feature-icon { width: 3.5rem; height: 3.5rem; }
+.feature-icon svg { width: 1.5rem; height: 1.5rem; color: hsl(30, 10%, 15%, 0.7); }
+.feature-header { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.25rem; flex-wrap: wrap; }
+.feature-title { font-size: 1.125rem; font-weight: 600; }
+.feature-subtitle, .feature-description { font-size: 0.875rem; color: var(--muted-foreground); }
+
+/* ================= ПРЕПОДАВАТЕЛИ (Лента) ================= */
+.faculty-tape { position: relative; padding: 0 3rem; }
+.faculty-track {
+  padding: 0.5rem 0;
+  cursor: grab;
+  width: 100%;
+  user-select: none;
+  overflow: hidden; /* <--- ОБЯЗАТЕЛЬНО ДОБАВИТЬ ЭТУ СТРОКУ */
+  border-radius: var(--radius); /* Для красоты, чтобы углы не торчали */
+}
+.faculty-track:active { cursor: grabbing; }
+
+.faculty-track-inner { display: flex; gap: 1.5rem; width: max-content; will-change: transform; transition: transform 0.25s ease-out; }
+/* Отключаем CSS транзишн при JS перетаскивании */
+.faculty-track.faculty-dragging .faculty-track-inner,
+.faculty-track.faculty-inertia .faculty-track-inner { transition: none; }
+
+.faculty-card {
+  flex: 0 0 auto; width: 360px; max-width: 85vw;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06); pointer-events: auto;
+}
+.faculty-photo-placeholder { width: 100%; aspect-ratio: 4/3; min-height: 180px; background-color: #c53030; }
+.faculty-info { padding: 1.25rem; text-align: left; }
+.faculty-name { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem; }
+.faculty-company { font-size: 0.875rem; color: var(--primary); font-weight: 500; margin-bottom: 0.75rem; }
+.faculty-disciplines-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
+.faculty-disciplines { font-size: 0.8125rem; color: var(--muted-foreground); }
+.faculty-disciplines li { padding: 0.125rem 0; }
+.faculty-disciplines li::before { content: '• '; color: var(--primary); }
+
+/* ================= ROADMAP (Учебный план) ================= */
+.roadmap-wrapper { overflow-x: auto; }
+.roadmap-container { min-width: 800px; }
+.roadmap-headers, .roadmap-row { display: grid; grid-template-columns: repeat(8, 1fr); gap: 0.5rem; }
+.roadmap-headers { margin-bottom: 1rem; }
+.roadmap-rows { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.semester-header { text-align: center; font-size: 0.875rem; font-weight: 500; color: var(--muted-foreground); padding: 0.5rem; }
+
+.roadmap-cell {
+  height: 3.5rem; display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition); cursor: pointer;
+}
+.roadmap-cell.inactive { background-color: hsl(40, 10%, 92%, 0.3); border-radius: 0.5rem; }
+.roadmap-cell.active { opacity: 1; }
+.roadmap-cell.active:hover { opacity: 0.8; }
+.roadmap-cell.start { border-top-left-radius: 0.75rem; border-bottom-left-radius: 0.75rem; }
+.roadmap-cell.end { border-top-right-radius: 0.75rem; border-bottom-right-radius: 0.75rem; }
+
+.roadmap-cell-text {
+  font-size: 0.75rem; font-weight: 500; color: hsl(30, 10%, 15%, 0.8);
+  padding: 0 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.year-markers {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+  margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);
+}
+.year-marker { text-align: center; font-size: 0.875rem; color: var(--muted-foreground); }
+
+/* Tooltip */
+.course-tooltip {
+  display: none; position: fixed; top: 1rem; right: 1rem; z-index: 50; padding: 1rem;
+  background-color: var(--card); border: 1px solid var(--border); border-radius: 0.75rem;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); max-width: 18rem; animation: scaleIn 0.2s ease-out;
+}
+.tooltip-icon { width: 2rem; height: 2rem; border-radius: 0.5rem; margin-bottom: 0.75rem; }
+.tooltip-title { font-weight: 600; margin-bottom: 0.25rem; }
+.tooltip-description { font-size: 0.875rem; color: var(--muted-foreground); margin-bottom: 0.5rem; line-height: 1.5; }
+.tooltip-meta { font-size: 0.75rem; color: var(--muted-foreground); }
+
+/* ================= TIMELINE ================= */
+.timeline-wrapper { position: relative; max-width: 800px; margin: 0 auto; padding: 1rem 0; }
+.timeline-line {
+  position: absolute; left: 24px; top: 0; bottom: 0; width: 2px;
+  background-color: var(--border); z-index: 0;
+}
+.timeline-item { position: relative; padding-left: 80px; margin-bottom: 3rem; z-index: 1; }
+.timeline-item:last-child { margin-bottom: 0; }
+
+.timeline-marker {
+  position: absolute; left: 0; top: 0; width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1.125rem;
+  border: 4px solid var(--background); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform var(--transition);
+}
+.timeline-item:hover .timeline-marker { transform: scale(1.1); }
+
+.timeline-content { padding: 1.5rem; position: relative; }
+.timeline-content::before {
+  content: ''; position: absolute; left: -6px; top: 20px; width: 10px; height: 10px;
+  background-color: var(--card); border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  transform: rotate(45deg);
+}
+
+.timeline-term {
+  display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--muted-foreground);
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;
+}
+.timeline-heading { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
+.timeline-desc { font-size: 0.9375rem; color: var(--muted-foreground); }
+
+@media (max-width: 640px) {
+  .timeline-line { left: 16px; }
+  .timeline-marker { width: 32px; height: 32px; font-size: 0.875rem; border-width: 3px; }
+  .timeline-item { padding-left: 50px; }
+}
+
+/* ================= ДОСТИЖЕНИЯ ================= */
+.achievements-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.achievement-card { padding: 1.5rem; position: relative; border-top-width: 4px; }
+.achievement-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+.achievement-tag {
+  font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 9999px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.achievement-icon { width: 2rem; height: 2rem; color: var(--muted-foreground); }
+.achievement-title { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.3; }
+.achievement-desc { font-size: 0.875rem; color: var(--muted-foreground); }
+
+/* Модификаторы рамок */
+.border-sky { border-top-color: var(--pastel-sky); }
+.border-mint { border-top-color: var(--pastel-mint); }
+.border-peach { border-top-color: var(--pastel-peach); }
+.border-lavender { border-top-color: var(--pastel-lavender); }
+
+/* ================= FAQ & APPLY FORM ================= */
+.apply-grid { display: grid; gap: 3rem; }
+@media (min-width: 900px) { .apply-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+
+/* FAQ */
+.faq-column { display: flex; flex-direction: column; gap: 1rem; }
+.faq-question {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  padding: 1.25rem; text-align: left; font-size: 1rem; font-weight: 600; transition: color 0.2s ease;
+}
+.faq-question:hover { color: var(--primary); }
+.faq-icon { font-weight: 400; font-size: 1.5rem; color: var(--muted-foreground); transition: transform var(--transition); }
+.faq-item.active .faq-icon { transform: rotate(45deg); color: var(--primary); }
+
+.faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s cubic-bezier(0,1,0,1); background-color: rgba(255,255,255,0.5); }
+.faq-answer p { padding: 0 1.25rem 1.25rem; font-size: 0.9375rem; color: var(--muted-foreground); }
+
+/* Form */
+.apply-form { padding: 2rem; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
+.form-header { margin-bottom: 1.5rem; }
+.form-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; }
+.form-subtitle { font-size: 0.875rem; color: var(--muted-foreground); }
+
+.form-group { margin-bottom: 1rem; }
+.form-input, .form-select {
+  width: 100%; padding: 0.75rem 1rem; font-size: 0.9375rem; font-family: inherit;
+  background-color: var(--background); border: 1px solid var(--border); border-radius: var(--radius);
+  outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.form-input:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+
+.form-privacy { margin-top: 1rem; font-size: 0.75rem; color: var(--muted-foreground); text-align: center; }
+.form-success {
+  margin-top: 1rem; padding: 1rem; background-color: var(--pastel-mint); border-radius: var(--radius);
+  display: flex; align-items: center; gap: 0.75rem; color: #064e3b; font-weight: 500; font-size: 0.9375rem;
+  animation: fadeInUp 0.4s ease;
+}
+
+/* ================= FOOTER ================= */
+.footer { padding: 4rem 0; background-color: var(--card); border-top: 1px solid var(--border); }
+.footer-grid { display: grid; gap: 3rem; }
+@media (min-width: 768px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .footer-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.footer-section { display: flex; flex-direction: column; gap: 1rem; }
+.footer-brand { font-size: 1.25rem; font-weight: 600; }
+.footer-description { font-size: 0.875rem; color: var(--muted-foreground); }
+.footer-cta { margin-top: 0.5rem; align-self: flex-start; }
+
+.footer-heading { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.footer-contacts, .footer-links { display: flex; flex-direction: column; gap: 0.75rem; }
+.footer-links { gap: 0.5rem; }
+
+.footer-contact, .footer-links a, .footer-social {
+  display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem; color: var(--muted-foreground); transition: color 0.2s ease;
+}
+.footer-contact a:hover, .footer-links a:hover, .footer-social:hover { color: var(--foreground); }
+
+.footer-squares { display: flex; gap: 0.5rem; padding-top: 1rem; }
+.footer-square { width: 2rem; height: 2rem; }
+
+.footer-bottom { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center; }
+.footer-copyright { font-size: 0.875rem; color: var(--muted-foreground); }
+</file>
+
+<file path="app/templates/index.html">
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>БГИТУ IT-Институт — IT-образование в Брянске</title>
+  <meta name="description" content="IT-образование в БГИТУ: кибербезопасность, ИИ, программная инженерия. Практика с 3 курса, трудоустройство.">
+  
+  <meta property="og:title" content="БГИТУ IT-Институт">
+  <meta property="og:description" content="Карьерный трек в IT с гарантией трудоустройства.">
+  <meta property="og:type" content="website">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/script.js" defer></script>
+</head>
+<body>
+  
+  <header id="header">
+    <div class="container">
+      <nav class="header-nav">
+        <a href="#" class="logo">БГИТУ <span class="text-muted-foreground font-normal">IT-Институт</span></a>
+        
+        <ul class="nav-links">
+          <li><button class="nav-link" data-target="directions">Направления</button></li>
+          <li><button class="nav-link" data-target="disciplines">Дисциплины</button></li>
+          <li><button class="nav-link" data-target="features">Преимущества</button></li>
+          <li><button class="nav-link" data-target="faculty">Преподаватели</button></li>
+          <li><button class="nav-link" data-target="roadmap">План</button></li>
+        </ul>
+        
+        <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary btn-sm header-cta">Подать заявление</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="hero" class="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-content reveal">
+            <h1 class="hero-title">IT-образование <br><span class="text-muted-foreground">в БГИТУ</span></h1>
+            <p class="hero-description">Образовательный и карьерный трек с последующим трудоустройством. Практика с 3 курса, работа в IT-компаниях региона.</p>
+            <div class="hero-buttons">
+              <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary btn-lg">Подать заявление</a>
+              <a href="#directions" class="btn btn-outline btn-lg">Узнать больше</a>
+            </div>
+          </div>
+          
+          <div class="hero-visual">
+            <div class="squares-composition">
+              <div class="square square-1 bg-pastel-sky"></div>
+              <div class="square square-2 bg-pastel-mint"></div>
+              <div class="square square-3 bg-pastel-peach"></div>
+              <div class="square square-4 bg-pastel-lavender"></div>
+              <div class="square square-5 bg-pastel-coral"></div>
+              <div class="square square-6 bg-pastel-sage"></div>
+              <div class="square square-7 bg-secondary"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="directions" class="section section-alt">
+      <div class="container">
+        <div class="section-header reveal">
+          <h2 class="section-title">Направления обучения</h2>
+          <p class="section-description">Выберите программу, соответствующую вашим интересам</p>
+        </div>
+        <div class="directions-carousel">
+          <div class="directions-track-wrap">
+            <button class="directions-arrow directions-prev" id="directionsPrev" aria-label="Назад">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button class="directions-arrow directions-next" id="directionsNext" aria-label="Вперед">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+            <div class="directions-track" id="directionsTrack"></div>
+          </div>
+          <div class="directions-dots" id="directionsDots"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="disciplines" class="section section-alt">
+      <div class="container">
+        <div class="section-header reveal">
+          <h2 class="section-title">Ключевые дисциплины</h2>
+          <p class="section-description">Актуальный технологический стек</p>
+        </div>
+        
+        <div class="disciplines-grid">
+          <div class="discipline-card reveal hover-lift" data-stagger>
+            <div class="discipline-icon bg-pastel-peach">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+            <h4 class="discipline-title">Java Ecosystem</h4>
+            <p class="discipline-description"><strong>Backend.</strong> ООП, Spring Framework, Hibernate и микросервисы.</p>
+          </div>
+
+          <div class="discipline-card reveal hover-lift" data-stagger>
+            <div class="discipline-icon bg-pastel-lavender">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+            </div>
+            <h4 class="discipline-title">Machine Learning</h4>
+            <p class="discipline-description"><strong>Data Science.</strong> Нейросети, Big Data, TensorFlow, PyTorch и Computer Vision.</p>
+          </div>
+
+          <div class="discipline-card reveal hover-lift" data-stagger>
+            <div class="discipline-icon bg-pastel-sky">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h4 class="discipline-title">Безопасность</h4>
+            <p class="discipline-description"><strong>Cybersecurity.</strong> Анализ уязвимостей, Pentesting, криптография.</p>
+          </div>
+
+          <div class="discipline-card reveal hover-lift" data-stagger>
+            <div class="discipline-icon bg-pastel-mint">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <h4 class="discipline-title">Web-технологии</h4>
+            <p class="discipline-description"><strong>Fullstack.</strong> React/Vue, Node.js, REST API и современный фронтенд.</p>
+          </div>
+
+          <div class="discipline-card reveal hover-lift" data-stagger>
+            <div class="discipline-icon bg-pastel-sage">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </div>
+            <h4 class="discipline-title">Базы данных</h4>
+            <p class="discipline-description"><strong>Data Engineering.</strong> SQL (PostgreSQL), NoSQL (MongoDB, Redis).</p>
+          </div>
+          
+          <div class="discipline-card reveal hover-lift" data-stagger>
+            <div class="discipline-icon bg-secondary">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            </div>
+            <h4 class="discipline-title">DevOps</h4>
+            <p class="discipline-description"><strong>Infrastructure.</strong> Docker, Kubernetes, CI/CD, Linux администрирование.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="section section-alt">
+      <div class="container">
+        <div class="section-header reveal">
+          <h2 class="section-title">Преимущества</h2>
+          <p class="section-description">Непрерывный путь развития</p>
+        </div>
+        
+        <div class="features-grid">
+          <div class="feature-card hover-lift reveal" data-stagger>
+            <div class="feature-icon bg-pastel-sky"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div><h3 class="feature-title">Кибербезопасность</h3><p class="feature-description">Защита инфраструктуры и пентестинг.</p></div>
+          </div>
+          <div class="feature-card hover-lift reveal" data-stagger>
+            <div class="feature-icon bg-pastel-mint"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg></div>
+            <div><h3 class="feature-title">Проектная работа</h3><p class="feature-description">Реальные проекты с 1 курса.</p></div>
+          </div>
+          <div class="feature-card hover-lift reveal" data-stagger>
+            <div class="feature-icon bg-pastel-peach"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+            <div><h3 class="feature-title">Практика</h3><p class="feature-description">Оплачиваемые стажировки с 3 курса.</p></div>
+          </div>
+          <div class="feature-card hover-lift reveal" data-stagger>
+            <div class="feature-icon bg-pastel-lavender"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <div><h3 class="feature-title">Трудоустройство</h3><p class="feature-description">Карьерный трек с гарантией работы.</p></div>
+          </div>
+          <div class="feature-card hover-lift reveal" data-stagger>
+            <div class="feature-icon bg-pastel-coral"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+            <div><h3 class="feature-title">Военный центр</h3><p class="feature-description">Военный билет вместе с дипломом.</p></div>
+          </div>
+          <div class="feature-card hover-lift reveal" data-stagger>
+            <div class="feature-icon bg-pastel-sage"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+            <div><h3 class="feature-title">Второй диплом</h3><p class="feature-description">Доп. квалификация в ЦЦК.</p></div>
+          </div>
+          <div class="feature-card hover-lift reveal" data-stagger>
+            <div class="feature-icon bg-pastel-sky"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+            <div><h3 class="feature-title">Общежитие</h3><p class="feature-description">100% заселение в кампусе.</p></div>
+          </div>
+          <div class="feature-card hover-lift reveal" data-stagger>
+            <div class="feature-icon bg-pastel-peach"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div><h3 class="feature-title">Цифровая экономика</h3><p class="feature-description">Внедрение реальных IS-проектов.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faculty" class="section">
+      <div class="container">
+        <div class="section-header reveal">
+          <h2 class="section-title">Преподаватели</h2>
+          <p class="section-description">Практикующие специалисты ведущих IT-компаний</p>
+        </div>
+        <div class="faculty-tape">
+          <button class="faculty-arrow faculty-prev" id="facultyPrev"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <button class="faculty-arrow faculty-next" id="facultyNext"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+          <div class="faculty-track" id="facultyTrack"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap" class="section section-alt">
+      <div class="container">
+        <div class="section-header reveal">
+          <h2 class="section-title">Учебный план</h2>
+          <p class="section-description">8 семестров интенсивного обучения</p>
+        </div>
+        <div id="course-tooltip" class="course-tooltip"></div>
+        <div class="roadmap-wrapper reveal">
+          <div class="roadmap-container">
+            <div class="roadmap-headers">
+              <div class="semester-header">1 сем.</div><div class="semester-header">2 сем.</div><div class="semester-header">3 сем.</div><div class="semester-header">4 сем.</div>
+              <div class="semester-header">5 сем.</div><div class="semester-header">6 сем.</div><div class="semester-header">7 сем.</div><div class="semester-header">8 сем.</div>
+            </div>
+            <div class="roadmap-rows" id="roadmap-grid"></div>
+            <div class="year-markers">
+              <div class="year-marker">1 курс</div><div class="year-marker">2 курс</div><div class="year-marker">3 курс</div><div class="year-marker">4 курс</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section id="curriculum-timeline" class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2 class="section-title">Программа (ИВТ)</h2>
+        <p class="section-description">Посеместровый разбор ключевых навыков</p>
+      </div>
+      <div class="timeline-wrapper">
+        <div class="timeline-line"></div>
+        <div class="timeline-item reveal">
+          <div class="timeline-marker bg-pastel-sky">1</div>
+          <div class="timeline-content hover-lift">
+            <span class="timeline-term">1 семестр</span><h3 class="timeline-heading">Основы</h3><p class="timeline-desc">Алгоритмизация, синтаксис C++, типы данных.</p>
+          </div>
+        </div>
+        <div class="timeline-item reveal">
+          <div class="timeline-marker bg-pastel-mint">2</div>
+          <div class="timeline-content hover-lift">
+            <span class="timeline-term">2 семестр</span><h3 class="timeline-heading">Алгоритмы</h3><p class="timeline-desc">Сортировки, поиск, стеки, деревья, Big O.</p>
+          </div>
+        </div>
+        <div class="timeline-item reveal">
+          <div class="timeline-marker bg-pastel-peach">3</div>
+          <div class="timeline-content hover-lift">
+            <span class="timeline-term">3 семестр</span><h3 class="timeline-heading">ООП</h3><p class="timeline-desc">Классы, наследование, паттерны на Java/C#.</p>
+          </div>
+        </div>
+        <div class="timeline-item reveal">
+          <div class="timeline-marker bg-pastel-lavender">4</div>
+          <div class="timeline-content hover-lift">
+            <span class="timeline-term">4 семестр</span><h3 class="timeline-heading">БД и SQL</h3><p class="timeline-desc">Реляционные БД, SQL-запросы, PostgreSQL.</p>
+          </div>
+        </div>
+        <div class="timeline-item reveal">
+          <div class="timeline-marker bg-pastel-sage">5</div>
+          <div class="timeline-content hover-lift">
+            <span class="timeline-term">5 семестр</span><h3 class="timeline-heading">Web</h3><p class="timeline-desc">React/Vue, Spring/ASP.NET, REST API.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="achievements" class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2 class="section-title">Достижения</h2>
+        <p class="section-description">Хакатоны, гранты и карьеры студентов</p>
+      </div>
+      <div class="achievements-grid" id="achievementsGrid"></div>
+    </div>
+  </section>
+
+  <section id="apply" class="section section-alt">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2 class="section-title">Абитуриенту</h2>
+      </div>
+      <div class="apply-grid">
+        <div class="faq-column reveal">
+          <div class="faq-item">
+            <button class="faq-question"><span>Экзамены ЕГЭ?</span><span class="faq-icon">+</span></button>
+            <div class="faq-answer"><p>Русский, Проф. математика. По выбору: Информатика или Физика.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question"><span>Проходной балл?</span><span class="faq-icon">+</span></button>
+            <div class="faq-answer"><p>Ориентир 180+. Рекомендуем подавать документы даже с меньшими баллами.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question"><span>Общежитие?</span><span class="faq-icon">+</span></button>
+            <div class="faq-answer"><p>Да, всем иногородним очникам. 5 минут от корпуса.</p></div>
+          </div>
+        </div>
+
+        <div class="form-column reveal">
+          <form class="apply-form" id="applyForm">
+            <div class="form-header"><h3 class="form-title">Заявка</h3></div>
+            <div class="form-group"><input type="text" class="form-input" id="leadName" placeholder="Имя" required></div>
+            <div class="form-group"><input type="tel" class="form-input" id="leadPhone" placeholder="+7 (999) 000-00-00" required></div>
+            <div class="form-group">
+              <select class="form-select" id="leadDirection">
+                <option value="" disabled selected>Направление</option>
+                <option value="cyber">Кибербезопасность</option>
+                <option value="ai">ИИ</option>
+                <option value="cad">САПР</option>
+                <option value="isit">ИСиТ</option>
+                <option value="soft">Software Eng</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Отправить</button>
+            <div id="formSuccess" class="form-success" style="display: none;"><span>Заявка принята!</span></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-section">
+          <h3 class="footer-brand">БГИТУ <span class="logo-accent">IT</span></h3>
+          <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary footer-cta">Подать</a>
+        </div>
+        <div class="footer-section">
+          <h4 class="footer-heading">Контакты</h4>
+          <ul class="footer-contacts">
+            <li class="footer-contact"><a href="mailto:it@bgitu.ru">it@bgitu.ru</a></li>
+            <li class="footer-contact"><span>+7 (4832) XX-XX-XX</span></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4 class="footer-heading">Разделы</h4>
+          <ul class="footer-links">
+            <li><a href="#directions">Направления</a></li>
+            <li><a href="#roadmap">План</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4 class="footer-heading">Соцсети</h4>
+          <a href="https://vk.com/it_bgitu" target="_blank" class="footer-social">vk.com/it_bgitu</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copyright">© <span id="current-year"></span> БГИТУ IT-Институт</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
+</file>
+
+<file path="alembic.ini">
+# A generic, single database configuration.
+
+[alembic]
+# path to migration scripts.
+# this is typically a path given in POSIX (e.g. forward slashes)
+# format, relative to the token %(here)s which refers to the location of this
+# ini file
+script_location = %(here)s/alembic
+
+# template used to generate migration file names; The default value is %%(rev)s_%%(slug)s
+# Uncomment the line below if you want the files to be prepended with date and time
+# see https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file
+# for all available tokens
+# file_template = %%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s
+# Or organize into date-based subdirectories (requires recursive_version_locations = true)
+# file_template = %%(year)d/%%(month).2d/%%(day).2d_%%(hour).2d%%(minute).2d_%%(second).2d_%%(rev)s_%%(slug)s
+
+# sys.path path, will be prepended to sys.path if present.
+# defaults to the current working directory.  for multiple paths, the path separator
+# is defined by "path_separator" below.
+prepend_sys_path = .
+
+# timezone to use when rendering the date within the migration file
+# as well as the filename.
+# If specified, requires the tzdata library which can be installed by adding
+# `alembic[tz]` to the pip requirements.
+# string value is passed to ZoneInfo()
+# leave blank for localtime
+# timezone =
+
+# max length of characters to apply to the "slug" field
+# truncate_slug_length = 40
+
+# set to 'true' to run the environment during
+# the 'revision' command, regardless of autogenerate
+# revision_environment = false
+
+# set to 'true' to allow .pyc and .pyo files without
+# a source .py file to be detected as revisions in the
+# versions/ directory
+# sourceless = false
+
+# version location specification; This defaults
+# to <script_location>/versions.  When using multiple version
+# directories, initial revisions must be specified with --version-path.
+# The path separator used here should be the separator specified by "path_separator"
+# below.
+# version_locations = %(here)s/bar:%(here)s/bat:%(here)s/alembic/versions
+
+# path_separator; This indicates what character is used to split lists of file
+# paths, including version_locations and prepend_sys_path within configparser
+# files such as alembic.ini.
+# The default rendered in new alembic.ini files is "os", which uses os.pathsep
+# to provide os-dependent path splitting.
+#
+# Note that in order to support legacy alembic.ini files, this default does NOT
+# take place if path_separator is not present in alembic.ini.  If this
+# option is omitted entirely, fallback logic is as follows:
+#
+# 1. Parsing of the version_locations option falls back to using the legacy
+#    "version_path_separator" key, which if absent then falls back to the legacy
+#    behavior of splitting on spaces and/or commas.
+# 2. Parsing of the prepend_sys_path option falls back to the legacy
+#    behavior of splitting on spaces, commas, or colons.
+#
+# Valid values for path_separator are:
+#
+# path_separator = :
+# path_separator = ;
+# path_separator = space
+# path_separator = newline
+#
+# Use os.pathsep. Default configuration used for new projects.
+path_separator = os
+
+
+# set to 'true' to search source files recursively
+# in each "version_locations" directory
+# new in Alembic version 1.10
+# recursive_version_locations = false
+
+# the output encoding used when revision files
+# are written from script.py.mako
+# output_encoding = utf-8
+
+# database URL.  This is consumed by the user-maintained env.py script only.
+# other means of configuring database URLs may be customized within the env.py
+# file.
+sqlalchemy.url = driver://user:pass@localhost/dbname
+
+
+[post_write_hooks]
+# post_write_hooks defines scripts or Python functions that are run
+# on newly generated revision scripts.  See the documentation for further
+# detail and examples
+
+# format using "black" - use the console_scripts runner, against the "black" entrypoint
+# hooks = black
+# black.type = console_scripts
+# black.entrypoint = black
+# black.options = -l 79 REVISION_SCRIPT_FILENAME
+
+# lint with attempts to fix using "ruff" - use the module runner, against the "ruff" module
+# hooks = ruff
+# ruff.type = module
+# ruff.module = ruff
+# ruff.options = check --fix REVISION_SCRIPT_FILENAME
+
+# Alternatively, use the exec runner to execute a binary found on your PATH
+# hooks = ruff
+# ruff.type = exec
+# ruff.executable = ruff
+# ruff.options = check --fix REVISION_SCRIPT_FILENAME
+
+# Logging configuration.  This is also consumed by the user-maintained
+# env.py script only.
+[loggers]
+keys = root,sqlalchemy,alembic
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARNING
+handlers = console
+qualname =
+
+[logger_sqlalchemy]
+level = WARNING
+handlers =
+qualname = sqlalchemy.engine
+
+[logger_alembic]
+level = INFO
+handlers =
+qualname = alembic
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+</file>
+
+<file path="alembic/README">
+Generic single-database configuration with an async dbapi.
+</file>
+
+<file path="alembic/script.py.mako">
+"""${message}
+
+Revision ID: ${up_revision}
+Revises: ${down_revision | comma,n}
+Create Date: ${create_date}
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+${imports if imports else ""}
+
+# revision identifiers, used by Alembic.
+revision: str = ${repr(up_revision)}
+down_revision: Union[str, Sequence[str], None] = ${repr(down_revision)}
+branch_labels: Union[str, Sequence[str], None] = ${repr(branch_labels)}
+depends_on: Union[str, Sequence[str], None] = ${repr(depends_on)}
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    ${upgrades if upgrades else "pass"}
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    ${downgrades if downgrades else "pass"}
+</file>
+
+<file path="alembic/versions/e0f5b3a489f8_create_users_table.py">
+"""create_users_table
+
+Revision ID: e0f5b3a489f8
+Revises: 7fef9a9928b1
+Create Date: 2026-01-31 21:19:27.816676
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = 'e0f5b3a489f8'
+down_revision: Union[str, Sequence[str], None] = None
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('users',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('email', sa.String(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+    op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
+    op.create_index(op.f('ix_users_name'), 'users', ['name'], unique=False)
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_users_name'), table_name='users')
+    op.drop_index(op.f('ix_users_id'), table_name='users')
+    op.drop_index(op.f('ix_users_email'), table_name='users')
+    op.drop_table('users')
+    # ### end Alembic commands ###
+</file>
+
+<file path="alembic/versions/f010c6bcde6b_reorganize_models_structure.py">
+"""reorganize models structure
+
+Revision ID: f010c6bcde6b
+Revises: e0f5b3a489f8
+Create Date: 2026-02-01 14:56:59.082948
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = 'f010c6bcde6b'
+down_revision: Union[str, Sequence[str], None] = 'e0f5b3a489f8'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('specialities',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('qualification', sa.String(), nullable=False),
+    sa.Column('term', sa.Integer(), nullable=False),
+    sa.Column('direction', sa.String(), nullable=False),
+    sa.Column('description', sa.Text(), nullable=False),
+    sa.Column('image_url', sa.String(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_specialities_id'), 'specialities', ['id'], unique=False)
+    op.create_index(op.f('ix_specialities_name'), 'specialities', ['name'], unique=True)
+    op.create_table('subjects',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('description', sa.String(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_subjects_id'), 'subjects', ['id'], unique=False)
+    op.create_index(op.f('ix_subjects_name'), 'subjects', ['name'], unique=True)
+    op.create_table('teachers',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('image_url', sa.String(), nullable=False),
+    sa.Column('fio', sa.String(), nullable=False),
+    sa.Column('post', sa.String(), nullable=False),
+    sa.Column('subjects', sa.ARRAY(sa.String(length=100)), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('image_url')
+    )
+    op.create_index(op.f('ix_teachers_fio'), 'teachers', ['fio'], unique=True)
+    op.create_index(op.f('ix_teachers_id'), 'teachers', ['id'], unique=False)
+    op.create_table('tracks',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_tracks_id'), 'tracks', ['id'], unique=False)
+    op.create_index(op.f('ix_tracks_name'), 'tracks', ['name'], unique=True)
+    op.create_table('directions',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('track_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['track_id'], ['tracks.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_directions_id'), 'directions', ['id'], unique=False)
+    op.create_index(op.f('ix_directions_name'), 'directions', ['name'], unique=True)
+    op.create_table('features',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('speciality_id', sa.Integer(), nullable=False),
+    sa.Column('subtitle', sa.String(), nullable=False),
+    sa.Column('description', sa.Text(), nullable=False),
+    sa.ForeignKeyConstraint(['speciality_id'], ['specialities.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_features_id'), 'features', ['id'], unique=False)
+    op.create_index(op.f('ix_features_subtitle'), 'features', ['subtitle'], unique=False)
+    op.create_table('disciplines',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('start_term', sa.Integer(), nullable=False),
+    sa.Column('end_term', sa.Integer(), nullable=False),
+    sa.Column('direction_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['direction_id'], ['directions.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_disciplines_id'), 'disciplines', ['id'], unique=False)
+    op.create_index(op.f('ix_disciplines_name'), 'disciplines', ['name'], unique=True)
+    op.add_column('users', sa.Column('hashed_password', sa.String(), nullable=False))
+    op.alter_column('users', 'name',
+               existing_type=sa.VARCHAR(),
+               nullable=False)
+    op.alter_column('users', 'email',
+               existing_type=sa.VARCHAR(),
+               nullable=False)
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.alter_column('users', 'email',
+               existing_type=sa.VARCHAR(),
+               nullable=True)
+    op.alter_column('users', 'name',
+               existing_type=sa.VARCHAR(),
+               nullable=True)
+    op.drop_column('users', 'hashed_password')
+    op.drop_index(op.f('ix_disciplines_name'), table_name='disciplines')
+    op.drop_index(op.f('ix_disciplines_id'), table_name='disciplines')
+    op.drop_table('disciplines')
+    op.drop_index(op.f('ix_features_subtitle'), table_name='features')
+    op.drop_index(op.f('ix_features_id'), table_name='features')
+    op.drop_table('features')
+    op.drop_index(op.f('ix_directions_name'), table_name='directions')
+    op.drop_index(op.f('ix_directions_id'), table_name='directions')
+    op.drop_table('directions')
+    op.drop_index(op.f('ix_tracks_name'), table_name='tracks')
+    op.drop_index(op.f('ix_tracks_id'), table_name='tracks')
+    op.drop_table('tracks')
+    op.drop_index(op.f('ix_teachers_id'), table_name='teachers')
+    op.drop_index(op.f('ix_teachers_fio'), table_name='teachers')
+    op.drop_table('teachers')
+    op.drop_index(op.f('ix_subjects_name'), table_name='subjects')
+    op.drop_index(op.f('ix_subjects_id'), table_name='subjects')
+    op.drop_table('subjects')
+    op.drop_index(op.f('ix_specialities_name'), table_name='specialities')
+    op.drop_index(op.f('ix_specialities_id'), table_name='specialities')
+    op.drop_table('specialities')
+    # ### end Alembic commands ###
+</file>
+
+<file path="app/__init__.py">
+
+</file>
+
+<file path="app/config.py">
+import os
+from dotenv import load_dotenv
+
+load_dotenv(".env.local")
+load_dotenv()
+
+class Settings:
+    DB_USER = os.getenv("DB_USER", "postgres")
+    DB_PASS = os.getenv("DB_PASS", "postgres")
+    DB_NAME = os.getenv("DB_NAME", "postgres")
+    DB_HOST = os.getenv("DB_HOST", "localhost")
+    DB_PORT = os.getenv("DB_PORT", "5432")
+    
+    @property
+    def DATABASE_URL(self):
+        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+settings = Settings()
+</file>
+
+<file path="app/models/__init__.py">
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
+
+from app.models.user import User
+from app.models.speciality import Speciality
+from app.models.feature import Feature
+from app.models.plan import Track, Direction, Discipline
+from app.models.teacher import Teacher
+from app.models.subject import Subject
+
+__all__ = [
+    "Base",
+    "User",
+    "Speciality",
+    "Feature",
+    "Track",
+    "Direction",
+    "Discipline",
+    "Teacher",
+    "Subject",
+]
+</file>
+
+<file path="app/models/feature.py">
+from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy.orm import relationship
+from app.models import Base
+
+class Feature(Base):
+    __tablename__ = 'features'
+
+    id = Column(Integer, primary_key=True, index=True)
+    speciality_id = Column(Integer, ForeignKey('specialities.id', ondelete='CASCADE'), nullable=False)
+    subtitle = Column(String, index=True, nullable=False)
+    description = Column(Text, nullable=False)
+    
+    speciality = relationship("Speciality", back_populates="features")
+</file>
+
+<file path="app/models/speciality.py">
+from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy.orm import relationship
+from app.models import Base
+
+class Speciality(Base):
+    __tablename__ = 'specialities'
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True, nullable=False, unique=True)
+    qualification = Column(String, nullable=False)
+    term = Column(Integer, nullable=False)
+    direction = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    image_url = Column(String, nullable=False)
+    
+    features = relationship(
+        "Feature", 
+        back_populates="speciality",
+        cascade="all, delete-orphan"
+    )
+</file>
+
+<file path="app/models/subject.py">
+from sqlalchemy import Column, Integer, String
+from app.models import Base
+
+class Subject(Base):
+    __tablename__ = 'subjects'
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True, nullable=False, unique=True)
+    description = Column(String, nullable=False)
+</file>
+
+<file path="app/models/teacher.py">
+from sqlalchemy import Column, Integer, String, ARRAY
+from app.models import Base
+
+class Teacher(Base):
+    __tablename__ = 'teachers'
+
+    id = Column(Integer, primary_key=True, index=True)
+    image_url = Column(String, unique=True, nullable=False)
+    fio = Column(String, unique=True, index=True, nullable=False)
+    post = Column(String, nullable=False)
+    subjects = Column(ARRAY(String(100)), nullable=False, default=[])
+</file>
+
+<file path="app/models/user.py">
+from sqlalchemy import Column, Integer, String
+from app.models import Base
+
+class User(Base):
+    __tablename__ = 'users'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False, index=True)
+    email = Column(String, unique=True, nullable=False, index=True)
+    hashed_password = Column(String, nullable=False)
+</file>
+
+<file path="app/routers/__init__.py">
+
+</file>
+
+<file path="app/routers/auth.py">
+from fastapi import APIRouter, Depends, HTTPException, status, Form
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+
+from app.database import get_db
+from app.models.user import User
+from app.schemas.auth import Token, LoginRequest
+from app.security import verify_password, get_password_hash
+from app.jwt_manager import jwt_manager
+
+router = APIRouter(prefix="/admin", tags=["Authentification"])
+
+# Authentification
+@router.get("/")
+async def admin_root():
+    return {
+        "Эндпоинты": {
+            "POST /admin/": "Аутентификация пользователя",
+            "POST /admin/hash-password": "Получить хэш пароля для ручного создания пользователя (Временое решение)"
+        }
+    }
+
+@router.post("/", response_model=Token)
+async def login(
+    login_data: LoginRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(User).where(User.email == login_data.email)
+    )
+    user = result.scalar_one_or_none()
+    
+    if not user or not verify_password(login_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Неверный email или пароль",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    token_data = {
+        "sub": str(user.id),
+        "email": user.email
+    }
+    access_token = jwt_manager.create_access_token(token_data)
+    
+    return Token(access_token=access_token)
+
+# Password to hash
+@router.post("/hash-password")
+async def hash_password_endpoint(password: str = Form(..., min_length=6)):
+    """
+    Получить хэш пароля для ручного создания пользователя в БД.
+    
+    Внимание: Bcrypt ограничивает пароли 72 байтами.
+    Если ваш пароль содержит не-ASCII символы или очень длинный,
+    он будет автоматически обрезан.
+    """
+    password_bytes = password.encode('utf-8')
+    original_length = len(password_bytes)
+    
+    if original_length > 72:
+        warning = f"Внимание: Пароль длиннее 72 байт ({original_length} байт). Он будет обрезан для совместимости с bcrypt."
+    else:
+        warning = None
+    
+    hashed_password = get_password_hash(password)
+    
+    return {
+        "original_password": password,
+        "password_length_bytes": original_length,
+        "warning": warning,
+        "hashed_password": hashed_password,
+        "Пример запроса sql": f"""
+-- SQL запрос для создания пользователя в PostgreSQL:
+INSERT INTO users (name, email, hashed_password) 
+VALUES ('Администратор', 'admin@university.ru', '{hashed_password}');
+        """
+    }
+</file>
+
+<file path="app/routers/cms.py">
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.exc import IntegrityError
+from typing import List, Optional
+import shutil
+
+from app.database import get_db
+from app.dependencies import get_current_user
+
+from app.models.user import User
+from app.models.speciality import Speciality
+from app.models.feature import Feature
+from app.models.plan import Track, Direction, Discipline
+from app.models.teacher import Teacher
+from app.models.subject import Subject
+
+from app.schemas.speciality import (
+    SpecialityCreate, 
+    SpecialityUpdate, 
+    Speciality as SpecialitySchema,
+    Speciality_Features
+)
+from app.schemas.feature import (
+    FeatureBase, 
+    FeatureCreate, 
+    FeatureUpdate, 
+    Feature as FeatureSchema
+)
+from app.schemas.plan import (
+    TrackBase, TrackCreate, TrackUpdate, Track as TrackSchema,
+    DirectionBase, DirectionCreate, DirectionUpdate, Direction as DirectionSchema,
+    DisciplineBase, DisciplineCreate, DisciplineUpdate, Discipline as DisciplineSchema,
+    Direction_Disciplines, Track_Directions
+)
+from app.schemas.teacher import (
+    TeacherBase, 
+    TeacherCreate, 
+    TeacherUpdate, 
+    Teacher as TeacherSchema
+)
+from app.schemas.subject import (
+    SubjectBase, 
+    SubjectCreate, 
+    SubjectUpdate, 
+    Subject as SubjectSchema
+)
+
+from app.security import verify_password, get_password_hash
+from app.jwt_manager import jwt_manager
+
+router = APIRouter(prefix="/amdin/cms", tags=["CMS Panel"])
+
+
+# Subject
+@router.post("/subject")
+async def subject_create(
+    subject_data: SubjectCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
+):
+    """
+    Создание нового предмета.
+    """
+    result = await db.execute(select(Subject).where(Subject.name == subject_data.name))
+    if result.scalar_one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Такой предмет уже существует"
+        )
+    
+    subject = Subject(**subject_data.model_dump())
+    try:
+        db.add(subject)
+        await db.commit()
+        await db.refresh(subject)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ошибка при создании предмета"
+        )
+    
+    return subject
+
+@router.put("/subject/{subject_id}")
+async def subject_update(
+    subject_id: int,
+    subject_data: SubjectUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
+):
+    """
+    Обновить предмет.
+    """
+    result = await db.execute(select(Subject).where(Subject.id == subject_id))
+    subject = result.scalar_one_or_none()
+    
+    if not subject:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Предмет не найден"
+        )
+    
+    update_data = subject_data.model_dump(exclude_unset=True)
+    
+    if "name" in update_data:
+        result = await db.execute(
+            select(Subject).where(
+                Subject.name == update_data["name"],
+                Subject.id != subject_id
+            )
+        )
+        if result.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Предмет с таким названием уже существует"
+            )
+    
+    for field, value in update_data.items():
+        setattr(subject, field, value)
+    
+    try:
+        await db.commit()
+        await db.refresh(subject)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ошибка при обновлении предмета"
+        )
+    
+    return subject
+
+@router.delete("/subject/{subject_id}")
+async def subject_delete(
+    subject_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
+):
+    """
+    Удаление предмета.
+    """
+    result = await db.execute(select(Subject).where(Subject.id == subject_id))
+    subject = result.scalar_one_or_none()
+
+    if not subject:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Предмет не найден"
+        )
+    
+    try:
+        await db.delete(subject)
+        await db.commit()
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ошибка при удалении"
+        )
+    
+    return subject
+
+# Teachers (Движуха с фото, static и docker)
+# @router.post("/teacher")
+# async def teacher_create(
+#     teacher_data: TeacherCreate,
+#     db: AsyncSession = Depends(get_db),
+#     current_user_id: int = Depends(get_current_user)
+# ):
+#     """
+#     Создание нового преподавателя.
+#     """
+#     result = await db.execute(select(Teacher).where(Teacher.fio == teacher_data.fio))
+#     if result.scalar_one_or_none():
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Преподаватель с таким ФИО уже существует"
+#         )
+    
+#     teacher = (Teacher(**teacher_data.model_dump()))
+
+#     try:
+#         db.add(teacher)
+#         await db.commit()
+#         await db.refresh(teacher)
+#     except IntegrityError:
+#         await db.rollback()
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Ошибка при создании преподавателя"
+#         )
+    
+#     return teacher
+    
+# @router.put("/teacher/{teacher_id}")
+# async def teacher_update(
+#     teacher_id: int,
+#     teacher_data: TeacherUpdate,
+#     db: AsyncSession = Depends(get_db),
+#     current_user_id: int = Depends(get_current_user)
+# ):
+#     """
+#     Обновление данных о преподавателе.
+#     """
+#     result = await db.execute(select(Teacher).where(Teacher.id == teacher_id))
+#     teacher = result.scalar_one_or_none()
+
+#     if not teacher:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="Преподаватель не найден"
+#         )
+    
+#     update_data = teacher_data.model_dump(exclude_unset=True)
+    
+#     if "fio" in update_data:
+#         result = await db.execute(
+#             select(Teacher).where(
+#                 Teacher.fio == update_data["fio"],
+#                 Teacher.id != teacher_id
+#             )
+#         )
+#         if result.scalar_one_or_none():
+#             raise HTTPException(
+#                 status_code=status.HTTP_400_BAD_REQUEST,
+#                 detail="Преподаватель уже существует"
+#             )
+    
+#     for field, value in update_data.items():
+#         setattr(teacher, field, value)
+    
+#     try:
+#         await db.commit()
+#         await db.refresh(teacher)
+#     except IntegrityError:
+#         await db.rollback()
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Ошибка при обновлении данных"
+#         )
+    
+#     return teacher
+
+# @router.delete("/teacher/{teacher_id}")
+# async def teacher_delete(
+#     teacher_id: int,
+#     db: AsyncSession = Depends(get_db),
+#     current_user_id: int = Depends(get_current_user)
+# ):
+#     """
+#     Удаление преподавателя.
+#     """
+#     result = await db.execute(select(Teacher).where(Teacher.id == teacher_id))
+#     teacher = result.scalar_one_or_none()
+
+#     if not teacher:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="Преподаватель не найден"
+#         )
+    
+#     try:
+#         await db.delete(teacher)
+#         await db.commit()
+#     except IntegrityError:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Ошибка при удалении"
+#         )
+    
+#     return teacher
+</file>
+
+<file path="app/schemas/health_check.py">
+from pydantic import BaseModel
+
+class HealthCheck(BaseModel):
+    db_status: bool
+    math_result: int | None = None
+    error: str | None = None
+</file>
+
+<file path="alembic/env.py">
+import asyncio
+from logging.config import fileConfig
+
+from sqlalchemy import pool
+from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import async_engine_from_config
+
+from alembic import context
+import sys
+import os
+
+sys.path.append(os.getcwd())
+
+from app.config import settings
+from app.models import Base
+
+config = context.config
+
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+target_metadata = Base.metadata
+
+def run_migrations_offline() -> None:
+    """Run migrations in 'offline' mode."""
+    url = config.get_main_option("sqlalchemy.url")
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+def do_run_migrations(connection: Connection) -> None:
+    context.configure(connection=connection, target_metadata=target_metadata)
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+async def run_migrations_online() -> None:
+    """Run migrations in 'online' mode."""
+    connectable = async_engine_from_config(
+        config.get_section(config.config_ini_section, {}),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
+
+    await connectable.dispose()
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    asyncio.run(run_migrations_online())
+</file>
+
+<file path="app/models/plan.py">
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
+from app.models import Base
+
+class Track(Base):
+    __tablename__ = 'tracks'
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True, nullable=False, unique=True)
+    
+    directions = relationship("Direction", back_populates="track", cascade="all, delete-orphan")
+
+class Direction(Base):
+    __tablename__ = 'directions'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True, nullable=False, unique=True)
+    track_id = Column(Integer, ForeignKey('tracks.id', ondelete='CASCADE'), nullable=False)
+    
+    track = relationship("Track", back_populates="directions")
+    disciplines = relationship("Discipline", back_populates="direction", cascade="all, delete-orphan")
+
+class Discipline(Base):
+    __tablename__ = "disciplines"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True, nullable=False, unique=True)
+    start_term = Column(Integer, nullable=False)
+    end_term = Column(Integer, nullable=False)
+    direction_id = Column(Integer, ForeignKey('directions.id', ondelete='CASCADE'), nullable=False)
+    
+    direction = relationship("Direction", back_populates="disciplines")
+</file>
+
+<file path="app/routers/public.py">
+from fastapi import APIRouter, Depends
+from fastapi.responses import FileResponse 
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import text
+from app.database import get_db
+import os 
+
+router = APIRouter()
+
+@router.get("/") 
+async def read_root():
+
+    file_path = os.path.join("app", "templates", "index.html")
+    return FileResponse(file_path)
+
+@router.get("/api/health")
+async def health_check(db: AsyncSession = Depends(get_db)):
+    try:
+        result = await db.execute(text("SELECT 100 + 55"))
+        value = result.scalar()
+        return {"db_status": True, "math_result": value}
+    except Exception as e:
+        print(f"DB Error: {e}")
+        return {"db_status": False, "error": str(e)}
+</file>
+
+<file path="app/schemas/plan.py">
+from pydantic import BaseModel, ConfigDict, Field
+from typing import Optional, List
+
+# Track
+class TrackBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+
+class TrackCreate(TrackBase):
+    pass
+
+class TrackUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+
+class Track(TrackBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int = Field(..., gt=0)
+
+
+# Direction
+class DirectionBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    track_id: int = Field(..., gt=0)
+
+class DirectionCreate(DirectionBase):
+    pass
+
+class DirectionUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    track_id: Optional[int] = Field(None, gt=0)
+
+class Direction(DirectionBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+
+
+# Discipline
+class DisciplineBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=225)
+    start_term: int = Field(..., ge=1, le=12)
+    end_term: int = Field(..., ge=1, le=12)
+    direction_id: int = Field(..., gt=0)
+
+class DisciplineCreate(DisciplineBase):
+    pass
+
+class DisciplineUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=200)
+    start_term: Optional[int] = Field(None, ge=1, le=12)
+    end_term: Optional[int] = Field(None, ge=1, le=12)
+    direction_id: Optional[int] = Field(None, gt=0)
+
+# шаблон для ответов API
+class Discipline(DisciplineBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int = Field(..., gt=0)
+
+
+# для вывода вложенных данных
+class Direction_Disciplines(Direction): # наследуем
+    disciplines: List[Discipline] = []  # добавляем
+
+class Track_Directions(Track):
+    directions: List[Direction_Disciplines] = []
+</file>
+
+<file path="app/security.py">
+import bcrypt
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    Проверяет, соответствует ли обычный пароль хешированному
+    """
+    try:
+        return bcrypt.checkpw(
+            plain_password.encode('utf-8'),
+            hashed_password.encode('utf-8')
+        )
+    except Exception:
+        return False
+
+def get_password_hash(password: str) -> str:
+    """
+    Хеширует пароль с использованием bcrypt
+    """
+    password_bytes = password.encode('utf-8')
+    
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+    
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    
+    return hashed.decode('utf-8')
+</file>
+
+<file path="DEV_GUIDE.md">
+1. Как запустить проект у себя:
+
+Клонируешь репо.
+Создаешь файл .env.local 
+Создаешь базу данных локально 
+Запускаешь: pip install -r requirements.txt
+Применяешь миграции: alembic upgrade head
+Запускаешь сервер: python main.py
+
+2. Как менять Базу Данных (ОЧЕНЬ ВАЖНО):
+ЗАПРЕЩЕНО менять структуру БД руками или через create_all.
+Если добавил таблицу/колонку в models.py:
+В терминале: alembic revision --autogenerate -m "название_изменения"
+Проверь созданный файл в папке alembic/versions.
+Примени у себя: alembic upgrade head и проверь, что работает.
+Только после этого делай Commit & Push.
+
+3. Где смотреть данные:
+
+Прод: https://admin.vinogradovnikita.ru (пароль спросишь)
+</file>
+
+<file path=".dockerignore">
+**/__pycache__
+**/.venv
+**/.classpath
+**/.dockerignore
+**/.env
+**/.git
+**/.gitignore
+**/.project
+**/.settings
+**/.toolstarget
+**/.vs
+**/.vscode
+**/*.*proj.user
+**/*.dbmdl
+**/*.jfm
+**/bin
+**/charts
+**/docker-compose*
+**/compose*
+**/Dockerfile*
+**/node_modules
+**/npm-debug.log
+**/obj
+**/secrets.dev.yaml
+**/values.dev.yaml
+LICENSE
+README.md
+</file>
+
+<file path="app/schemas/feature.py">
+from pydantic import BaseModel, ConfigDict, Field
+from typing import Optional
+
+class FeatureBase(BaseModel):
+    subtitle: str = Field(..., min_length=1, max_length=225)
+    description: str =  Field(..., min_length=1)
+    speciality_id: int =  Field(..., gt=0)
+
+class FeatureUpdate(BaseModel):
+    subtitle: Optional[str] = Field(None, min_length=1,  max_length=225)
+    description: Optional[str] = Field(None, min_length=1)
+    speciality_id: Optional[int] = Field(None, gt=0)
+
+class FeatureCreate(FeatureBase):
+    pass
+
+class Feature(FeatureBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int = Field(..., gt=0)
+</file>
+
+<file path="app/schemas/speciality.py">
+from pydantic import BaseModel, ConfigDict, Field
+from typing import Optional, List
+from .feature import Feature
+
+class SpecialityBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=225)
+    qualification: str = Field(..., min_length=1, max_length=225)
+    term: int = Field(..., ge=1, le=10)
+    direction: str = Field(..., min_length=1, max_length=100)
+    description: str = Field(..., min_length=1)
+    image_url: str
+
+class SpecialityCreate(SpecialityBase):
+    pass
+
+class SpecialityUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=225)
+    qualification: Optional[str] = Field(None, min_length=1, max_length=225)
+    term: Optional[int] = Field(None, ge=1, le=10)
+    direction: Optional[str] = Field(None, min_length=1, max_length=100)
+    description: Optional[str] = Field(None, min_length=1)
+    image_url: Optional[str] = None
+
+class Speciality(SpecialityBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int = Field(..., gt=0)
+
+class Speciality_Features(Speciality):
+    features: List[Feature] = []
+</file>
+
+<file path="app/schemas/subject.py">
+from pydantic import BaseModel, ConfigDict, Field
+from typing import Optional
+
+class SubjectBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=225)
+    description: str = Field(..., min_length=1)
+
+class SubjectCreate(SubjectBase):
+    pass
+
+class SubjectUpdate(BaseModel):
+    name: Optional[str] = Field(None, max_length=225)
+    description: Optional[str] = Field(None, min_length=1)
+
+class Subject(SubjectBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int = Field(..., gt=0)
+</file>
+
+<file path="app/schemas/teacher.py">
+from pydantic import BaseModel, ConfigDict, Field
+from typing import Optional, List
+
+class TeacherBase(BaseModel):
+    image_url: str 
+    fio: str = Field(..., min_length=1, max_length=100)
+    post: str = Field(..., min_length=1, max_length=100)
+    subjects: List[str] = Field(..., min_items=1, max_items=100)
+
+class TeacherCreate(BaseModel):
+    fio: str = Field(..., min_length=1, max_length=100)
+    post: str = Field(..., min_length=1, max_length=100)
+    subjects: List[str] = Field(..., min_items=1, max_items=100)
+
+class TeacherUpdate(BaseModel):
+    fio: Optional[str] = Field(None, min_length=5, max_length=100)
+    post: Optional[str] = Field(None, min_length=3, max_length=100)
+    subjects: Optional[List[str]] = Field(None, min_items=1, max_items=100)
+
+class Teacher(TeacherBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int = Field(..., gt=0)
+</file>
+
+<file path="app/schemas/user.py">
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from typing import Optional, List
+
+class UserBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=225)  
+    email: EmailStr = Field(..., max_length=255)
+    
+class User(UserBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int = Field(..., gt=0)
+</file>
+
+<file path="app/database.py">
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+from app.config import settings
+
+# Создаем движок
+engine = create_async_engine(settings.DATABASE_URL, echo=True)
+
+AsyncSessionLocal = sessionmaker(
+    engine, 
+    class_=AsyncSession, 
+    expire_on_commit=False
+)
+
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session
+</file>
+
+<file path="app/dependencies.py">
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+from app.jwt_manager import jwt_manager
+
+security = HTTPBearer()
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+) -> int:
+    """
+    Зависимость для получения текущего пользователя из JWT токена.
+    """
+    token = credentials.credentials
+    user_id = jwt_manager.get_user_id_from_token(token)
+    
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Невалидный или истекший токен",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    return user_id
+</file>
+
+<file path="app/main.py">
+import uvicorn
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles # <--- 1. Импортируем
+from app.routers import auth, cms, public
+
+app = FastAPI(title="IT BGITU Remake")
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+app.include_router(public.router)
+app.include_router(auth.router)
+app.include_router(cms.router)
+
+if __name__ == "__main__":
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+</file>
+
+<file path="app/schemas/__init__.py">
+from .feature import (FeatureBase, FeatureCreate, FeatureUpdate, Feature)
+
+from .plan import (TrackBase, TrackCreate, TrackUpdate, Track, DirectionBase, DirectionCreate, DirectionUpdate, Direction, DisciplineBase, DisciplineCreate, DisciplineUpdate, Discipline, Direction_Disciplines, Track_Directions)
+from .speciality import (SpecialityBase, SpecialityCreate, SpecialityUpdate, Speciality, Speciality_Features)
+from .subject import (SubjectBase, SubjectCreate, SubjectUpdate, Subject)
+from .teacher import (TeacherBase, TeacherCreate, TeacherUpdate, Teacher)
+from .user import (UserBase, User)
+from .auth import (Token, TokenData, LoginRequest)
+
+from .health_check import HealthCheck
+
+__all__ = [
+    # Feature
+    'FeatureBase', 'FeatureCreate', 'FeatureUpdate', 'Feature',
+    
+    # Plan
+    'TrackBase', 'TrackCreate', 'TrackUpdate', 'Track',
+    'DirectionBase', 'DirectionCreate', 'DirectionUpdate', 'Direction',
+    'DisciplineBase', 'DisciplineCreate', 'DisciplineUpdate', 'Discipline',
+    'Direction_Disciplines', 'Track_Directions',
+    
+    # Speciality
+    'SpecialityBase', 'SpecialityCreate', 'SpecialityUpdate', 'Speciality',
+    'Speciality_Features',
+    
+    # Subject
+    'SubjectBase', 'SubjectCreate', 'SubjectUpdate', 'Subject',
+    
+    # Teacher
+    'TeacherBase', 'TeacherCreate', 'TeacherUpdate', 'Teacher',
+    
+    # User
+    'UserBase', 'User',
+
+    # Auth - только то, что осталось
+    'Token', 'TokenData', 'LoginRequest',
+
+    # Health Check
+    'HealthCheck',
+]
+</file>
+
+<file path="app/schemas/auth.py">
+# app/schemas/auth.py
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
+
+class Token(BaseModel):
+    access_token: str = Field(..., min_length=1)
+    token_type: str = Field(default="bearer")
+
+class TokenData(BaseModel):
+    user_id: int = Field(..., gt=0)
+    email: EmailStr = Field(...)
+
+class LoginRequest(BaseModel):
+    email: EmailStr = Field(..., max_length=255)
+    password: str = Field(..., min_length=6, max_length=225)
+</file>
+
+<file path="Dockerfile">
+FROM python:3.11-slim
+
+WORKDIR /code 
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Создаем юзера для безопасности
+RUN adduser --disabled-password --gecos "" appuser && chown -R appuser /code
+USER appuser
+
+# ЗАПУСК: 
+# Используем модуль app.main, так как файл теперь лежит в папке app/
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+</file>
+
+<file path="README.md">
+# deploy_testing
+test
+</file>
+
+<file path=".gitignore">
+gh_deploy_key
+gh_deploy_key.pub
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Database
+*.sqlite
+*.db
+
+# Environment variables
+.env
+.env.local
+</file>
+
+<file path="Caddyfile">
+vinogradovnikita.ru, www.vinogradovnikita.ru {
+    reverse_proxy app:8000
+}
+
+admin.vinogradovnikita.ru {
+    basicauth {
+        admin $2a$04$9c8OMNev8LNYkqcavBu2kOIjT0sQ4OMNHgvMBQi3hPnC0CGxMtX6i
+    }
+    reverse_proxy pgadmin:80
+}
+</file>
+
+<file path=".github/workflows/ci.yml">
+name: Deploy IT_BGITU
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  # 1. Проверка кода (защита от дурака)
+  check-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check for missing migrations
+        run: |
+          # Создаем временную SQLite базу для проверки схемы
+          export DATABASE_URL="sqlite:///./check.db"
+          # alembic check работает начиная с версии 1.9.0
+          alembic check || echo "⚠️ ВНИМАНИЕ: Похоже, вы забыли создать миграцию! (Или alembic check не поддерживается, пропускаем)"
+
+  # 2. Сборка и отправка образа
+  build-and-push:
+    needs: check-code  
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: binarybard7279/it-bgitu:latest
+
+  # 3. Деплой на сервер
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd /root/it-bgitu
+            
+            # 1. Создаем/перезаписываем .env файл с секретами базы
+            echo "DB_USER=${{ secrets.DB_USER }}" > .env
+            echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+            echo "DB_HOST=db" >> .env
+            echo "DB_PORT=5432" >> .env
+            
+            # 2. ДОБАВЛЯЕМ СЕКРЕТЫ ДЛЯ JWT (Без них jwt_manager.py упадет)
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+            echo "ALGORITHM=${{ secrets.ALGORITHM }}" >> .env
+            echo "ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}" >> .env
+            
+            # 3. Деплой
+            docker compose pull
+            docker compose up -d --remove-orphans
+            
+            # 4. Миграции
+            sleep 5
+            docker compose exec -T app alembic upgrade head
+            
+            # 5. Очистка старых образов
+            docker image prune -f
+</file>
+
+<file path="app/jwt_manager.py">
+import os
+from datetime import datetime, timedelta, timezone
+from typing import Optional, Dict, Any
+from jose import JWTError, jwt
+from dotenv import load_dotenv
+
+load_dotenv(".env.local")
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key-change-me")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+
+class JWTManager:
+    def __init__(self):
+        if not SECRET_KEY or SECRET_KEY == "fallback-secret-key-change-me":
+            raise ValueError("SECRET_KEY не установлен в .env.local!")
+        
+        self.secret_key = SECRET_KEY
+        self.algorithm = ALGORITHM
+        self.access_token_expire_minutes = ACCESS_TOKEN_EXPIRE_MINUTES
+    
+    def create_access_token(self, data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+        to_encode = data.copy()
+        now = datetime.now(timezone.utc)
+        
+        if expires_delta:
+            expire = now + expires_delta
+        else:
+            expire = now + timedelta(minutes=self.access_token_expire_minutes)
+
+        to_encode.update({"exp": expire})
+        return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
+    
+    def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
+        try:
+            return jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+        except JWTError:
+            return None
+    
+    def get_user_id_from_token(self, token: str) -> Optional[int]:
+        payload = self.verify_token(token)
+        if payload is None:
+            return None
+        
+        user_id = payload.get("sub")
+        if user_id:
+            try:
+                return int(user_id)
+            except (ValueError, TypeError):
+                return None
+        return None
+
+jwt_manager = JWTManager()
+</file>
+
+<file path="docker-compose.yml">
+version: '3.8'
+
+services:
+  app:
+    image: binarybard7279/it-bgitu:latest
+    restart: always
+    expose:
+      - "8000"
+    env_file:
+      - .env  # <-- Это будет .env на сервере, созданный из secrets
+    depends_on:
+      - db
+    networks:
+      - itnet
+
+  caddy:
+    image: caddy:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+      - pgadmin
+    networks:
+      - itnet
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER} # Читает из .env на сервере
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - itnet
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: StrongPass123
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - itnet
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+  pgadmin_data:
+
+networks:
+  itnet:
+    driver: bridge
+</file>
+
+<file path="requirements.txt">
+fastapi
+uvicorn[standard]
+pydantic
+sqlalchemy       
+asyncpg          
+python-dotenv    
+asyncpg
+sqlalchemy
+alembic
+passlib[bcrypt]
+python-jose[cryptography]
+pydantic[email]
+python-multipart
+</file>
+
+</files>

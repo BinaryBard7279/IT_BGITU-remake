@@ -1,10 +1,12 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles # <--- 1. Импортируем
 from app.routers import auth, cms, public
 
 app = FastAPI(title="IT BGITU Remake")
 
-# Подключаем роутеры (разделы сайта)
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 app.include_router(public.router)
 app.include_router(auth.router)
 app.include_router(cms.router)
