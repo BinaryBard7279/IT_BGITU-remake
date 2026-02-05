@@ -2,10 +2,12 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.routers import auth, cms, public
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI(title="IT BGITU Remake")
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# templates = Jinja2Templates(directory="app/templates")
 
 app.include_router(public.router)
 app.include_router(auth.router)

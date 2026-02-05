@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from sqlalchemy.future import select
 from app.database import get_db
+from sqlalchemy.orm import selectinload
 from typing import List
 import os
 
@@ -76,9 +77,51 @@ async def health_check(db: AsyncSession = Depends(get_db)):
         print(f"DB Error: {e}")
         return {"db_status": False, "error": str(e)}
     
+
 # Гет запросы для подвязки к фронту
-@router.get("/speciality", response_model=List[SpecialitySchema])
-async def get_speciality(db: AsyncSession = Depends(get_db)):
+
+@router.get("/achievements", response_model=List[AchievementSchema])        # достижения
+async def get_all_achievements(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Achievement).order_by(Achievement.id))
+    return result.scalars().all()
+
+@router.get("/features", response_model=List[FeatureSchema])                # преимущества
+async def get_all_features(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Feature).order_by(Feature.id))
+
+    return result.scalars().all()
+
+@router.get("/directions-with-disciplines")                                 # план - вложенная структура
+async def get_all_directions_with_disciplines(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Direction).options(selectinload(Direction.disciplines)).order_by(Direction.id))
+    directions = result.scalars().all()
+    
+    return [{
+        "id": d.id,
+        "name": d.name,
+        "disciplines": [{
+            "id": disc.id,
+            "name": disc.name,
+            "start_term": disc.start_term,
+            "end_term": disc.end_term,
+            "direction_id": disc.direction_id
+        } for disc in d.disciplines]
+    } for d in directions]
+
+@router.get("/speciality", response_model=List[SpecialitySchema])           # специальности
+async def get_all_speciality(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Speciality).order_by(Speciality.id))
+
+    return result.scalars().all()
+
+@router.get("/subjects", response_model=List[SubjectSchema])                # предметы 
+async def get_all_subjects(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Subject).order_by(Subject.id))
+
+    return result.scalars().all()
+
+@router.get("/teachers", response_model=List[TeacherSchema])                # преподаватели 
+async def get_all_teachers(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Teacher).order_by(Teacher.fio))
 
     return result.scalars().all()
