@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends
-from fastapi.responses import FileResponse 
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
+from sqlalchemy.future import select
 from app.database import get_db
+from typing import List
 import os
 
 from app.models.speciality import Speciality
@@ -75,3 +77,8 @@ async def health_check(db: AsyncSession = Depends(get_db)):
         return {"db_status": False, "error": str(e)}
     
 # Гет запросы для подвязки к фронту
+@router.get("/speciality", response_model=List[SpecialitySchema])
+async def get_speciality(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Speciality).order_by(Speciality.id))
+
+    return result.scalars().all()
