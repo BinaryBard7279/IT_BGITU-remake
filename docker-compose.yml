@@ -10,6 +10,10 @@ services:
       - .env  # <-- Это будет .env на сервере, созданный из secrets
     depends_on:
       - db
+    # --- ВАЖНОЕ ИЗМЕНЕНИЕ: Сохраняем картинки на диск ---
+    volumes:
+      - media_data:/code/app/uploads
+    # ----------------------------------------------------
     networks:
       - itnet
 
@@ -57,6 +61,7 @@ volumes:
   caddy_data:
   caddy_config:
   pgadmin_data:
+  media_data: # <-- Создаем хранилище для картинок
 
 networks:
   itnet:

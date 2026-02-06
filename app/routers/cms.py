@@ -61,6 +61,8 @@ from app.jwt_manager import jwt_manager
 router = APIRouter(prefix="/admin/cms", tags=["CMS Panel"])
 
 # Uplod image
+# app/routers/cms.py
+
 @router.post("/upload")
 async def upload_image(
     file: UploadFile = File(...),
@@ -75,19 +77,26 @@ async def upload_image(
     file_extension = file.filename.split(".")[-1]
     unique_filename = f"{uuid.uuid4()}.{file_extension}"
     
-    save_path = Path("app/uploads") / unique_filename
+    # --- ИСПРАВЛЕНИЕ НАЧАЛО ---
+    # Создаем объект пути
+    save_directory = Path("app/uploads")
+    # Гарантируем, что папка существует (создаст, если нет)
+    save_directory.mkdir(parents=True, exist_ok=True)
+    
+    save_path = save_directory / unique_filename
+    # --- ИСПРАВЛЕНИЕ КОНЕЦ ---
     
     try:
         with open(save_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-    except Exception:
+    except Exception as e:
+        print(f"Upload Error: {e}") # Логируем ошибку в консоль сервера
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Ошибка сохранения файла"
         )
         
-    return {"url": f"/media/{unique_filename}"} 
-
+    return {"url": f"/media/{unique_filename}"}
 # Subject
 @router.post("/subject")
 async def subject_create(
