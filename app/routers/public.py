@@ -10,46 +10,18 @@ import os
 
 from app.models.speciality import Speciality
 from app.models.feature import Feature
-from app.models.plan import Direction, Discipline
+from app.models.plan import Direction
 from app.models.teacher import Teacher
 from app.models.subject import Subject
 from app.models.achievement import Achievement
 
-from app.schemas.speciality import (
-    SpecialityCreate, 
-    SpecialityUpdate, 
-    Speciality as SpecialitySchema,
-    Speciality_Features
-)
-from app.schemas.feature import (
-    FeatureBase, 
-    FeatureCreate, 
-    FeatureUpdate, 
-    Feature as FeatureSchema
-)
-from app.schemas.plan import (
-    DirectionBase, DirectionCreate, DirectionUpdate, Direction as DirectionSchema,
-    DisciplineBase, DisciplineCreate, DisciplineUpdate, Discipline as DisciplineSchema,
-    Direction_Disciplines
-)
-from app.schemas.teacher import (
-    TeacherBase,
-    TeacherCreate,
-    TeacherUpdate,
-    Teacher as TeacherSchema
-)
-from app.schemas.subject import (
-    SubjectBase, 
-    SubjectCreate, 
-    SubjectUpdate, 
-    Subject as SubjectSchema
-)
-from app.schemas.achievement import (
-    AchievementBase,
-    Achievement as AchievementSchema,
-    AchievementCreate,
-    AchievementUpdate
-)
+from app.schemas.speciality import Speciality as SpecialitySchema
+
+from app.schemas.feature import Feature as FeatureSchema
+
+from app.schemas.teacher import Teacher as TeacherSchema
+from app.schemas.subject import Subject as SubjectSchema
+from app.schemas.achievement import Achievement as AchievementSchema
 
 router = APIRouter(tags=["Landing"])
 
