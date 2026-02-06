@@ -111,37 +111,47 @@
     getById('directionsNext')?.addEventListener('click', () => set(idx + 1));
   }
 
-  // --- Дисциплины (Subjects) ---
+  // --- Дисциплины (FontAwesome) ---
   function renderSubjects(data) {
     const grid = getById('subjectsGrid');
     if (!grid) return;
-    grid.innerHTML = data.map((s, i) => `
+    
+    grid.innerHTML = data.map((s, i) => {
+      // Если в БД пусто, ставим дефолтную иконку (круг)
+      // В БД ожидаем строку типа: "fa-solid fa-code"
+      const iconClass = s.svg_code ? s.svg_code : 'fa-solid fa-circle';
+      
+      return `
       <div class="discipline-card reveal hover-lift" data-stagger>
         <div class="discipline-icon ${getColor(i)}">
-           ${ICONS.default} </div>
+           <i class="${esc(iconClass)}" style="font-size: 1.75rem;"></i>
+        </div>
         <h4 class="discipline-title">${esc(s.name)}</h4>
         <p class="discipline-description">${esc(s.description)}</p>
       </div>
-    `).join('');
+    `}).join('');
   }
 
-  // --- Преимущества (Features) ---
+  // --- Преимущества (FontAwesome) ---
   function renderFeatures(data) {
     const grid = getById('featuresGrid');
     if (!grid) return;
-    grid.innerHTML = data.map((f, i) => `
+    
+    grid.innerHTML = data.map((f, i) => {
+      const iconClass = f.svg_code ? f.svg_code : 'fa-solid fa-check';
+
+      return `
       <div class="feature-card hover-lift reveal" data-stagger>
         <div class="feature-icon ${getColor(i)}">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <i class="${esc(iconClass)}" style="font-size: 1.5rem;"></i>
         </div>
         <div>
             <h3 class="feature-title">${esc(f.title)}</h3>
             <p class="feature-description">${esc(f.description)}</p>
         </div>
       </div>
-    `).join('');
+    `}).join('');
   }
-
   // --- Преподаватели (Teachers) ---
   function renderTeachers(data) {
     const fTrack = getById('facultyTrack');
