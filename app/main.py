@@ -3,10 +3,12 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.routers import auth, cms, public
 from fastapi.templating import Jinja2Templates
+import os
 
 app = FastAPI(title="IT BGITU Remake")
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/media", StaticFiles(directory="app/uploads"), name="upload")
 templates = Jinja2Templates(directory="app/templates")
 
 app.include_router(public.router)

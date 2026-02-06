@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
+import shutil
+import uuid
+from pathlib import Path
 
 from app.database import get_db
 from app.dependencies import get_current_user
@@ -57,6 +60,33 @@ from app.jwt_manager import jwt_manager
 
 router = APIRouter(prefix="/admin/cms", tags=["CMS Panel"])
 
+# Uplod image
+@router.post("/upload")
+async def upload_image(
+    file: UploadFile = File(...),
+    current_user_id: int = Depends(get_current_user)
+):
+    if file.content_type not in ["image/jpeg", "image/png", "image/webp"]:
+         raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Только изображения (jpg, png, webp)"
+            )
+
+    file_extension = file.filename.split(".")[-1]
+    unique_filename = f"{uuid.uuid4()}.{file_extension}"
+    
+    save_path = Path("app/uploads") / unique_filename
+    
+    try:
+        with open(save_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ошибка сохранения файла"
+        )
+        
+    return {"url": f"/media/{unique_filename}"} 
 
 # Subject
 @router.post("/subject")
@@ -781,112 +811,114 @@ async def discipline_delete(
     return discipline
 
 
+
+
 # Teachers
-# @router.post("/teacher")
-# async def teacher_create(
-#     teacher_data: TeacherCreate,
-#     db: AsyncSession = Depends(get_db),
-#     current_user_id: int = Depends(get_current_user)
-# ):
-#     """
-#     Создание нового преподавателя.
-#     """
-#     result = await db.execute(select(Teacher).where(Teacher.fio == teacher_data.fio))
-#     if result.scalar_one_or_none():
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="Преподаватель с таким ФИО уже существует"
-#         )
+@router.post("/teacher")
+async def teacher_create(
+    teacher_data: TeacherCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
+):
+    """
+    Создание нового преподавателя.
+    """
+    result = await db.execute(select(Teacher).where(Teacher.fio == teacher_data.fio))
+    if result.scalar_one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Преподаватель с таким ФИО уже существует"
+        )
     
-#     teacher = (Teacher(**teacher_data.model_dump()))
+    teacher = (Teacher(**teacher_data.model_dump()))
 
-#     try:
-#         db.add(teacher)
-#         await db.commit()
-#         await db.refresh(teacher)
-#     except IntegrityError:
-#         await db.rollback()
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="Ошибка при создании преподавателя"
-#         )
+    try:
+        db.add(teacher)
+        await db.commit()
+        await db.refresh(teacher)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ошибка при создании преподавателя"
+        )
     
-#     return teacher
+    return teacher
     
-# @router.put("/teacher/{teacher_id}")
-# async def teacher_update(
-#     teacher_id: int,
-#     teacher_data: TeacherUpdate,
-#     db: AsyncSession = Depends(get_db),
-#     current_user_id: int = Depends(get_current_user)
-# ):
-#     """
-#     Обновление данных о преподавателе.
-#     """
-#     result = await db.execute(select(Teacher).where(Teacher.id == teacher_id))
-#     teacher = result.scalar_one_or_none()
+@router.put("/teacher/{teacher_id}")
+async def teacher_update(
+    teacher_id: int,
+    teacher_data: TeacherUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
+):
+    """
+    Обновление данных о преподавателе.
+    """
+    result = await db.execute(select(Teacher).where(Teacher.id == teacher_id))
+    teacher = result.scalar_one_or_none()
 
-#     if not teacher:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail="Преподаватель не найден"
-#         )
+    if not teacher:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Преподаватель не найден"
+        )
     
-#     update_data = teacher_data.model_dump(exclude_unset=True)
+    update_data = teacher_data.model_dump(exclude_unset=True)
     
-#     if "fio" in update_data:
-#         result = await db.execute(
-#             select(Teacher).where(
-#                 Teacher.fio == update_data["fio"],
-#                 Teacher.id != teacher_id
-#             )
-#         )
-#         if result.scalar_one_or_none():
-#             raise HTTPException(
-#                 status_code=status.HTTP_400_BAD_REQUEST,
-#                 detail="Преподаватель уже существует"
-#             )
+    if "fio" in update_data:
+        result = await db.execute(
+            select(Teacher).where(
+                Teacher.fio == update_data["fio"],
+                Teacher.id != teacher_id
+            )
+        )
+        if result.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Преподаватель уже существует"
+            )
     
-#     for field, value in update_data.items():
-#         setattr(teacher, field, value)
+    for field, value in update_data.items():
+        setattr(teacher, field, value)
     
-#     try:
-#         await db.commit()
-#         await db.refresh(teacher)
-#     except IntegrityError:
-#         await db.rollback()
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="Ошибка при обновлении данных"
-#         )
+    try:
+        await db.commit()
+        await db.refresh(teacher)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ошибка при обновлении данных"
+        )
     
-#     return teacher
+    return teacher
 
-# @router.delete("/teacher/{teacher_id}")
-# async def teacher_delete(
-#     teacher_id: int,
-#     db: AsyncSession = Depends(get_db),
-#     current_user_id: int = Depends(get_current_user)
-# ):
-#     """
-#     Удаление преподавателя.
-#     """
-#     result = await db.execute(select(Teacher).where(Teacher.id == teacher_id))
-#     teacher = result.scalar_one_or_none()
+@router.delete("/teacher/{teacher_id}")
+async def teacher_delete(
+    teacher_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
+):
+    """
+    Удаление преподавателя.
+    """
+    result = await db.execute(select(Teacher).where(Teacher.id == teacher_id))
+    teacher = result.scalar_one_or_none()
 
-#     if not teacher:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail="Преподаватель не найден"
-#         )
+    if not teacher:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Преподаватель не найден"
+        )
     
-#     try:
-#         await db.delete(teacher)
-#         await db.commit()
-#     except IntegrityError:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="Ошибка при удалении"
-#         )
+    try:
+        await db.delete(teacher)
+        await db.commit()
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ошибка при удалении"
+        )
     
-#     return teacher
+    return teacher
