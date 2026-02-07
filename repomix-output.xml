@@ -52,6 +52,7 @@ alembic/versions/9e7aa4b64b0c_tables_fix.py
 alembic/versions/e0f5b3a489f8_create_users_table.py
 alembic/versions/f010c6bcde6b_reorganize_models_structure.py
 app/__init__.py
+app/admin.py
 app/config.py
 app/database.py
 app/dependencies.py
@@ -658,87 +659,6 @@ class User(Base):
 
 </file>
 
-<file path="app/routers/auth.py">
-from fastapi import APIRouter, Depends, HTTPException, status, Form
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-
-from app.database import get_db
-from app.models.user import User
-from app.schemas.auth import Token, LoginRequest
-from app.security import verify_password, get_password_hash
-from app.jwt_manager import jwt_manager
-
-router = APIRouter(prefix="/admin", tags=["Authentification"])
-
-# Authentification
-@router.get("/")
-async def admin_root():
-    return {
-        "Эндпоинты": {
-            "POST /admin/": "Аутентификация пользователя",
-            "POST /admin/hash-password": "Получить хэш пароля для ручного создания пользователя (Временое решение)"
-        }
-    }
-
-@router.post("/", response_model=Token)
-async def login(
-    login_data: LoginRequest,
-    db: AsyncSession = Depends(get_db)
-):
-    result = await db.execute(
-        select(User).where(User.email == login_data.email)
-    )
-    user = result.scalar_one_or_none()
-    
-    if not user or not verify_password(login_data.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Неверный email или пароль",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    token_data = {
-        "sub": str(user.id),
-        "email": user.email
-    }
-    access_token = jwt_manager.create_access_token(token_data)
-    
-    return Token(access_token=access_token)
-
-# Password to hash
-@router.post("/hash-password")
-async def hash_password_endpoint(password: str = Form(..., min_length=6)):
-    """
-    Получить хэш пароля для ручного создания пользователя в БД.
-    
-    Внимание: Bcrypt ограничивает пароли 72 байтами.
-    Если ваш пароль содержит не-ASCII символы или очень длинный,
-    он будет автоматически обрезан.
-    """
-    password_bytes = password.encode('utf-8')
-    original_length = len(password_bytes)
-    
-    if original_length > 72:
-        warning = f"Внимание: Пароль длиннее 72 байт ({original_length} байт). Он будет обрезан для совместимости с bcrypt."
-    else:
-        warning = None
-    
-    hashed_password = get_password_hash(password)
-    
-    return {
-        "original_password": password,
-        "password_length_bytes": original_length,
-        "warning": warning,
-        "hashed_password": hashed_password,
-        "Пример запроса sql": f"""
--- SQL запрос для создания пользователя в PostgreSQL:
-INSERT INTO users (name, email, hashed_password) 
-VALUES ('Администратор', 'admin@university.ru', '{hashed_password}');
-        """
-    }
-</file>
-
 <file path="app/schemas/achievement.py">
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
@@ -887,6 +807,70 @@ class Subject(Base):
     name = Column(String, index=True, nullable=False, unique=True)
     description = Column(String, nullable=False)
     svg_code = Column(Text, nullable=True) # Поле в базе данных
+</file>
+
+<file path="app/routers/auth.py">
+from fastapi import APIRouter, Depends, HTTPException, status, Form
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+
+from app.database import get_db
+from app.models.user import User
+from app.schemas.auth import Token, LoginRequest
+from app.security import verify_password, get_password_hash
+from app.jwt_manager import jwt_manager
+
+# ИЗМЕНЕНИЕ 1: Меняем префикс с "/admin" на "/api/auth", чтобы освободить место
+router = APIRouter(prefix="/api/auth", tags=["Authentification"])
+
+# ИЗМЕНЕНИЕ 2: Удаляем функцию admin_root (которая отдавала JSON со скриншота), она больше не нужна.
+
+@router.post("/login", response_model=Token) # Можно поменять путь на /login для ясности
+async def login(
+    login_data: LoginRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(User).where(User.email == login_data.email)
+    )
+    user = result.scalar_one_or_none()
+    
+    if not user or not verify_password(login_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Неверный email или пароль",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    token_data = {
+        "sub": str(user.id),
+        "email": user.email
+    }
+    access_token = jwt_manager.create_access_token(token_data)
+    
+    return Token(access_token=access_token)
+
+# Password to hash
+@router.post("/hash-password")
+async def hash_password_endpoint(password: str = Form(..., min_length=6)):
+    """
+    Получить хэш пароля для ручного создания пользователя в БД.
+    """
+    password_bytes = password.encode('utf-8')
+    original_length = len(password_bytes)
+    
+    if original_length > 72:
+        warning = f"Внимание: Пароль длиннее 72 байт ({original_length} байт). Он будет обрезан для совместимости с bcrypt."
+    else:
+        warning = None
+    
+    hashed_password = get_password_hash(password)
+    
+    return {
+        "original_password": password,
+        "hashed_password": hashed_password,
+        "warning": warning
+    }
 </file>
 
 <file path="app/security.py">
@@ -1078,6 +1062,230 @@ class User(UserBase):
 
 <file path="app/static/robots.txt">
 User-agent: * Disallow: /
+</file>
+
+<file path="app/admin.py">
+import os
+import shutil
+import uuid
+from pathlib import Path
+from typing import Any
+
+from fastapi import Request
+from sqladmin import Admin, ModelView
+from sqladmin.authentication import AuthenticationBackend
+from sqlalchemy import select
+from wtforms import PasswordField, TextAreaField, StringField
+
+from app.database import engine
+from app.models import User, Speciality, Feature, Direction, Discipline, Teacher, Subject, Achievement
+from app.security import verify_password, get_password_hash
+from app.config import settings
+
+# --- 1. Логика Аутентификации ---
+class AdminAuth(AuthenticationBackend):
+    async def login(self, request: Request) -> bool:
+        form = await request.form()
+        email, password = form.get("username"), form.get("password")
+
+        async with engine.connect() as conn:
+            # Ищем пользователя по email
+            stmt = select(User).where(User.email == email)
+            result = await conn.execute(stmt)
+            user = result.fetchone()
+
+        if user and verify_password(password, user.hashed_password):
+            request.session.update({"token": str(user.id)})
+            return True
+        return False
+
+    async def logout(self, request: Request) -> bool:
+        request.session.clear()
+        return True
+
+    async def authenticate(self, request: Request) -> bool:
+        return "token" in request.session
+
+authentication_backend = AdminAuth(secret_key=os.getenv("SECRET_KEY", "supersecret"))
+
+
+# --- 2. Настройка Представлений (Views) ---
+
+# --- Пользователи ---
+class UserAdmin(ModelView, model=User):
+    name = "Администратор"
+    name_plural = "Администраторы"
+    icon = "fa-solid fa-user-shield"
+    
+    column_list = [User.id, User.name, User.email]
+    column_details_exclude_list = [User.hashed_password]
+    form_columns = [User.name, User.email, User.hashed_password]
+    
+    # Подменяем поле ввода пароля на Secure widget
+    form_overrides = {
+        "hashed_password": PasswordField
+    }
+    form_args = {
+        "hashed_password": {"label": "Пароль (оставьте пустым, если не меняете)"}
+    }
+
+    # Хешируем пароль при сохранении
+    async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
+        password = data.get("hashed_password")
+        if password:
+            data["hashed_password"] = get_password_hash(password)
+        elif not is_created and "hashed_password" in data:
+            # Если редактируем и пароль пустой — удаляем ключ, чтобы не перезаписать хеш пустым
+            del data["hashed_password"]
+
+# --- Специальности ---
+class SpecialityAdmin(ModelView, model=Speciality):
+    name = "Специальность"
+    name_plural = "Специальности"
+    icon = "fa-solid fa-graduation-cap"
+
+    column_list = [Speciality.id, Speciality.name, Speciality.qualification, Speciality.term]
+    column_searchable_list = [Speciality.name]
+    form_columns = [Speciality.name, Speciality.qualification, Speciality.term, Speciality.direction, Speciality.description]
+    
+    form_overrides = {"description": TextAreaField}
+
+# --- Преимущества ---
+class FeatureAdmin(ModelView, model=Feature):
+    name = "Преимущество"
+    name_plural = "Преимущества"
+    icon = "fa-solid fa-star"
+
+    column_list = [Feature.title, Feature.svg_code]
+    form_overrides = {"description": TextAreaField, "svg_code": StringField}
+    form_args = {
+        "svg_code": {"label": "Класс иконки FontAwesome (например: fa-solid fa-code)"}
+    }
+
+# --- Преподаватели (с загрузкой фото и массивом предметов) ---
+class TeacherAdmin(ModelView, model=Teacher):
+    name = "Преподаватель"
+    name_plural = "Преподаватели"
+    icon = "fa-solid fa-chalkboard-user"
+
+    column_list = [Teacher.image_url, Teacher.fio, Teacher.post]
+    form_columns = [Teacher.fio, Teacher.post, Teacher.subjects, Teacher.image_url]
+
+    # Кастомный рендер фото в таблице
+    column_formatters = {
+        Teacher.image_url: lambda m, a: f'<img src="{m.image_url}" width="50" style="border-radius: 5px;">' if m.image_url else ""
+    }
+
+    # Инструкция для массива
+    form_args = {
+        "subjects": {
+            "label": "Предметы (вводите через запятую, SQLAdmin сам преобразует в массив, если это PostgreSQL Array)",
+            "render_kw": {"placeholder": "Математика, Физика, Алгоритмы"}
+        },
+        "image_url": {
+             "label": "Ссылка на фото или загрузка (пока используем URL или загрузку через API)"
+        }
+    }
+    
+    # !!! SQLAdmin пока не имеет встроенного FileField для SQLAlchemy с авто-сохранением пути.
+    # Простейший вариант: Оставить текстовое поле, куда вставлять ссылку из роутера /admin/cms/upload
+    # Либо дописать сложную логику. Для надежности оставим StringField, 
+    # так как у вас уже реализован API загрузки. 
+    # В описании поля image_url мы подскажем администратору.
+
+# --- План обучения: Направления ---
+class DirectionAdmin(ModelView, model=Direction):
+    name = "Направление (План)"
+    name_plural = "Направления (План)"
+    icon = "fa-solid fa-route"
+    
+    column_list = [Direction.id, Direction.name]
+    # discipline relationship будет показан автоматически
+
+# --- План обучения: Дисциплины ---
+class DisciplineAdmin(ModelView, model=Discipline):
+    name = "Дисциплина (План)"
+    name_plural = "Дисциплины (План)"
+    icon = "fa-solid fa-book"
+    
+    column_list = [Discipline.name, Discipline.start_term, Discipline.end_term, Discipline.direction]
+    column_sortable_list = [Discipline.start_term]
+    column_searchable_list = [Discipline.name]
+
+# --- Предметы (Стек) ---
+class SubjectAdmin(ModelView, model=Subject):
+    name = "Технология (Стек)"
+    name_plural = "Технологии (Стек)"
+    icon = "fa-solid fa-layer-group"
+    
+    column_list = [Subject.name, Subject.svg_code]
+    form_args = {
+        "svg_code": {"label": "Класс иконки FontAwesome (например: fa-brands fa-python)"}
+    }
+
+# --- Достижения ---
+class AchievementAdmin(ModelView, model=Achievement):
+    name = "Достижение"
+    name_plural = "Достижения"
+    icon = "fa-solid fa-trophy"
+    
+    column_list = [Achievement.theme, Achievement.title]
+    form_overrides = {"description": TextAreaField}
+    column_labels = {"theme": "Тема (тег)", "title": "Заголовок"}
+
+
+# ... (остальной код admin.py выше не трогаем) ...
+
+def setup_admin(app):
+    # Хак для стилизации: создаем класс админки, который сам внедряет CSS
+    # Это предотвращает ошибку 500 с шаблонами
+    
+    admin = Admin(
+        app, 
+        engine, 
+        authentication_backend=authentication_backend,
+        title="БГИТУ IT-Институт",
+        base_url="/admin",
+        # УБРАЛИ templates_dir, чтобы не было ошибки рекурсии
+    )
+    
+    # Инъекция стилей прямо в админку через внутренний шаблон
+    # Мы просто подменяем кусок HTML в памяти
+    admin.templates.env.globals["extra_css"] = """
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body, .navbar, .card, .table { font-family: 'Inter', sans-serif !important; }
+        body { background-color: hsl(40, 20%, 98%) !important; color: hsl(30, 10%, 15%) !important; }
+        
+        /* Шапка */
+        .navbar-dark { background-color: #ffffff !important; border-bottom: 1px solid hsl(40, 15%, 88%); }
+        .navbar-brand { color: hsl(30, 10%, 15%) !important; font-weight: 700; }
+        .nav-link { color: hsl(30, 8%, 45%) !important; }
+        .nav-link:hover, .nav-link.active { color: hsl(30, 10%, 20%) !important; background: hsl(40, 15%, 94%); border-radius: 5px; }
+        
+        /* Кнопки */
+        .btn-primary { background-color: hsl(30, 10%, 20%) !important; border-color: hsl(30, 10%, 20%) !important; }
+        .btn-success { background-color: hsl(160, 45%, 70%) !important; border: none !important; color: #064e3b !important; }
+        .btn-danger { background-color: hsl(25, 70%, 80%) !important; border: none !important; color: #7f1d1d !important; }
+        
+        /* Карточки */
+        .card { border: 1px solid hsl(40, 15%, 88%); border-radius: 0.75rem; box-shadow: none !important; }
+        .table thead th { color: hsl(30, 8%, 45%); text-transform: uppercase; font-size: 0.75rem; }
+    </style>
+    """
+    
+    # Чтобы стили применились, нам нужно переопределить базовый шаблон в памяти
+    # или надеяться, что SQLAdmin позволит вставить это в head.
+    # Самый надежный способ без файлов - просто запустить админку как есть.
+    
+    admin.add_view(UserAdmin)
+    admin.add_view(SpecialityAdmin)
+    admin.add_view(DirectionAdmin)
+    admin.add_view(DisciplineAdmin)
+    admin.add_view(TeacherAdmin)
+    admin.add_view(FeatureAdmin)
+    admin.add_view(SubjectAdmin)
+    admin.add_view(AchievementAdmin)
 </file>
 
 <file path="app/database.py">
@@ -1620,33 +1828,6 @@ class Feature(FeatureBase):
     id: int = Field(..., gt=0)
 </file>
 
-<file path="Dockerfile">
-FROM python:3.11-slim
-
-WORKDIR /code 
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# ... (начало файла без изменений)
-COPY . .
-
-# --- ИСПРАВЛЕНИЕ НАЧАЛО ---
-# Явно создаем папку для загрузок
-RUN mkdir -p /code/app/uploads
-
-# Раздаем права пользователю appuser на всю папку проекта
-RUN adduser --disabled-password --gecos "" appuser && chown -R appuser:appuser /code
-# --- ИСПРАВЛЕНИЕ КОНЕЦ ---
-
-USER appuser
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-</file>
-
 <file path="README.md">
 # deploy_testing
 test
@@ -1684,21 +1865,31 @@ env/
 .env.local
 </file>
 
-<file path="Caddyfile">
-www.vinogradovnikita.ru {
-    redir https://vinogradovnikita.ru{uri}
-}
+<file path="Dockerfile">
+FROM python:3.11-slim
 
-vinogradovnikita.ru {
-    reverse_proxy app:8000
-}
+WORKDIR /code 
 
-admin.vinogradovnikita.ru {
-    basicauth {
-        admin $2a$04$9c8OMNev8LNYkqcavBu2kOIjT0sQ4OMNHgvMBQi3hPnC0CGxMtX6i
-    }
-    reverse_proxy pgadmin:80
-}
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ... (начало файла без изменений)
+COPY . .
+
+# --- ИСПРАВЛЕНИЕ НАЧАЛО ---
+# Явно создаем папку для загрузок
+RUN mkdir -p /code/app/uploads
+
+# Раздаем права пользователю appuser на всю папку проекта
+RUN adduser --disabled-password --gecos "" appuser && chown -R appuser:appuser /code
+# --- ИСПРАВЛЕНИЕ КОНЕЦ ---
+
+USER appuser
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 </file>
 
 <file path=".github/workflows/ci.yml">
@@ -1844,6 +2035,432 @@ class JWTManager:
         return None
 
 jwt_manager = JWTManager()
+</file>
+
+<file path="app/static/script.js">
+/* БГИТУ IT-Институт — Dynamic Logic */
+(() => {
+  'use strict';
+
+  // ================= 0. ИНИЦИАЛИЗАЦИЯ LENIS =================
+  let lenis;
+  if (typeof Lenis !== 'undefined') {
+    lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+    });
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        const targetElem = document.getElementById(targetId);
+        if (targetElem) lenis.scrollTo(targetElem);
+      });
+    });
+  }
+
+  // ================= 1. UTIL & HELPERS =================
+  const esc = s => (s ? String(s).replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t])) : '');
+  const getById = id => document.getElementById(id);
+  
+  // Цветовая палитра для динамической генерации
+  const COLORS = ['bg-pastel-sky', 'bg-pastel-mint', 'bg-pastel-peach', 'bg-pastel-lavender', 'bg-pastel-coral', 'bg-pastel-sage'];
+  const BORDERS = ['border-sky', 'border-mint', 'border-peach', 'border-lavender', 'border-coral', 'border-sage'];
+  const getColor = (i) => COLORS[i % COLORS.length];
+  const getBorder = (i) => BORDERS[i % BORDERS.length];
+
+  const ICONS = {
+    q: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>',
+    t: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+    f: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+    default: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg>'
+  };
+
+  // ================= 2. FETCH DATA =================
+  async function loadData() {
+    try {
+      // Запрашиваем все данные параллельно
+      const [specialities, subjects, features, teachers, achievements, directions] = await Promise.all([
+        fetch('/speciality').then(r => r.json()),
+        fetch('/subjects').then(r => r.json()),
+        fetch('/features').then(r => r.json()),
+        fetch('/teachers').then(r => r.json()),
+        fetch('/achievements').then(r => r.json()),
+        fetch('/directions-with-disciplines').then(r => r.json())
+      ]);
+
+      renderSpecialities(specialities);
+      renderSubjects(subjects);
+      renderFeatures(features);
+      renderTeachers(teachers);
+      renderAchievements(achievements);
+      initRoadmap(directions); // Инициализация логики плана с селектом
+
+      // Инициализируем анимации появления после рендера
+      initObservers();
+
+    } catch (err) {
+      console.error('Ошибка загрузки данных:', err);
+    }
+  }
+
+  // ================= 3. RENDER FUNCTIONS =================
+
+  // --- Направления (Carousel) ---
+  function renderSpecialities(data) {
+    const dTrack = getById('directionsTrack');
+    const dDots = getById('directionsDots');
+    if (!dTrack || !data.length) return;
+
+    dTrack.innerHTML = data.map(d => `
+      <div class="direction-slide">
+        <div class="direction-card"> 
+          <div class="direction-card-head"><h3 class="direction-title">${esc(d.name)}</h3></div>
+          <div class="direction-attrs">
+            <div class="direction-attr"><span class="direction-attr-icon">${ICONS.q}</span><div><span class="direction-attr-label">Квалификация</span><span class="direction-attr-value">${esc(d.qualification)}</span></div></div>
+            <div class="direction-attr"><span class="direction-attr-icon">${ICONS.t}</span><div><span class="direction-attr-label">Срок</span><span class="direction-attr-value">${d.term} года</span></div></div>
+            <div class="direction-attr"><span class="direction-attr-icon">${ICONS.f}</span><div><span class="direction-attr-label">Направление</span><span class="direction-attr-value">${esc(d.direction)}</span></div></div>
+          </div>
+          <p class="direction-description">${esc(d.description)}</p>
+        </div>
+      </div>`).join('');
+    
+    dDots.innerHTML = data.map((_, i) => `<button class="directions-dot ${i===0?'is-active':''}" aria-label="Слайд ${i+1}"></button>`).join('');
+    
+    // Логика карусели
+    const dots = dDots.children;
+    const count = data.length;
+    let idx = 0;
+    const set = i => {
+      idx = (i + count) % count;
+      dTrack.style.transform = `translateX(-${idx * 100}%)`;
+      [...dots].forEach((d, n) => d.classList.toggle('is-active', n === idx));
+    };
+    dDots.addEventListener('click', e => e.target.classList.contains('directions-dot') && set([...dots].indexOf(e.target)));
+    getById('directionsPrev')?.addEventListener('click', () => set(idx - 1));
+    getById('directionsNext')?.addEventListener('click', () => set(idx + 1));
+  }
+
+  // --- Дисциплины (FontAwesome) ---
+  function renderSubjects(data) {
+    const grid = getById('subjectsGrid');
+    if (!grid) return;
+    
+    grid.innerHTML = data.map((s, i) => {
+      // Если в БД пусто, ставим дефолтную иконку (круг)
+      // В БД ожидаем строку типа: "fa-solid fa-code"
+      const iconClass = s.svg_code ? s.svg_code : 'fa-solid fa-circle';
+      
+      return `
+      <div class="discipline-card reveal hover-lift" data-stagger>
+        <div class="discipline-icon ${getColor(i)}">
+           <i class="${esc(iconClass)}" style="font-size: 1.75rem;"></i>
+        </div>
+        <h4 class="discipline-title">${esc(s.name)}</h4>
+        <p class="discipline-description">${esc(s.description)}</p>
+      </div>
+    `}).join('');
+  }
+
+  // --- Преимущества (FontAwesome) ---
+  function renderFeatures(data) {
+    const grid = getById('featuresGrid');
+    if (!grid) return;
+    
+    grid.innerHTML = data.map((f, i) => {
+      const iconClass = f.svg_code ? f.svg_code : 'fa-solid fa-check';
+
+      return `
+      <div class="feature-card hover-lift reveal" data-stagger>
+        <div class="feature-icon ${getColor(i)}">
+            <i class="${esc(iconClass)}" style="font-size: 1.5rem;"></i>
+        </div>
+        <div>
+            <h3 class="feature-title">${esc(f.title)}</h3>
+            <p class="feature-description">${esc(f.description)}</p>
+        </div>
+      </div>
+    `}).join('');
+  }
+  // --- Преподаватели (Teachers) ---
+  function renderTeachers(data) {
+    const fTrack = getById('facultyTrack');
+    if (!fTrack) return;
+
+    const innerHtml = data.map(t => {
+      // Если есть URL картинки, используем img, иначе цветную заглушку
+      const imgBlock = t.image_url 
+        ? `<img src="${esc(t.image_url)}" alt="${esc(t.fio)}" style="width:100%; height:100%; object-fit:cover;">`
+        : `<div style="width:100%; height:100%; background:#ddd; display:flex; align-items:center; justify-content:center; color:#777;">Нет фото</div>`;
+
+      return `
+      <div class="faculty-card reveal" data-stagger>
+        <div class="faculty-photo-placeholder" style="overflow:hidden;">
+            ${imgBlock}
+        </div>
+        <div class="faculty-info">
+          <h3 class="faculty-name">${esc(t.fio)}</h3>
+          <p class="faculty-company">${esc(t.post)}</p>
+          <p class="faculty-disciplines-title">Дисциплины:</p>
+          <ul class="faculty-disciplines">${t.subjects.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+        </div>
+      </div>`
+    }).join('');
+
+    fTrack.innerHTML = `<div class="faculty-track-inner">${innerHtml}</div>`;
+    initFacultyPhysics(fTrack);
+  }
+
+  // --- Достижения ---
+  function renderAchievements(data) {
+    const grid = getById('achievementsGrid');
+    if (!grid) return;
+    grid.innerHTML = data.map((a, i) => `
+      <div class="achievement-card ${getBorder(i)} reveal">
+        <div class="achievement-header">
+            <span class="achievement-tag ${getColor(i)}">${esc(a.theme)}</span>
+        </div>
+        <h3 class="achievement-title">${esc(a.title)}</h3>
+        <p class="achievement-desc">${esc(a.description)}</p>
+      </div>
+    `).join('');
+  }
+
+  // --- Roadmap Logic (План) ---
+  function initRoadmap(directionsData) {
+    const rSelect = getById('roadmapSelect');
+    const rGrid = getById('roadmap-grid');
+    const rTip = getById('course-tooltip');
+    
+    if (!rGrid || !directionsData.length) return;
+
+    // Заполняем Select
+    rSelect.innerHTML = directionsData.map((d, i) => 
+        `<option value="${i}">${esc(d.name)}</option>`
+    ).join('');
+
+    // Функция отрисовки сетки для конкретного направления
+    const drawGrid = (directionIndex) => {
+        const direction = directionsData[directionIndex];
+        const disciplines = direction.disciplines || [];
+
+        // Отрисовка ячеек (по предметам, упрощенно: 1 строка на предмет)
+        // Но в старом дизайне предметы были строками. Тут мы сделаем так:
+        // Рисуем список предметов, каждый занимает свои семестры.
+        
+        rGrid.innerHTML = disciplines.map((c, idx) => {
+            let cells = '';
+            const colorClass = getColor(idx);
+            
+            for(let i=1; i<=8; i++) {
+                const act = i >= c.start_term && i <= c.end_term;
+                // Классы для скругления
+                const isStart = i === c.start_term;
+                const isEnd = i === c.end_term;
+                
+                cells += `
+                <div class="roadmap-cell ${act ? `active ${colorClass}` : 'inactive'} ${isStart?'start':''} ${isEnd?'end':''}" 
+                     ${act ? `data-desc="Семестры: ${c.start_term}-${c.end_term}" data-name="${esc(c.name)}"` : ''}>
+                     ${isStart ? `<span class="roadmap-cell-text">${esc(c.name)}</span>` : ''}
+                </div>`;
+            }
+            return `<div class="roadmap-row">${cells}</div>`;
+        }).join('');
+    };
+
+    // Рендер первого по умолчанию
+    drawGrid(0);
+
+    // Событие смены
+    rSelect.addEventListener('change', (e) => {
+        drawGrid(e.target.value);
+    });
+
+    // Tooltip Logic
+    const bgMap = { 'bg-pastel-sky':'#bae6fd','bg-pastel-mint':'#a7f3d0','bg-pastel-peach':'#fecaca','bg-pastel-lavender':'#ddd6fe','bg-pastel-coral':'#fda4af','bg-pastel-sage':'#a7f3d0' };
+    
+    rGrid.addEventListener('mousemove', e => {
+      const cell = e.target.closest('.active');
+      if (cell) {
+        const name = cell.dataset.name;
+        const desc = cell.dataset.desc;
+        // Находим цвет из класса
+        const colorClass = Array.from(cell.classList).find(c => c.startsWith('bg-pastel'));
+        const hex = bgMap[colorClass] || '#ccc';
+
+        rTip.innerHTML = `
+            <div class="tooltip-icon" style="background:${hex}"></div>
+            <div class="tooltip-title">${name}</div>
+            <div class="tooltip-meta">${desc}</div>`;
+            
+        Object.assign(rTip.style, { display: 'block', top: `${e.clientY+15}px`, left: `${e.clientX+15}px` });
+      } else rTip.style.display = 'none';
+    }, { passive: true });
+    
+    rGrid.addEventListener('mouseleave', () => rTip.style.display = 'none');
+  }
+
+  // ================= 4. PHYSICS & UI (Старый код) =================
+  function initFacultyPhysics(fTrack) {
+      const inner = fTrack.firstElementChild;
+      let off = 0, max = 0, isD = false, start, startOff, last, vel = 0, rafP;
+      
+      const upd = () => { max = Math.max(0, inner.scrollWidth - fTrack.clientWidth); if(off>max) off=max; inner.style.transform = `translateX(-${off}px)`; };
+      new ResizeObserver(upd).observe(fTrack);
+      
+      const move = x => {
+        if(!isD) return;
+        let n = startOff + (start - x);
+        if(n<0 || n>max) n = startOff + (start-x)*0.5;
+        off = n; vel = x - last; last = x;
+        inner.style.transform = `translateX(-${off}px)`;
+      };
+      
+      const inertia = () => {
+        if(Math.abs(vel)<0.1) return fTrack.classList.remove('faculty-inertia');
+        vel*=0.89; off-=vel*1.2;
+        if(off<0){off=0;vel=0} else if(off>max){off=max;vel=0}
+        inner.style.transform = `translateX(-${off}px)`;
+        rafP = requestAnimationFrame(inertia);
+      };
+      
+      const end = () => {
+        if(!isD) return;
+        isD = false; fTrack.classList.remove('faculty-dragging');
+        if(off<0||off>max) { fTrack.classList.add('faculty-inertia'); off=Math.max(0,Math.min(max,off)); inner.style.transform=`translateX(-${off}px)`; }
+        else inertia();
+      };
+      
+      const startDrag = x => { cancelAnimationFrame(rafP); fTrack.classList.add('faculty-dragging'); fTrack.classList.remove('faculty-inertia'); isD=true; start=last=x; startOff=off; vel=0; };
+
+      fTrack.addEventListener('mousedown', e => { e.preventDefault(); startDrag(e.pageX); });
+      window.addEventListener('mousemove', e => move(e.pageX));
+      window.addEventListener('mouseup', end);
+      window.addEventListener('mouseleave', end);
+      fTrack.addEventListener('touchstart', e => startDrag(e.touches[0].pageX), {passive:true});
+      window.addEventListener('touchmove', e => move(e.touches[0].pageX), {passive:false});
+      window.addEventListener('touchend', end);
+
+      const scroll = d => {
+        const w = inner.firstElementChild ? inner.firstElementChild.offsetWidth + 24 : 300;
+        off = Math.max(0, Math.min(max, off + d * w));
+        fTrack.classList.remove('faculty-inertia');
+        inner.style.transform = `translateX(-${off}px)`;
+        startOff = off; last = off;
+      };
+      getById('facultyPrev')?.addEventListener('click', () => scroll(-1));
+      getById('facultyNext')?.addEventListener('click', () => scroll(1));
+  }
+
+  function initObservers() {
+    const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}}), {threshold:0.1, rootMargin:'0px 0px -50px 0px'});
+    document.querySelectorAll('.reveal').forEach(e => obs.observe(e));
+    
+    document.querySelectorAll('.disciplines-grid, .features-grid, .faculty-track-inner').forEach(container => {
+        const children = container.querySelectorAll('[data-stagger], .faculty-card');
+        children.forEach((el, i) => {
+          const delay = container.classList.contains('faculty-track-inner') ? 0.05 : 0.1;
+          el.style.animationDelay = `${delay * (i + 1)}s`;
+        });
+      });
+  }
+
+  // Global UI
+  const yearEl = getById('current-year');
+  if(yearEl) yearEl.textContent = new Date().getFullYear();
+  
+  const header = getById('header');
+  window.addEventListener('scroll', () => requestAnimationFrame(() => header.classList.toggle('scrolled', window.scrollY > 50)), {passive:true});
+
+  // Nav ScrollSpy
+  let tick = false;
+  const links = document.querySelectorAll('.nav-link');
+  window.addEventListener('scroll', () => {
+    if(!tick) {
+      window.requestAnimationFrame(() => {
+        const curr = ['roadmap','faculty','features','disciplines','directions'].find(id => {
+           const el = getById(id); return el && window.scrollY >= el.offsetTop - 300;
+        });
+        links.forEach(l => l.classList.toggle('active', l.dataset.target === curr));
+        tick = false;
+      });
+      tick = true;
+    }
+  }, {passive:true});
+
+  // Form Submit
+  const form = getById('applyForm');
+  const msg = getById('formSuccess');
+  if(form) form.addEventListener('submit', e => {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    const txt = btn.textContent;
+    btn.disabled=true; btn.textContent='Отправка...';
+    setTimeout(() => { btn.textContent=txt; btn.disabled=false; form.reset(); msg.style.display='flex'; setTimeout(()=>msg.style.display='none',5000); }, 1000);
+  });
+  
+  // Nav Click
+  const nav = document.querySelector('.header-nav');
+  if(nav) nav.addEventListener('click', e => {
+    if(e.target.classList.contains('nav-link')) {
+        const targetId = e.target.dataset.target;
+        const targetElem = getById(targetId);
+        if(targetElem) {
+            if(lenis) lenis.scrollTo(targetElem); 
+            else targetElem.scrollIntoView({behavior:'smooth'}); 
+        }
+    }
+  });
+
+  // FAQ
+  document.querySelector('.faq-column')?.addEventListener('click', e => {
+    const btn = e.target.closest('.faq-question');
+    if(!btn) return;
+    const item = btn.parentElement, ans = item.querySelector('.faq-answer');
+    if(item.classList.contains('active')) {
+      item.classList.remove('active'); ans.style.maxHeight = null;
+    } else {
+      document.querySelectorAll('.faq-item.active').forEach(i => { i.classList.remove('active'); i.querySelector('.faq-answer').style.maxHeight = null; });
+      item.classList.add('active'); ans.style.maxHeight = ans.scrollHeight + 'px';
+    }
+  });
+
+  // ЗАПУСК ЗАГРУЗКИ ДАННЫХ
+  loadData();
+
+})();
+</file>
+
+<file path="Caddyfile">
+www.vinogradovnikita.ru {
+    redir https://vinogradovnikita.ru{uri}
+}
+
+vinogradovnikita.ru {
+    reverse_proxy app:8000
+}
+
+admin.vinogradovnikita.ru {
+    reverse_proxy app:8000
+}
+
+pgadmin.vinogradovnikita.ru {
+
+    basicauth {
+        admin $2a$04$z.kKT3e8UHbSPQCkD7OPveI9Cfu7tzucta4OlHfOWn8AwAPniqub6
+    }
+    reverse_proxy pgadmin:80
+}
 </file>
 
 <file path="app/routers/cms.py">
@@ -2782,432 +3399,6 @@ async def teacher_delete(
     return teacher
 </file>
 
-<file path="app/static/script.js">
-/* БГИТУ IT-Институт — Dynamic Logic */
-(() => {
-  'use strict';
-
-  // ================= 0. ИНИЦИАЛИЗАЦИЯ LENIS =================
-  let lenis;
-  if (typeof Lenis !== 'undefined') {
-    lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 2,
-    });
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('href').substring(1);
-        const targetElem = document.getElementById(targetId);
-        if (targetElem) lenis.scrollTo(targetElem);
-      });
-    });
-  }
-
-  // ================= 1. UTIL & HELPERS =================
-  const esc = s => (s ? String(s).replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t])) : '');
-  const getById = id => document.getElementById(id);
-  
-  // Цветовая палитра для динамической генерации
-  const COLORS = ['bg-pastel-sky', 'bg-pastel-mint', 'bg-pastel-peach', 'bg-pastel-lavender', 'bg-pastel-coral', 'bg-pastel-sage'];
-  const BORDERS = ['border-sky', 'border-mint', 'border-peach', 'border-lavender', 'border-coral', 'border-sage'];
-  const getColor = (i) => COLORS[i % COLORS.length];
-  const getBorder = (i) => BORDERS[i % BORDERS.length];
-
-  const ICONS = {
-    q: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>',
-    t: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
-    f: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
-    default: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg>'
-  };
-
-  // ================= 2. FETCH DATA =================
-  async function loadData() {
-    try {
-      // Запрашиваем все данные параллельно
-      const [specialities, subjects, features, teachers, achievements, directions] = await Promise.all([
-        fetch('/speciality').then(r => r.json()),
-        fetch('/subjects').then(r => r.json()),
-        fetch('/features').then(r => r.json()),
-        fetch('/teachers').then(r => r.json()),
-        fetch('/achievements').then(r => r.json()),
-        fetch('/directions-with-disciplines').then(r => r.json())
-      ]);
-
-      renderSpecialities(specialities);
-      renderSubjects(subjects);
-      renderFeatures(features);
-      renderTeachers(teachers);
-      renderAchievements(achievements);
-      initRoadmap(directions); // Инициализация логики плана с селектом
-
-      // Инициализируем анимации появления после рендера
-      initObservers();
-
-    } catch (err) {
-      console.error('Ошибка загрузки данных:', err);
-    }
-  }
-
-  // ================= 3. RENDER FUNCTIONS =================
-
-  // --- Направления (Carousel) ---
-  function renderSpecialities(data) {
-    const dTrack = getById('directionsTrack');
-    const dDots = getById('directionsDots');
-    if (!dTrack || !data.length) return;
-
-    dTrack.innerHTML = data.map(d => `
-      <div class="direction-slide">
-        <div class="direction-card"> 
-          <div class="direction-card-head"><h3 class="direction-title">${esc(d.name)}</h3></div>
-          <div class="direction-attrs">
-            <div class="direction-attr"><span class="direction-attr-icon">${ICONS.q}</span><div><span class="direction-attr-label">Квалификация</span><span class="direction-attr-value">${esc(d.qualification)}</span></div></div>
-            <div class="direction-attr"><span class="direction-attr-icon">${ICONS.t}</span><div><span class="direction-attr-label">Срок</span><span class="direction-attr-value">${d.term} года</span></div></div>
-            <div class="direction-attr"><span class="direction-attr-icon">${ICONS.f}</span><div><span class="direction-attr-label">Направление</span><span class="direction-attr-value">${esc(d.direction)}</span></div></div>
-          </div>
-          <p class="direction-description">${esc(d.description)}</p>
-        </div>
-      </div>`).join('');
-    
-    dDots.innerHTML = data.map((_, i) => `<button class="directions-dot ${i===0?'is-active':''}" aria-label="Слайд ${i+1}"></button>`).join('');
-    
-    // Логика карусели
-    const dots = dDots.children;
-    const count = data.length;
-    let idx = 0;
-    const set = i => {
-      idx = (i + count) % count;
-      dTrack.style.transform = `translateX(-${idx * 100}%)`;
-      [...dots].forEach((d, n) => d.classList.toggle('is-active', n === idx));
-    };
-    dDots.addEventListener('click', e => e.target.classList.contains('directions-dot') && set([...dots].indexOf(e.target)));
-    getById('directionsPrev')?.addEventListener('click', () => set(idx - 1));
-    getById('directionsNext')?.addEventListener('click', () => set(idx + 1));
-  }
-
-  // --- Дисциплины (FontAwesome) ---
-  function renderSubjects(data) {
-    const grid = getById('subjectsGrid');
-    if (!grid) return;
-    
-    grid.innerHTML = data.map((s, i) => {
-      // Если в БД пусто, ставим дефолтную иконку (круг)
-      // В БД ожидаем строку типа: "fa-solid fa-code"
-      const iconClass = s.svg_code ? s.svg_code : 'fa-solid fa-circle';
-      
-      return `
-      <div class="discipline-card reveal hover-lift" data-stagger>
-        <div class="discipline-icon ${getColor(i)}">
-           <i class="${esc(iconClass)}" style="font-size: 1.75rem;"></i>
-        </div>
-        <h4 class="discipline-title">${esc(s.name)}</h4>
-        <p class="discipline-description">${esc(s.description)}</p>
-      </div>
-    `}).join('');
-  }
-
-  // --- Преимущества (FontAwesome) ---
-  function renderFeatures(data) {
-    const grid = getById('featuresGrid');
-    if (!grid) return;
-    
-    grid.innerHTML = data.map((f, i) => {
-      const iconClass = f.svg_code ? f.svg_code : 'fa-solid fa-check';
-
-      return `
-      <div class="feature-card hover-lift reveal" data-stagger>
-        <div class="feature-icon ${getColor(i)}">
-            <i class="${esc(iconClass)}" style="font-size: 1.5rem;"></i>
-        </div>
-        <div>
-            <h3 class="feature-title">${esc(f.title)}</h3>
-            <p class="feature-description">${esc(f.description)}</p>
-        </div>
-      </div>
-    `}).join('');
-  }
-  // --- Преподаватели (Teachers) ---
-  function renderTeachers(data) {
-    const fTrack = getById('facultyTrack');
-    if (!fTrack) return;
-
-    const innerHtml = data.map(t => {
-      // Если есть URL картинки, используем img, иначе цветную заглушку
-      const imgBlock = t.image_url 
-        ? `<img src="${esc(t.image_url)}" alt="${esc(t.fio)}" style="width:100%; height:100%; object-fit:cover;">`
-        : `<div style="width:100%; height:100%; background:#ddd; display:flex; align-items:center; justify-content:center; color:#777;">Нет фото</div>`;
-
-      return `
-      <div class="faculty-card reveal" data-stagger>
-        <div class="faculty-photo-placeholder" style="overflow:hidden;">
-            ${imgBlock}
-        </div>
-        <div class="faculty-info">
-          <h3 class="faculty-name">${esc(t.fio)}</h3>
-          <p class="faculty-company">${esc(t.post)}</p>
-          <p class="faculty-disciplines-title">Дисциплины:</p>
-          <ul class="faculty-disciplines">${t.subjects.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
-        </div>
-      </div>`
-    }).join('');
-
-    fTrack.innerHTML = `<div class="faculty-track-inner">${innerHtml}</div>`;
-    initFacultyPhysics(fTrack);
-  }
-
-  // --- Достижения ---
-  function renderAchievements(data) {
-    const grid = getById('achievementsGrid');
-    if (!grid) return;
-    grid.innerHTML = data.map((a, i) => `
-      <div class="achievement-card ${getBorder(i)} reveal">
-        <div class="achievement-header">
-            <span class="achievement-tag ${getColor(i)}">${esc(a.theme)}</span>
-        </div>
-        <h3 class="achievement-title">${esc(a.title)}</h3>
-        <p class="achievement-desc">${esc(a.description)}</p>
-      </div>
-    `).join('');
-  }
-
-  // --- Roadmap Logic (План) ---
-  function initRoadmap(directionsData) {
-    const rSelect = getById('roadmapSelect');
-    const rGrid = getById('roadmap-grid');
-    const rTip = getById('course-tooltip');
-    
-    if (!rGrid || !directionsData.length) return;
-
-    // Заполняем Select
-    rSelect.innerHTML = directionsData.map((d, i) => 
-        `<option value="${i}">${esc(d.name)}</option>`
-    ).join('');
-
-    // Функция отрисовки сетки для конкретного направления
-    const drawGrid = (directionIndex) => {
-        const direction = directionsData[directionIndex];
-        const disciplines = direction.disciplines || [];
-
-        // Отрисовка ячеек (по предметам, упрощенно: 1 строка на предмет)
-        // Но в старом дизайне предметы были строками. Тут мы сделаем так:
-        // Рисуем список предметов, каждый занимает свои семестры.
-        
-        rGrid.innerHTML = disciplines.map((c, idx) => {
-            let cells = '';
-            const colorClass = getColor(idx);
-            
-            for(let i=1; i<=8; i++) {
-                const act = i >= c.start_term && i <= c.end_term;
-                // Классы для скругления
-                const isStart = i === c.start_term;
-                const isEnd = i === c.end_term;
-                
-                cells += `
-                <div class="roadmap-cell ${act ? `active ${colorClass}` : 'inactive'} ${isStart?'start':''} ${isEnd?'end':''}" 
-                     ${act ? `data-desc="Семестры: ${c.start_term}-${c.end_term}" data-name="${esc(c.name)}"` : ''}>
-                     ${isStart ? `<span class="roadmap-cell-text">${esc(c.name)}</span>` : ''}
-                </div>`;
-            }
-            return `<div class="roadmap-row">${cells}</div>`;
-        }).join('');
-    };
-
-    // Рендер первого по умолчанию
-    drawGrid(0);
-
-    // Событие смены
-    rSelect.addEventListener('change', (e) => {
-        drawGrid(e.target.value);
-    });
-
-    // Tooltip Logic
-    const bgMap = { 'bg-pastel-sky':'#bae6fd','bg-pastel-mint':'#a7f3d0','bg-pastel-peach':'#fecaca','bg-pastel-lavender':'#ddd6fe','bg-pastel-coral':'#fda4af','bg-pastel-sage':'#a7f3d0' };
-    
-    rGrid.addEventListener('mousemove', e => {
-      const cell = e.target.closest('.active');
-      if (cell) {
-        const name = cell.dataset.name;
-        const desc = cell.dataset.desc;
-        // Находим цвет из класса
-        const colorClass = Array.from(cell.classList).find(c => c.startsWith('bg-pastel'));
-        const hex = bgMap[colorClass] || '#ccc';
-
-        rTip.innerHTML = `
-            <div class="tooltip-icon" style="background:${hex}"></div>
-            <div class="tooltip-title">${name}</div>
-            <div class="tooltip-meta">${desc}</div>`;
-            
-        Object.assign(rTip.style, { display: 'block', top: `${e.clientY+15}px`, left: `${e.clientX+15}px` });
-      } else rTip.style.display = 'none';
-    }, { passive: true });
-    
-    rGrid.addEventListener('mouseleave', () => rTip.style.display = 'none');
-  }
-
-  // ================= 4. PHYSICS & UI (Старый код) =================
-  function initFacultyPhysics(fTrack) {
-      const inner = fTrack.firstElementChild;
-      let off = 0, max = 0, isD = false, start, startOff, last, vel = 0, rafP;
-      
-      const upd = () => { max = Math.max(0, inner.scrollWidth - fTrack.clientWidth); if(off>max) off=max; inner.style.transform = `translateX(-${off}px)`; };
-      new ResizeObserver(upd).observe(fTrack);
-      
-      const move = x => {
-        if(!isD) return;
-        let n = startOff + (start - x);
-        if(n<0 || n>max) n = startOff + (start-x)*0.5;
-        off = n; vel = x - last; last = x;
-        inner.style.transform = `translateX(-${off}px)`;
-      };
-      
-      const inertia = () => {
-        if(Math.abs(vel)<0.1) return fTrack.classList.remove('faculty-inertia');
-        vel*=0.89; off-=vel*1.2;
-        if(off<0){off=0;vel=0} else if(off>max){off=max;vel=0}
-        inner.style.transform = `translateX(-${off}px)`;
-        rafP = requestAnimationFrame(inertia);
-      };
-      
-      const end = () => {
-        if(!isD) return;
-        isD = false; fTrack.classList.remove('faculty-dragging');
-        if(off<0||off>max) { fTrack.classList.add('faculty-inertia'); off=Math.max(0,Math.min(max,off)); inner.style.transform=`translateX(-${off}px)`; }
-        else inertia();
-      };
-      
-      const startDrag = x => { cancelAnimationFrame(rafP); fTrack.classList.add('faculty-dragging'); fTrack.classList.remove('faculty-inertia'); isD=true; start=last=x; startOff=off; vel=0; };
-
-      fTrack.addEventListener('mousedown', e => { e.preventDefault(); startDrag(e.pageX); });
-      window.addEventListener('mousemove', e => move(e.pageX));
-      window.addEventListener('mouseup', end);
-      window.addEventListener('mouseleave', end);
-      fTrack.addEventListener('touchstart', e => startDrag(e.touches[0].pageX), {passive:true});
-      window.addEventListener('touchmove', e => move(e.touches[0].pageX), {passive:false});
-      window.addEventListener('touchend', end);
-
-      const scroll = d => {
-        const w = inner.firstElementChild ? inner.firstElementChild.offsetWidth + 24 : 300;
-        off = Math.max(0, Math.min(max, off + d * w));
-        fTrack.classList.remove('faculty-inertia');
-        inner.style.transform = `translateX(-${off}px)`;
-        startOff = off; last = off;
-      };
-      getById('facultyPrev')?.addEventListener('click', () => scroll(-1));
-      getById('facultyNext')?.addEventListener('click', () => scroll(1));
-  }
-
-  function initObservers() {
-    const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}}), {threshold:0.1, rootMargin:'0px 0px -50px 0px'});
-    document.querySelectorAll('.reveal').forEach(e => obs.observe(e));
-    
-    document.querySelectorAll('.disciplines-grid, .features-grid, .faculty-track-inner').forEach(container => {
-        const children = container.querySelectorAll('[data-stagger], .faculty-card');
-        children.forEach((el, i) => {
-          const delay = container.classList.contains('faculty-track-inner') ? 0.05 : 0.1;
-          el.style.animationDelay = `${delay * (i + 1)}s`;
-        });
-      });
-  }
-
-  // Global UI
-  const yearEl = getById('current-year');
-  if(yearEl) yearEl.textContent = new Date().getFullYear();
-  
-  const header = getById('header');
-  window.addEventListener('scroll', () => requestAnimationFrame(() => header.classList.toggle('scrolled', window.scrollY > 50)), {passive:true});
-
-  // Nav ScrollSpy
-  let tick = false;
-  const links = document.querySelectorAll('.nav-link');
-  window.addEventListener('scroll', () => {
-    if(!tick) {
-      window.requestAnimationFrame(() => {
-        const curr = ['roadmap','faculty','features','disciplines','directions'].find(id => {
-           const el = getById(id); return el && window.scrollY >= el.offsetTop - 300;
-        });
-        links.forEach(l => l.classList.toggle('active', l.dataset.target === curr));
-        tick = false;
-      });
-      tick = true;
-    }
-  }, {passive:true});
-
-  // Form Submit
-  const form = getById('applyForm');
-  const msg = getById('formSuccess');
-  if(form) form.addEventListener('submit', e => {
-    e.preventDefault();
-    const btn = form.querySelector('button[type="submit"]');
-    const txt = btn.textContent;
-    btn.disabled=true; btn.textContent='Отправка...';
-    setTimeout(() => { btn.textContent=txt; btn.disabled=false; form.reset(); msg.style.display='flex'; setTimeout(()=>msg.style.display='none',5000); }, 1000);
-  });
-  
-  // Nav Click
-  const nav = document.querySelector('.header-nav');
-  if(nav) nav.addEventListener('click', e => {
-    if(e.target.classList.contains('nav-link')) {
-        const targetId = e.target.dataset.target;
-        const targetElem = getById(targetId);
-        if(targetElem) {
-            if(lenis) lenis.scrollTo(targetElem); 
-            else targetElem.scrollIntoView({behavior:'smooth'}); 
-        }
-    }
-  });
-
-  // FAQ
-  document.querySelector('.faq-column')?.addEventListener('click', e => {
-    const btn = e.target.closest('.faq-question');
-    if(!btn) return;
-    const item = btn.parentElement, ans = item.querySelector('.faq-answer');
-    if(item.classList.contains('active')) {
-      item.classList.remove('active'); ans.style.maxHeight = null;
-    } else {
-      document.querySelectorAll('.faq-item.active').forEach(i => { i.classList.remove('active'); i.querySelector('.faq-answer').style.maxHeight = null; });
-      item.classList.add('active'); ans.style.maxHeight = ans.scrollHeight + 'px';
-    }
-  });
-
-  // ЗАПУСК ЗАГРУЗКИ ДАННЫХ
-  loadData();
-
-})();
-</file>
-
-<file path="app/main.py">
-import uvicorn
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from app.routers import auth, cms, public
-from fastapi.templating import Jinja2Templates
-import os
-
-app = FastAPI(title="IT BGITU Remake")
-
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-app.mount("/media", StaticFiles(directory="app/uploads"), name="upload")
-templates = Jinja2Templates(directory="app/templates")
-
-app.include_router(public.router)
-app.include_router(auth.router)
-app.include_router(cms.router)
-
-if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
-</file>
-
 <file path="app/templates/index.html">
 <head>
   <meta charset="UTF-8">
@@ -3510,6 +3701,44 @@ if __name__ == "__main__":
 </html>
 </file>
 
+<file path="app/main.py">
+import uvicorn
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+# --- ДОБАВИТЬ ЭТОТ ИМПОРТ ---
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+# ----------------------------
+
+from app.routers import auth, cms, public
+import os
+
+from app.admin import setup_admin
+
+app = FastAPI(title="IT BGITU Remake")
+
+# --- ВСТАВИТЬ ЭТОТ БЛОК СРАЗУ ПОСЛЕ СОЗДАНИЯ APP ---
+# Это говорит приложению: "Ты за прокси (Caddy), используй HTTPS ссылки"
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+# ---------------------------------------------------
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+os.makedirs("app/uploads", exist_ok=True)
+app.mount("/media", StaticFiles(directory="app/uploads"), name="upload")
+
+templates = Jinja2Templates(directory="app/templates")
+
+app.include_router(public.router)
+app.include_router(auth.router)
+app.include_router(cms.router) 
+
+setup_admin(app)
+
+if __name__ == "__main__":
+    # Важно: forwarded_allow_ips='*' разрешает проксирование заголовков
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, forwarded_allow_ips='*', reload=True)
+</file>
+
 <file path="docker-compose.yml">
 version: '3.8'
 
@@ -3579,23 +3808,6 @@ volumes:
 networks:
   itnet:
     driver: bridge
-</file>
-
-<file path="requirements.txt">
-fastapi
-uvicorn[standard]
-pydantic
-sqlalchemy       
-asyncpg          
-python-dotenv    
-asyncpg
-sqlalchemy
-alembic
-passlib[bcrypt]
-python-jose[cryptography]
-pydantic[email]
-python-multipart
-Jinja2
 </file>
 
 <file path="app/routers/public.py">
@@ -3696,6 +3908,25 @@ async def get_all_teachers(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Teacher).order_by(Teacher.fio))
 
     return result.scalars().all()
+</file>
+
+<file path="requirements.txt">
+fastapi
+uvicorn[standard]
+pydantic
+sqlalchemy       
+asyncpg          
+python-dotenv    
+asyncpg
+sqlalchemy
+alembic
+passlib[bcrypt]
+python-jose[cryptography]
+pydantic[email]
+python-multipart
+Jinja2
+sqladmin[full]
+wtforms
 </file>
 
 </files>
