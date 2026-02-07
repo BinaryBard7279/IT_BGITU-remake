@@ -1,147 +1,198 @@
 /* app/static/admin_theme.css */
 
-/* 1. Шрифт и Базовые цвета (копия из styles.css) */
+/* Подключаем шрифт */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Ваши переменные из styles.css */
 :root {
   --background: hsl(40, 20%, 98%);
   --foreground: hsl(30, 10%, 15%);
+  
   --card: hsl(40, 30%, 97%);
   --primary: hsl(30, 10%, 20%);
   --primary-foreground: hsl(40, 20%, 98%);
+  
+  --muted: hsl(40, 10%, 92%);
+  --muted-foreground: hsl(30, 8%, 45%);
+  
   --border: hsl(40, 15%, 88%);
   --radius: 0.75rem;
-  --muted-foreground: hsl(30, 8%, 45%);
+  
+  /* Цвета для кнопок действий */
+  --btn-hover: hsl(30, 10%, 25%);
+  --danger: hsl(25, 70%, 80%);
+  --danger-text: #7f1d1d;
 }
 
-/* 2. Глобальный сброс под стиль сайта */
-body, .admin-layout, .main-content {
+/* === ГЛОБАЛЬНЫЙ СБРОС === */
+body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
     background-color: var(--background) !important;
     color: var(--foreground) !important;
 }
 
-/* 3. Сайдбар (Боковое меню) - делаем светлым */
-.offcanvas-lg, .sidebar {
+a { text-decoration: none !important; }
+
+/* === БОКОВОЕ МЕНЮ (SIDEBAR) === */
+/* Делаем его светлым, как на сайте */
+.offcanvas-lg, aside, .sidebar {
     background-color: var(--card) !important;
     border-right: 1px solid var(--border) !important;
 }
 
-.nav-link {
+/* Ссылки в меню */
+.nav-pills .nav-link, .nav-link {
     color: var(--muted-foreground) !important;
-    border-radius: var(--radius) !important;
-    margin-bottom: 5px;
     font-weight: 500;
+    border-radius: var(--radius) !important;
+    padding: 10px 15px;
+    margin-bottom: 4px;
     transition: all 0.2s ease;
 }
 
-.nav-link:hover {
-    background-color: hsl(40, 15%, 94%) !important; /* --secondary */
+/* Ховер эффект */
+.nav-pills .nav-link:hover, .nav-link:hover {
+    background-color: rgba(0,0,0,0.04) !important;
     color: var(--foreground) !important;
 }
 
-.nav-link.active {
+/* Активный пункт меню */
+.nav-pills .nav-link.active, .nav-link.active {
     background-color: var(--primary) !important;
     color: var(--primary-foreground) !important;
     font-weight: 600;
 }
 
-.navbar-brand {
+/* Логотип */
+.navbar-brand, .sidebar-brand {
     color: var(--foreground) !important;
     font-weight: 700 !important;
-    font-family: 'Inter', sans-serif !important;
+    font-size: 1.25rem;
 }
 
-/* 4. Верхняя панель (Navbar) */
+/* === ВЕРХНЯЯ ПАНЕЛЬ === */
 .navbar {
     background-color: var(--background) !important;
     border-bottom: 1px solid var(--border) !important;
     box-shadow: none !important;
 }
 
-/* 5. Карточки и Таблицы */
+.navbar-toggler {
+    border: 1px solid var(--border) !important;
+    color: var(--foreground) !important;
+}
+
+/* === ОСНОВНОЙ КОНТЕНТ И КАРТОЧКИ === */
+.content-header h1 {
+    font-weight: 700;
+    color: var(--foreground);
+}
+
 .card {
-    background-color: #ffffff !important; /* Чуть светлее фона */
+    background-color: #ffffff !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--radius) !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.02) !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
 }
 
 .card-header {
     background-color: transparent !important;
     border-bottom: 1px solid var(--border) !important;
     font-weight: 600;
-    color: var(--foreground);
-    padding: 1.5rem !important;
+    padding: 1.25rem !important;
 }
 
+/* === ТАБЛИЦЫ === */
 .table {
-    --bs-table-bg: transparent !important;
     color: var(--foreground) !important;
 }
-
-.table th {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: var(--muted-foreground);
-    font-weight: 600;
+.table thead th {
     border-bottom: 1px solid var(--border) !important;
-    padding: 1rem !important;
+    color: var(--muted-foreground) !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    background: transparent !important;
 }
-
 .table td {
     border-bottom: 1px solid var(--border) !important;
-    padding: 1rem !important;
     vertical-align: middle;
+    padding: 1rem 0.75rem !important;
 }
 
-/* 6. Кнопки (Точно как на сайте) */
+/* === КНОПКИ === */
 .btn {
     border-radius: var(--radius) !important;
-    padding: 0.5rem 1rem !important;
-    font-weight: 500 !important;
-    font-size: 0.875rem !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
     border: none !important;
     box-shadow: none !important;
 }
 
+/* Основная кнопка (New Item, Save) - Темно-серая */
 .btn-primary {
     background-color: var(--primary) !important;
     color: var(--primary-foreground) !important;
 }
-
 .btn-primary:hover {
-    opacity: 0.9;
+    background-color: var(--btn-hover) !important;
 }
 
-.btn-secondary, .btn-light {
+/* Второстепенная (Export, Cancel) - Прозрачная с рамкой */
+.btn-secondary, .btn-light, .btn-outline-secondary {
     background-color: transparent !important;
     border: 1px solid var(--border) !important;
     color: var(--foreground) !important;
 }
-
-.btn-danger {
-    background-color: hsl(25, 70%, 80%) !important; /* pastel-peach */
-    color: #7f1d1d !important;
+.btn-secondary:hover {
+    background-color: var(--card) !important;
 }
 
-/* 7. Поля ввода */
+/* Удаление - Персиковый цвет (как на сайте) */
+.btn-danger {
+    background-color: var(--danger) !important;
+    color: var(--danger-text) !important;
+}
+
+/* === ФОРМЫ === */
 .form-control, .form-select {
-    background-color: #fff !important;
+    background-color: var(--background) !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--radius) !important;
-    padding: 0.75rem 1rem !important;
     color: var(--foreground) !important;
+    padding: 0.7rem 1rem;
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: var(--primary) !important;
     box-shadow: 0 0 0 2px rgba(0,0,0,0.05) !important;
+    border-color: var(--primary) !important;
 }
 
-/* 8. Хлебные крошки */
-.breadcrumb-item a {
-    color: var(--muted-foreground) !important;
-    text-decoration: none;
-}
-.breadcrumb-item.active {
+/* === Pagination === */
+.page-link {
     color: var(--foreground) !important;
+    border: 1px solid var(--border) !important;
+    background: transparent !important;
+    margin: 0 2px;
+    border-radius: 6px !important;
+}
+.page-item.active .page-link {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+}
+
+/* Убираем синий фон у дропдаунов */
+.dropdown-menu {
+    background-color: #ffffff !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    border-radius: var(--radius) !important;
+}
+.dropdown-item {
+    color: var(--foreground) !important;
+}
+.dropdown-item:hover {
+    background-color: var(--card) !important;
 }

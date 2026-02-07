@@ -167,27 +167,24 @@ class AchievementAdmin(ModelView, model=Achievement):
 
 # ... импорты и классы моделей ...
 
+# ... (код выше оставляем без изменений)
+
 def setup_admin(app):
     admin = Admin(
         app, 
         engine, 
         authentication_backend=authentication_backend,
-        title="БГИТУ IT-Институт",
+        title="БГИТУ IT-Институт", # Это отобразится в заголовке вкладки
         base_url="/admin",
-        # Логотип текстом, чтобы соответствовать сайту, или путь к SVG
-        logo_url=None 
+        logo_url=None # Убираем логотип-картинку, будет красивый текст шрифтом Inter
     )
     
-    # Внедряем стили.
-    # 1. Шрифт Inter (Google Fonts)
-    # 2. Наш кастомный файл admin_theme.css
+    # ПОДКЛЮЧЕНИЕ ДИЗАЙНА
+    # 1. Ссылка на FontAwesome (иконки)
+    # 2. Ссылка на наш новый файл admin_theme.css, который лежит в /static
     admin.templates.env.globals["extra_css"] = """
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="/static/admin_theme.css" rel="stylesheet">
-    <style>
-        /* Дополнительный фикс для иконок FontAwesome, если они не грузятся в админке */
-        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/admin_theme.css">
     """
     
     admin.add_view(UserAdmin)
