@@ -169,47 +169,19 @@ class AchievementAdmin(ModelView, model=Achievement):
 
 # ... (весь код классов UserAdmin, TeacherAdmin и т.д. оставляем как был) ...
 
+# app/admin.py
+
+# ... (импорты и классы остаются как были) ...
+
 def setup_admin(app):
-    # Добавляем ваши стили в шаблон админки
-    # SQLAdmin позволяет инъекцию HTML в head
-    
-    custom_head = """
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body, .navbar, .card, .table { font-family: 'Inter', sans-serif !important; }
-        
-        /* Делаем шапку светлой, как на сайте */
-        .navbar-dark { background-color: #ffffff !important; border-bottom: 1px solid #e5e7eb; }
-        .navbar-dark .navbar-brand { color: #333 !important; font-weight: 700; }
-        .navbar-dark .nav-link { color: #666 !important; }
-        .navbar-dark .nav-link:hover { color: #000 !important; }
-        .navbar-dark .nav-link.active { color: #000 !important; font-weight: 600; }
-
-        /* Кнопки в стиле сайта */
-        .btn-primary { background-color: hsl(30, 10%, 20%) !important; border-color: hsl(30, 10%, 20%) !important; }
-        .btn-primary:hover { opacity: 0.9; }
-        
-        /* Фон */
-        body { background-color: hsl(40, 20%, 98%) !important; }
-        
-        /* Карточки */
-        .card { border: 1px solid hsl(40, 15%, 88%); box-shadow: none; border-radius: 0.75rem; }
-    </style>
-    """
-
     admin = Admin(
         app, 
         engine, 
         authentication_backend=authentication_backend,
         title="БГИТУ IT-Институт",
-        base_url="/admin", # Явно указываем путь
-        # Подключаем кастомные стили
+        base_url="/admin",
+        templates_dir="app/templates"  # <--- ДОБАВИТЬ ЭТУ СТРОКУ
     )
-    
-    # ВАЖНО: У SQLAdmin нет прямого параметра custom_head в конструкторе в старых версиях,
-    # но мы можем переопределить шаблон или использовать хак. 
-    # Самый надежный способ без создания файлов шаблонов - это стандартная тема.
-    # Если дизайн все еще "сломан", дело точно в Исправлении №1 (Middleware).
     
     admin.add_view(UserAdmin)
     admin.add_view(SpecialityAdmin)

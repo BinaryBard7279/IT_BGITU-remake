@@ -1,0 +1,149 @@
+{% extends "sqladmin/layout.html" %}
+
+{% block head %}
+{{ super() }}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    /* === 1. Глобальные переменные из вашего сайта === */
+    :root {
+        --bg-main: hsl(40, 20%, 98%);
+        --bg-card: hsl(40, 30%, 97%);
+        --text-main: hsl(30, 10%, 15%);
+        --primary: hsl(30, 10%, 20%);
+        --secondary: hsl(40, 15%, 94%);
+        --border: hsl(40, 15%, 88%);
+        --muted: hsl(30, 8%, 45%);
+        --pastel-mint: hsl(160, 45%, 70%); /* Для успехов */
+        --pastel-peach: hsl(25, 70%, 80%); /* Для ошибок */
+    }
+
+    /* === 2. Основной фон и шрифт === */
+    body {
+        font-family: 'Inter', sans-serif !important;
+        background-color: var(--bg-main) !important;
+        color: var(--text-main) !important;
+    }
+
+    /* === 3. Сайдбар (Меню слева) === */
+    .offcanvas-md, .sidebar {
+        background-color: #ffffff !important;
+        border-right: 1px solid var(--border) !important;
+    }
+    
+    /* Ссылки в меню */
+    .nav-pills .nav-link {
+        color: var(--muted) !important;
+        font-weight: 500;
+        border-radius: 0.5rem !important;
+        padding: 0.75rem 1rem !important;
+        margin-bottom: 0.25rem;
+    }
+    .nav-pills .nav-link:hover {
+        background-color: var(--secondary) !important;
+        color: var(--text-main) !important;
+    }
+    .nav-pills .nav-link.active {
+        background-color: var(--primary) !important;
+        color: #fff !important;
+    }
+    /* Логотип */
+    .sidebar-brand {
+        color: var(--text-main) !important;
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+
+    /* === 4. Верхняя панель (Navbar) === */
+    header.navbar {
+        background-color: var(--bg-main) !important; /* Сливаем с фоном */
+        border-bottom: 1px solid var(--border) !important;
+        box-shadow: none !important;
+    }
+    /* Кнопка выхода и хлебные крошки */
+    .navbar .text-muted, .breadcrumb-item a {
+        color: var(--muted) !important;
+        text-decoration: none;
+    }
+    .breadcrumb-item.active {
+        color: var(--text-main) !important;
+        font-weight: 600;
+    }
+
+    /* === 5. Карточки и Таблицы === */
+    .card {
+        background-color: #ffffff !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 0.75rem !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.02) !important;
+    }
+    .card-header {
+        background-color: transparent !important;
+        border-bottom: 1px solid var(--border) !important;
+        font-weight: 700;
+        padding: 1.5rem !important;
+    }
+    
+    /* Таблица */
+    .table {
+        color: var(--text-main) !important;
+        --bs-table-bg: transparent !important; 
+    }
+    .table thead th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--muted);
+        border-bottom: 2px solid var(--border) !important;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+    }
+    .table td {
+        border-bottom: 1px solid var(--border) !important;
+        vertical-align: middle;
+        padding: 1rem 0.5rem !important;
+    }
+
+    /* === 6. Кнопки и Формы === */
+    .btn-primary {
+        background-color: var(--primary) !important;
+        border-color: var(--primary) !important;
+        border-radius: 0.5rem !important;
+        font-weight: 500;
+    }
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+    /* Кнопка "Создать" (+) */
+    .btn-success {
+        background-color: var(--secondary) !important;
+        color: var(--text-main) !important;
+        border: 1px solid var(--border) !important;
+    }
+    .btn-success:hover {
+        background-color: #e5e5e5 !important; /* Чуть темнее */
+    }
+
+    /* Поля ввода */
+    .form-control, .form-select {
+        background-color: #fff !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 0.5rem !important;
+        padding: 0.6rem 1rem !important;
+    }
+    .form-control:focus {
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 3px rgba(0,0,0,0.05) !important;
+    }
+
+    /* Уведомления (Alerts) */
+    .alert-success {
+        background-color: var(--pastel-mint) !important;
+        color: #064e3b !important;
+        border: none !important;
+    }
+    .alert-danger {
+        background-color: var(--pastel-peach) !important;
+        color: #7f1d1d !important;
+        border: none !important;
+    }
+</style>
+{% endblock %}
