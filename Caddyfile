@@ -7,8 +7,13 @@ vinogradovnikita.ru {
 }
 
 admin.vinogradovnikita.ru {
+    reverse_proxy app:8000
+}
+
+pgadmin.vinogradovnikita.ru {
+
     basicauth {
-        admin $2a$04$9c8OMNev8LNYkqcavBu2kOIjT0sQ4OMNHgvMBQi3hPnC0CGxMtX6i
+        admin $2a$04$z.kKT3e8UHbSPQCkD7OPveI9Cfu7tzucta4OlHfOWn8AwAPniqub6
     }
     reverse_proxy pgadmin:80
 }
