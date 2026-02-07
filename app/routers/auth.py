@@ -8,19 +8,12 @@ from app.schemas.auth import Token, LoginRequest
 from app.security import verify_password, get_password_hash
 from app.jwt_manager import jwt_manager
 
-router = APIRouter(prefix="/admin", tags=["Authentification"])
+# ИЗМЕНЕНИЕ 1: Меняем префикс с "/admin" на "/api/auth", чтобы освободить место
+router = APIRouter(prefix="/api/auth", tags=["Authentification"])
 
-# Authentification
-@router.get("/")
-async def admin_root():
-    return {
-        "Эндпоинты": {
-            "POST /admin/": "Аутентификация пользователя",
-            "POST /admin/hash-password": "Получить хэш пароля для ручного создания пользователя (Временое решение)"
-        }
-    }
+# ИЗМЕНЕНИЕ 2: Удаляем функцию admin_root (которая отдавала JSON со скриншота), она больше не нужна.
 
-@router.post("/", response_model=Token)
+@router.post("/login", response_model=Token) # Можно поменять путь на /login для ясности
 async def login(
     login_data: LoginRequest,
     db: AsyncSession = Depends(get_db)
@@ -50,10 +43,6 @@ async def login(
 async def hash_password_endpoint(password: str = Form(..., min_length=6)):
     """
     Получить хэш пароля для ручного создания пользователя в БД.
-    
-    Внимание: Bcrypt ограничивает пароли 72 байтами.
-    Если ваш пароль содержит не-ASCII символы или очень длинный,
-    он будет автоматически обрезан.
     """
     password_bytes = password.encode('utf-8')
     original_length = len(password_bytes)
@@ -67,12 +56,6 @@ async def hash_password_endpoint(password: str = Form(..., min_length=6)):
     
     return {
         "original_password": password,
-        "password_length_bytes": original_length,
-        "warning": warning,
         "hashed_password": hashed_password,
-        "Пример запроса sql": f"""
--- SQL запрос для создания пользователя в PostgreSQL:
-INSERT INTO users (name, email, hashed_password) 
-VALUES ('Администратор', 'admin@university.ru', '{hashed_password}');
-        """
+        "warning": warning
     }
