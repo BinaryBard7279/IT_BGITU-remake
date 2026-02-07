@@ -1,0 +1,147 @@
+/* app/static/admin_theme.css */
+
+/* 1. Шрифт и Базовые цвета (копия из styles.css) */
+:root {
+  --background: hsl(40, 20%, 98%);
+  --foreground: hsl(30, 10%, 15%);
+  --card: hsl(40, 30%, 97%);
+  --primary: hsl(30, 10%, 20%);
+  --primary-foreground: hsl(40, 20%, 98%);
+  --border: hsl(40, 15%, 88%);
+  --radius: 0.75rem;
+  --muted-foreground: hsl(30, 8%, 45%);
+}
+
+/* 2. Глобальный сброс под стиль сайта */
+body, .admin-layout, .main-content {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+}
+
+/* 3. Сайдбар (Боковое меню) - делаем светлым */
+.offcanvas-lg, .sidebar {
+    background-color: var(--card) !important;
+    border-right: 1px solid var(--border) !important;
+}
+
+.nav-link {
+    color: var(--muted-foreground) !important;
+    border-radius: var(--radius) !important;
+    margin-bottom: 5px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    background-color: hsl(40, 15%, 94%) !important; /* --secondary */
+    color: var(--foreground) !important;
+}
+
+.nav-link.active {
+    background-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+    font-weight: 600;
+}
+
+.navbar-brand {
+    color: var(--foreground) !important;
+    font-weight: 700 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* 4. Верхняя панель (Navbar) */
+.navbar {
+    background-color: var(--background) !important;
+    border-bottom: 1px solid var(--border) !important;
+    box-shadow: none !important;
+}
+
+/* 5. Карточки и Таблицы */
+.card {
+    background-color: #ffffff !important; /* Чуть светлее фона */
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02) !important;
+}
+
+.card-header {
+    background-color: transparent !important;
+    border-bottom: 1px solid var(--border) !important;
+    font-weight: 600;
+    color: var(--foreground);
+    padding: 1.5rem !important;
+}
+
+.table {
+    --bs-table-bg: transparent !important;
+    color: var(--foreground) !important;
+}
+
+.table th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 1rem !important;
+}
+
+.table td {
+    border-bottom: 1px solid var(--border) !important;
+    padding: 1rem !important;
+    vertical-align: middle;
+}
+
+/* 6. Кнопки (Точно как на сайте) */
+.btn {
+    border-radius: var(--radius) !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.btn-primary {
+    background-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary, .btn-light {
+    background-color: transparent !important;
+    border: 1px solid var(--border) !important;
+    color: var(--foreground) !important;
+}
+
+.btn-danger {
+    background-color: hsl(25, 70%, 80%) !important; /* pastel-peach */
+    color: #7f1d1d !important;
+}
+
+/* 7. Поля ввода */
+.form-control, .form-select {
+    background-color: #fff !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    padding: 0.75rem 1rem !important;
+    color: var(--foreground) !important;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.05) !important;
+}
+
+/* 8. Хлебные крошки */
+.breadcrumb-item a {
+    color: var(--muted-foreground) !important;
+    text-decoration: none;
+}
+.breadcrumb-item.active {
+    color: var(--foreground) !important;
+}
