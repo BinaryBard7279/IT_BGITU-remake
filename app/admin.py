@@ -116,15 +116,9 @@ class TeacherAdmin(ModelView, model=Teacher):
             "render_kw": {"placeholder": "Математика, Физика, Алгоритмы"}
         },
         "image_url": {
-             "label": "Ссылка на фото или загрузка (пока используем URL или загрузку через API)"
+             "label": "Ссылка на фото"
         }
     }
-    
-    # !!! SQLAdmin пока не имеет встроенного FileField для SQLAlchemy с авто-сохранением пути.
-    # Простейший вариант: Оставить текстовое поле, куда вставлять ссылку из роутера /admin/cms/upload
-    # Либо дописать сложную логику. Для надежности оставим StringField, 
-    # так как у вас уже реализован API загрузки. 
-    # В описании поля image_url мы подскажем администратору.
 
 # --- План обучения: Направления ---
 class DirectionAdmin(ModelView, model=Direction):
@@ -167,49 +161,21 @@ class AchievementAdmin(ModelView, model=Achievement):
     column_labels = {"theme": "Тема (тег)", "title": "Заголовок"}
 
 
-# ... (остальной код admin.py выше не трогаем) ...
+# --- 3. Инициализация Админки ---
 
 def setup_admin(app):
-    # Хак для стилизации: создаем класс админки, который сам внедряет CSS
-    # Это предотвращает ошибку 500 с шаблонами
-    
     admin = Admin(
         app, 
         engine, 
         authentication_backend=authentication_backend,
         title="БГИТУ IT-Институт",
-        base_url="/admin",
-        # УБРАЛИ templates_dir, чтобы не было ошибки рекурсии
+        base_url="/admin"
     )
     
-    # Инъекция стилей прямо в админку через внутренний шаблон
-    # Мы просто подменяем кусок HTML в памяти
-    admin.templates.env.globals["extra_css"] = """
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body, .navbar, .card, .table { font-family: 'Inter', sans-serif !important; }
-        body { background-color: hsl(40, 20%, 98%) !important; color: hsl(30, 10%, 15%) !important; }
-        
-        /* Шапка */
-        .navbar-dark { background-color: #ffffff !important; border-bottom: 1px solid hsl(40, 15%, 88%); }
-        .navbar-brand { color: hsl(30, 10%, 15%) !important; font-weight: 700; }
-        .nav-link { color: hsl(30, 8%, 45%) !important; }
-        .nav-link:hover, .nav-link.active { color: hsl(30, 10%, 20%) !important; background: hsl(40, 15%, 94%); border-radius: 5px; }
-        
-        /* Кнопки */
-        .btn-primary { background-color: hsl(30, 10%, 20%) !important; border-color: hsl(30, 10%, 20%) !important; }
-        .btn-success { background-color: hsl(160, 45%, 70%) !important; border: none !important; color: #064e3b !important; }
-        .btn-danger { background-color: hsl(25, 70%, 80%) !important; border: none !important; color: #7f1d1d !important; }
-        
-        /* Карточки */
-        .card { border: 1px solid hsl(40, 15%, 88%); border-radius: 0.75rem; box-shadow: none !important; }
-        .table thead th { color: hsl(30, 8%, 45%); text-transform: uppercase; font-size: 0.75rem; }
-    </style>
-    """
-    
-    # Чтобы стили применились, нам нужно переопределить базовый шаблон в памяти
-    # или надеяться, что SQLAdmin позволит вставить это в head.
-    # Самый надежный способ без файлов - просто запустить админку как есть.
+    # --- ДИЗАЙН: Подключаем внешний CSS ---
+    # Мы используем хак с extra_css, чтобы внедрить ссылку на наш файл стилей.
+    # Файл app/static/admin_style.css будет загружен браузером и переопределит стили.
+    admin.templates.env.globals["extra_css"] = '<link href="/static/admin_style.css" rel="stylesheet">'
     
     admin.add_view(UserAdmin)
     admin.add_view(SpecialityAdmin)
