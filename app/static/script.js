@@ -197,6 +197,7 @@
   }
 
   // --- Roadmap Logic (План) ---
+  // --- Roadmap Logic (План с группировкой и упаковкой) ---
   function initRoadmap(directionsData) {
     const rSelect = getById('roadmapSelect');
     const rGrid = getById('roadmap-grid');
@@ -209,67 +210,130 @@
         `<option value="${i}">${esc(d.name)}</option>`
     ).join('');
 
-    // Функция отрисовки сетки для конкретного направления
-    const drawGrid = (directionIndex) => {
-        const direction = directionsData[directionIndex];
-        const disciplines = direction.disciplines || [];
+    // --- Алгоритм упаковки предметов в строки ---
+    const packDisciplines = (disciplines) => {
+        // Сортировка: сначала ранние семестры, при равенстве - самые длинные
+        const sorted = [...disciplines].sort((a, b) => {
+            if (a.start_term !== b.start_term) return a.start_term - b.start_term;
+            return (b.end_term - b.start_term) - (a.end_term - a.start_term);
+        });
 
-        // Отрисовка ячеек (по предметам, упрощенно: 1 строка на предмет)
-        // Но в старом дизайне предметы были строками. Тут мы сделаем так:
-        // Рисуем список предметов, каждый занимает свои семестры.
-        
-        rGrid.innerHTML = disciplines.map((c, idx) => {
-            let cells = '';
-            const colorClass = getColor(idx);
-            
-            for(let i=1; i<=8; i++) {
-                const act = i >= c.start_term && i <= c.end_term;
-                // Классы для скругления
-                const isStart = i === c.start_term;
-                const isEnd = i === c.end_term;
-                
-                cells += `
-                <div class="roadmap-cell ${act ? `active ${colorClass}` : 'inactive'} ${isStart?'start':''} ${isEnd?'end':''}" 
-                     ${act ? `data-desc="Семестры: ${c.start_term}-${c.end_term}" data-name="${esc(c.name)}"` : ''}>
-                     ${isStart ? `<span class="roadmap-cell-text">${esc(c.name)}</span>` : ''}
-                </div>`;
+        const lanes = []; // Массив "строк"
+
+        sorted.forEach(disc => {
+            let placed = false;
+            // Ищем строку, куда влезет предмет
+            for (let lane of lanes) {
+                const lastItem = lane[lane.length - 1];
+                // Если предмет начинается ПОСЛЕ окончания последнего в строке
+                if (disc.start_term > lastItem.end_term) {
+                    lane.push(disc);
+                    placed = true;
+                    break;
+                }
             }
-            return `<div class="roadmap-row">${cells}</div>`;
-        }).join('');
+            // Если не нашли место, создаем новую строку
+            if (!placed) lanes.push([disc]);
+        });
+        return lanes;
     };
 
-    // Рендер первого по умолчанию
+    // Функция отрисовки
+    const drawGrid = (directionIndex) => {
+        const direction = directionsData[directionIndex];
+        const allDisciplines = direction.disciplines || [];
+
+        // 1. Группируем предметы
+        const groups = {};
+        allDisciplines.forEach(d => {
+            const gName = d.group || "Общие";
+            if (!groups[gName]) groups[gName] = [];
+            groups[gName].push(d);
+        });
+
+        // Сортировка групп ("Общие" всегда сверху)
+        const groupNames = Object.keys(groups).sort((a, b) => {
+            if(a === "Общие") return -1;
+            if(b === "Общие") return 1;
+            return a.localeCompare(b);
+        });
+
+        let html = '';
+
+        groupNames.forEach((gName, gIndex) => {
+            const groupDisciplines = groups[gName];
+            const packedLanes = packDisciplines(groupDisciplines);
+            const colorClass = getColor(gIndex);
+
+            // Генерируем HTML для строк внутри группы
+            const rowsHtml = packedLanes.map(lane => {
+                let cellsHtml = '';
+                let currentTerm = 1;
+
+                lane.forEach(disc => {
+                    // Пустота ДО предмета
+                    if (disc.start_term > currentTerm) {
+                        const emptySpan = disc.start_term - currentTerm;
+                        cellsHtml += `<div class="roadmap-cell inactive" style="grid-column: span ${emptySpan};"></div>`;
+                    }
+                    // Предмет
+                    const duration = disc.end_term - disc.start_term + 1;
+                    cellsHtml += `
+                        <div class="roadmap-cell active ${colorClass} start end" 
+                             style="grid-column: span ${duration};"
+                             data-desc="${esc(gName)} | Семестры: ${disc.start_term}-${disc.end_term}" 
+                             data-name="${esc(disc.name)}">
+                             <span class="roadmap-cell-text">${esc(disc.name)}</span>
+                        </div>
+                    `;
+                    currentTerm = disc.end_term + 1;
+                });
+
+                // Пустота ПОСЛЕ последнего предмета
+                if (currentTerm <= 8) {
+                    const remaining = 9 - currentTerm;
+                    cellsHtml += `<div class="roadmap-cell inactive" style="grid-column: span ${remaining};"></div>`;
+                }
+
+                return `<div class="roadmap-row" style="grid-template-columns: repeat(8, 1fr); display: grid;">${cellsHtml}</div>`;
+            }).join('');
+
+            // Сборка группы
+            html += `
+                <div class="roadmap-row">
+                    <div class="roadmap-group-title">${esc(gName)}</div>
+                    <div style="grid-column: span 8; display: flex; flex-direction: column; gap: 0.5rem;">
+                        ${rowsHtml}
+                    </div>
+                </div>
+                <div style="height: 1px; background: var(--border); margin: 0.5rem 0 1rem 0; opacity: 0.5; grid-column: 1 / -1;"></div>
+            `;
+        });
+
+        rGrid.innerHTML = html;
+    };
+
     drawGrid(0);
+    rSelect.addEventListener('change', (e) => drawGrid(e.target.value));
 
-    // Событие смены
-    rSelect.addEventListener('change', (e) => {
-        drawGrid(e.target.value);
-    });
-
-    // Tooltip Logic
+    // Tooltip
     const bgMap = { 'bg-pastel-sky':'#bae6fd','bg-pastel-mint':'#a7f3d0','bg-pastel-peach':'#fecaca','bg-pastel-lavender':'#ddd6fe','bg-pastel-coral':'#fda4af','bg-pastel-sage':'#a7f3d0' };
-    
     rGrid.addEventListener('mousemove', e => {
       const cell = e.target.closest('.active');
       if (cell) {
-        const name = cell.dataset.name;
-        const desc = cell.dataset.desc;
-        // Находим цвет из класса
         const colorClass = Array.from(cell.classList).find(c => c.startsWith('bg-pastel'));
         const hex = bgMap[colorClass] || '#ccc';
-
         rTip.innerHTML = `
             <div class="tooltip-icon" style="background:${hex}"></div>
-            <div class="tooltip-title">${name}</div>
-            <div class="tooltip-meta">${desc}</div>`;
-            
-        Object.assign(rTip.style, { display: 'block', top: `${e.clientY+15}px`, left: `${e.clientX+15}px` });
+            <div class="tooltip-title">${cell.dataset.name}</div>
+            <div class="tooltip-meta">${cell.dataset.desc}</div>`;
+        rTip.style.display = 'block';
+        rTip.style.top = `${e.clientY + 15}px`;
+        rTip.style.left = `${e.clientX + 15}px`;
       } else rTip.style.display = 'none';
     }, { passive: true });
-    
     rGrid.addEventListener('mouseleave', () => rTip.style.display = 'none');
   }
-
   // ================= 4. PHYSICS & UI (Старый код) =================
   function initFacultyPhysics(fTrack) {
       const inner = fTrack.firstElementChild;

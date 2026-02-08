@@ -74,6 +74,7 @@ async def get_all_directions_with_disciplines(db: AsyncSession = Depends(get_db)
             "name": disc.name,
             "start_term": disc.start_term,
             "end_term": disc.end_term,
+            "group": disc.group,
             "direction_id": disc.direction_id
         } for disc in d.disciplines]
     } for d in directions]

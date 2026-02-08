@@ -17,6 +17,7 @@ class Discipline(Base):
     name = Column(String, index=True, nullable=False, unique=True)
     start_term = Column(Integer, nullable=False)
     end_term = Column(Integer, nullable=False)
+    group = Column(String, nullable=False, server_default='Общие')
     direction_id = Column(Integer, ForeignKey('directions.id', ondelete='CASCADE'), nullable=False)
     
     direction = relationship("Direction", back_populates="disciplines")

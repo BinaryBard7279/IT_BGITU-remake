@@ -130,15 +130,23 @@ class DirectionAdmin(ModelView, model=Direction):
     # discipline relationship будет показан автоматически
 
 # --- План обучения: Дисциплины ---
+# ... (импорты и другие админки без изменений)
+
+# --- План обучения: Дисциплины ---
 class DisciplineAdmin(ModelView, model=Discipline):
     name = "Дисциплина (План)"
     name_plural = "Дисциплины (План)"
     icon = "fa-solid fa-book"
     
-    column_list = [Discipline.name, Discipline.start_term, Discipline.end_term, Discipline.direction]
-    column_sortable_list = [Discipline.start_term]
-    column_searchable_list = [Discipline.name]
+    # Добавили group в начало списков
+    column_list = [Discipline.group, Discipline.name, Discipline.start_term, Discipline.end_term, Discipline.direction]
+    column_sortable_list = [Discipline.group, Discipline.start_term]
+    column_searchable_list = [Discipline.name, Discipline.group]
+    
+    # Добавили group в форму редактирования
+    form_columns = [Discipline.direction, Discipline.group, Discipline.name, Discipline.start_term, Discipline.end_term]
 
+# ... (остальной код без изменений)
 # --- Предметы (Стек) ---
 class SubjectAdmin(ModelView, model=Subject):
     name = "Технология (Стек)"

@@ -21,6 +21,7 @@ class DisciplineBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=225)
     start_term: int = Field(..., ge=1, le=12)
     end_term: int = Field(..., ge=1, le=12)
+    group: str = Field(default="Общие", min_length=1, max_length=100)
     direction_id: int = Field(..., gt=0)
 
 class DisciplineCreate(DisciplineBase):

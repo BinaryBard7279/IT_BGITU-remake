@@ -225,19 +225,83 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .faculty-disciplines li::before { content: '• '; color: var(--primary); }
 
 /* ================= ROADMAP ================= */
-.roadmap-wrapper { overflow-x: auto; }
-.roadmap-container { min-width: 800px; }
-.roadmap-headers, .roadmap-row { display: grid; grid-template-columns: repeat(8, 1fr); gap: 0.5rem; }
-.roadmap-headers { margin-bottom: 1rem; }
-.roadmap-rows { display: flex; flex-direction: column; gap: 0.75rem; }
-.semester-header { text-align: center; font-size: 0.875rem; font-weight: 500; color: var(--muted-foreground); padding: 0.5rem; }
-.roadmap-cell { height: 3.5rem; display: flex; align-items: center; justify-content: center; transition: all var(--transition); cursor: pointer; }
-.roadmap-cell.inactive { background-color: hsl(40, 10%, 92%, 0.3); border-radius: 0.5rem; }
-.roadmap-cell.active { opacity: 1; }
-.roadmap-cell.active:hover { opacity: 0.8; }
-.roadmap-cell.start { border-top-left-radius: 0.75rem; border-bottom-left-radius: 0.75rem; }
-.roadmap-cell.end { border-top-right-radius: 0.75rem; border-bottom-right-radius: 0.75rem; }
-.roadmap-cell-text { font-size: 0.75rem; font-weight: 500; color: hsl(30, 10%, 15%, 0.8); padding: 0 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* ================= ROADMAP ================= */
+.roadmap-wrapper { overflow-x: auto; padding-bottom: 2rem; }
+.roadmap-container { min-width: 900px; }
+
+/* Сетка: Первая колонка 160px (заголовок группы), остальные 8 равные (семестры) */
+.roadmap-headers, .roadmap-row { 
+    display: grid; 
+    grid-template-columns: 160px repeat(8, 1fr); 
+    gap: 0.5rem; 
+}
+
+.roadmap-headers { margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+
+/* Отступ для заголовков семестров */
+.semester-header { 
+    text-align: center; font-size: 0.875rem; font-weight: 500; color: var(--muted-foreground); padding: 0.5rem; 
+}
+.semester-header-empty { grid-column: 1 / 2; }
+
+.roadmap-group-title {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--primary);
+    padding-right: 1rem;
+    line-height: 1.2;
+}
+
+.roadmap-rows { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.roadmap-cell { 
+    height: 3rem; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    transition: all var(--transition); 
+    cursor: pointer; 
+    position: relative;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: hsl(30, 10%, 15%, 0.8);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 0 0.5rem;
+}
+
+.roadmap-cell.inactive { background-color: transparent; }
+
+.roadmap-cell.active { 
+    opacity: 1; 
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.roadmap-cell.active:hover { opacity: 0.9; transform: scale(1.02); z-index: 2; }
+
+/* Скругления */
+.roadmap-cell.start { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; margin-left: 2px; }
+.roadmap-cell.end { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; margin-right: 2px; }
+.roadmap-cell.start.end { border-radius: 0.5rem; }
+
+/* Маркеры годов обучения */
+.year-markers { 
+    display: grid; 
+    grid-template-columns: 160px repeat(4, 1fr); 
+    gap: 1rem; 
+    margin-top: 1.5rem; 
+    padding-top: 1rem; 
+    border-top: 1px solid var(--border); 
+}
+.year-marker { text-align: center; font-size: 0.875rem; color: var(--muted-foreground); }
+.year-marker:nth-child(2) { grid-column: 2 / 4; }
+.year-marker:nth-child(3) { grid-column: 4 / 6; }
+.year-marker:nth-child(4) { grid-column: 6 / 8; }
+.year-marker:nth-child(5) { grid-column: 8 / 10; }
+
+.course-tooltip { display: none; position: fixed; top: 1rem; right: 1rem; z-index: 50; padding: 1rem; background-color: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); max-width: 18rem; animation: scaleIn 0.2s ease-out; pointer-events: none;}
 .year-markers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
 .year-marker { text-align: center; font-size: 0.875rem; color: var(--muted-foreground); }
 
