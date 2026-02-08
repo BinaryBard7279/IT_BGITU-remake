@@ -10,6 +10,11 @@ class Direction(Base):
     
     disciplines = relationship("Discipline", back_populates="direction", cascade="all, delete-orphan")
 
+    # --- ДОБАВИТЬ ЭТОТ МЕТОД ---
+    def __str__(self):
+        return self.name
+
+
 class Discipline(Base):
     __tablename__ = "disciplines"
 
@@ -21,3 +26,7 @@ class Discipline(Base):
     direction_id = Column(Integer, ForeignKey('directions.id', ondelete='CASCADE'), nullable=False)
     
     direction = relationship("Direction", back_populates="disciplines")
+
+    # --- ДОБАВИТЬ ЭТОТ МЕТОД ---
+    def __str__(self):
+        return f"{self.name} ({self.group})"
