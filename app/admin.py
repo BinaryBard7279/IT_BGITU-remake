@@ -170,17 +170,18 @@ class AchievementAdmin(ModelView, model=Achievement):
 # ... (код выше оставляем без изменений)
 
 def setup_admin(app):
-    # Добавь templates_dir="app/templates"
-    # Добавь templates_dir="app/templates"
     admin = Admin(
-    app, 
-    engine, 
-    authentication_backend=authentication_backend,
-    title="БГИТУ IT-Институт",
-    base_url="/admin",
-    logo_url=None,
-    templates_dir="app/templates"  # <-- ВАЖНО: Укажи путь к папке шаблонов
-)
+        app, 
+        engine, 
+        authentication_backend=authentication_backend,
+        title="БГИТУ IT-Институт",
+        base_url="/admin",
+        logo_url=None,
+        templates_dir="app/templates",
+        base_template="sqladmin/custom_layout.html"  # <--- ДОБАВЬ ЭТУ СТРОКУ
+    )
+    
+    # ... остальной код ...
     
     admin.add_view(UserAdmin)
     admin.add_view(SpecialityAdmin)
