@@ -127,13 +127,16 @@ class TeacherAdmin(ModelView, model=Teacher):
         "image_url": {"label": "Ссылка на фото"}
     }
 
-# --- ЛОГИКА ПЛАНА (Direction + Discipline) ---
+# --- ИСПРАВЛЕННЫЙ БЛОК ПЛАНА (Direction + Discipline) ---
 
 class DisciplineInline(ModelView, model=Discipline):
-    # Указываем, какие поля показывать в таблице внутри Направления
+    # Колонки, которые видны в таблице
     column_list = [Discipline.name, Discipline.group, Discipline.start_term, Discipline.end_term]
     
-    # Указываем, какие поля можно редактировать
+    # Поля, доступные для редактирования. 
+    # ВАЖНО: Исключаем direction, чтобы он не просил выбрать родителя вручную
+    form_excluded_columns = [Discipline.direction]
+    
     form_columns = [
         Discipline.name, 
         Discipline.group, 
@@ -143,7 +146,7 @@ class DisciplineInline(ModelView, model=Discipline):
     
     column_labels = {
         Discipline.name: "Дисциплина",
-        Discipline.group: "Группа",
+        Discipline.group: "Группа (Общие/Спец)",
         Discipline.start_term: "С семестра",
         Discipline.end_term: "По семестр"
     }
@@ -156,11 +159,13 @@ class DirectionAdmin(ModelView, model=Direction):
     column_list = [Direction.id, Direction.name]
     column_labels = {Direction.id: "ID", Direction.name: "Название направления"}
     
-    # ВАЖНО: form_columns здесь удален или расширен, чтобы не скрывать Inline
-    form_columns = [Direction.name]
+    # ВАЖНО: Я УДАЛИЛ form_columns = [Direction.name]. 
+    # Если оставить эту строку, SQLAdmin покажет ТОЛЬКО имя и скроет Inline таблицу.
     
-    # Подключаем Inline модель (таблицу дисциплин)
+    # Подключаем Inline модель
     inline_models = [DisciplineInline]
+
+# --------------------------------------------------------
 
 class SubjectAdmin(ModelView, model=Subject):
     name = "Технология (Стек)"
