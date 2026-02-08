@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link rel="stylesheet" href="{{ url_for('static', path='admin_theme.css') }}">
+    
     <style>
       @import url('https://rsms.me/inter/inter.css');
       :root {
@@ -96,9 +97,27 @@
         </footer>
       </div>
     </div>
-    <script src="{{ url_for('admin:statics', path='js/tabler.min.js') }}"></script>
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/js/tabler.min.js"></script>
     
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+          // 1. Исправляем ошибку "bootstrap is not defined", если она есть
+          if (typeof bootstrap === 'undefined' && typeof window.tabler !== 'undefined') {
+              window.bootstrap = window.tabler;
+          }
+
+          // 2. Исправляем ссылки HTTP -> HTTPS в формах (лечит блокировку Mixed Content)
+          document.querySelectorAll('form').forEach(form => {
+              if (form.action && form.action.startsWith('http://') && window.location.protocol === 'https:') {
+                  console.log('Fixing HTTP form action:', form.action);
+                  form.action = form.action.replace('http://', 'https://');
+              }
+          });
+      });
+    </script>
+
     {% block tail %}{% endblock %}
   </body>
 </html>
