@@ -130,13 +130,11 @@ class TeacherAdmin(ModelView, model=Teacher):
 # --- ИСПРАВЛЕННЫЙ БЛОК ПЛАНА (Direction + Discipline) ---
 
 class DisciplineInline(ModelView, model=Discipline):
-    # Колонки, которые видны в таблице
+    # Колонки в таблице просмотра
     column_list = [Discipline.name, Discipline.group, Discipline.start_term, Discipline.end_term]
     
-    # Поля, доступные для редактирования. 
-    # ВАЖНО: Исключаем direction, чтобы он не просил выбрать родителя вручную
-    form_excluded_columns = [Discipline.direction]
-    
+    # ИСПРАВЛЕНИЕ: Убрали form_excluded_columns, оставили только form_columns.
+    # SQLAdmin покажет только те поля, что перечислены здесь.
     form_columns = [
         Discipline.name, 
         Discipline.group, 
@@ -159,10 +157,9 @@ class DirectionAdmin(ModelView, model=Direction):
     column_list = [Direction.id, Direction.name]
     column_labels = {Direction.id: "ID", Direction.name: "Название направления"}
     
-    # ВАЖНО: Я УДАЛИЛ form_columns = [Direction.name]. 
-    # Если оставить эту строку, SQLAdmin покажет ТОЛЬКО имя и скроет Inline таблицу.
+    # Оставляем пустым или не указываем form_columns вообще, 
+    # чтобы он показал стандартные поля + inline_models
     
-    # Подключаем Inline модель
     inline_models = [DisciplineInline]
 
 # --------------------------------------------------------
