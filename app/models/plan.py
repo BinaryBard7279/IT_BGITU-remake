@@ -1,3 +1,4 @@
+# app/models/plan.py
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from app.models import Base
@@ -10,16 +11,15 @@ class Direction(Base):
     
     disciplines = relationship("Discipline", back_populates="direction", cascade="all, delete-orphan")
 
-    # --- ДОБАВИТЬ ЭТОТ МЕТОД ---
     def __str__(self):
         return self.name
-
 
 class Discipline(Base):
     __tablename__ = "disciplines"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False, unique=True)
+    # УБРАЛ unique=True, так как предметы могут повторяться на разных направлениях
+    name = Column(String, index=True, nullable=False) 
     start_term = Column(Integer, nullable=False)
     end_term = Column(Integer, nullable=False)
     group = Column(String, nullable=False, server_default='Общие')
@@ -27,6 +27,5 @@ class Discipline(Base):
     
     direction = relationship("Direction", back_populates="disciplines")
 
-    # --- ДОБАВИТЬ ЭТОТ МЕТОД ---
     def __str__(self):
         return f"{self.name} ({self.group})"

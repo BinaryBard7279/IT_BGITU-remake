@@ -11,7 +11,7 @@ from app.database import engine
 from app.models import User, Speciality, Feature, Direction, Discipline, Teacher, Subject, Achievement
 from app.security import verify_password, get_password_hash
 
-# ... (Код AuthenticationBackend оставляем без изменений) ...
+# --- AUTHENTICATION ---
 class AdminAuth(AuthenticationBackend):
     async def login(self, request: Request) -> bool:
         form = await request.form()
@@ -44,7 +44,7 @@ class UserAdmin(ModelView, model=User):
     icon = "fa-solid fa-user-shield"
     
     column_list = [User.id, User.name, User.email]
-    column_labels = {User.id: "ID", User.name: "Имя", User.email: "Email", User.hashed_password: "Хэш пароля"} # ПЕРЕВОД
+    column_labels = {User.id: "ID", User.name: "Имя", User.email: "Email", User.hashed_password: "Хэш пароля"}
     column_details_exclude_list = [User.hashed_password]
     form_columns = [User.name, User.email, User.hashed_password]
     
@@ -68,7 +68,7 @@ class SpecialityAdmin(ModelView, model=Speciality):
     icon = "fa-solid fa-graduation-cap"
 
     column_list = [Speciality.name, Speciality.qualification, Speciality.term]
-    column_labels = { # ПЕРЕВОД
+    column_labels = {
         Speciality.name: "Название", 
         Speciality.qualification: "Квалификация", 
         Speciality.term: "Срок обучения",
@@ -84,7 +84,7 @@ class FeatureAdmin(ModelView, model=Feature):
     icon = "fa-solid fa-star"
 
     column_list = [Feature.title, Feature.svg_code]
-    column_labels = { # ПЕРЕВОД
+    column_labels = {
         Feature.title: "Заголовок", 
         Feature.description: "Описание", 
         Feature.svg_code: "Иконка (код/класс)"
@@ -100,7 +100,7 @@ class TeacherAdmin(ModelView, model=Teacher):
     icon = "fa-solid fa-chalkboard-user"
 
     column_list = [Teacher.image_url, Teacher.fio, Teacher.post]
-    column_labels = { # ПЕРЕВОД
+    column_labels = {
         Teacher.image_url: "Фото",
         Teacher.fio: "ФИО",
         Teacher.post: "Должность",
@@ -129,16 +129,24 @@ class TeacherAdmin(ModelView, model=Teacher):
 
 # --- ЛОГИКА ПЛАНА (Direction + Discipline) ---
 
-# 1. Скрытая модель для вставки дисциплин внутрь направления
 class DisciplineInline(ModelView, model=Discipline):
+    # Указываем, какие поля показывать в таблице внутри Направления
     column_list = [Discipline.name, Discipline.group, Discipline.start_term, Discipline.end_term]
+    
+    # Указываем, какие поля можно редактировать
+    form_columns = [
+        Discipline.name, 
+        Discipline.group, 
+        Discipline.start_term, 
+        Discipline.end_term
+    ]
+    
     column_labels = {
         Discipline.name: "Дисциплина",
         Discipline.group: "Группа",
-        Discipline.start_term: "Начало (сем.)",
-        Discipline.end_term: "Конец (сем.)"
+        Discipline.start_term: "С семестра",
+        Discipline.end_term: "По семестр"
     }
-    form_columns = [Discipline.name, Discipline.group, Discipline.start_term, Discipline.end_term]
 
 class DirectionAdmin(ModelView, model=Direction):
     name = "Направление (План)"
@@ -148,9 +156,10 @@ class DirectionAdmin(ModelView, model=Direction):
     column_list = [Direction.id, Direction.name]
     column_labels = {Direction.id: "ID", Direction.name: "Название направления"}
     
-    form_columns = [Direction.name] # Убираем disciplines отсюда, чтобы не путать
+    # ВАЖНО: form_columns здесь удален или расширен, чтобы не скрывать Inline
+    form_columns = [Direction.name]
     
-    # 2. Подключаем Inline модель
+    # Подключаем Inline модель (таблицу дисциплин)
     inline_models = [DisciplineInline]
 
 class SubjectAdmin(ModelView, model=Subject):
@@ -189,11 +198,7 @@ def setup_admin(app):
     
     admin.add_view(UserAdmin)
     admin.add_view(SpecialityAdmin)
-    # DirectionAdmin теперь содержит в себе управление дисциплинами
     admin.add_view(DirectionAdmin) 
-    # DisciplineAdmin можно убрать, так как редактируем через Direction, 
-    # но можно и оставить для общего списка:
-    # admin.add_view(DisciplineAdmin) 
     admin.add_view(TeacherAdmin)
     admin.add_view(FeatureAdmin)
     admin.add_view(SubjectAdmin)
