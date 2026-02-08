@@ -164,3 +164,16 @@ body, .wrapper, .content-wrapper, html {
 .content-wrapper {
     background: var(--bg-color) !important;
 }
+
+/* Исправление для групп кнопок в таблицах */
+.btn-group, .btn-list {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 5px !important; /* Отступ между кнопками */
+}
+
+/* На всякий случай убираем отрицательные марджины бутстрапа, если они мешают */
+.btn-group > .btn:not(:first-child),
+.btn-group > .btn-group:not(:first-child) {
+    margin-left: 0 !important;
+}

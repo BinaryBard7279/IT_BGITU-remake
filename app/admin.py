@@ -96,6 +96,9 @@ class FeatureAdmin(ModelView, model=Feature):
     }
 
 # --- Преподаватели (с загрузкой фото и массивом предметов) ---
+# ... импорты
+
+# --- Преподаватели ---
 class TeacherAdmin(ModelView, model=Teacher):
     name = "Преподаватель"
     name_plural = "Преподаватели"
@@ -104,22 +107,31 @@ class TeacherAdmin(ModelView, model=Teacher):
     column_list = [Teacher.image_url, Teacher.fio, Teacher.post]
     form_columns = [Teacher.fio, Teacher.post, Teacher.subjects, Teacher.image_url]
 
-    # Кастомный рендер фото в таблице
     column_formatters = {
         Teacher.image_url: lambda m, a: f'<img src="{m.image_url}" width="50" style="border-radius: 5px;">' if m.image_url else ""
     }
+    
+    # 1. Добавляем переопределение виджета на TextArea (чтобы поле стало высоким и широким)
+    form_overrides = {
+        "subjects": TextAreaField
+    }
 
-    # Инструкция для массива
+    # 2. Обновляем аргументы формы
     form_args = {
         "subjects": {
-            "label": "Предметы (вводите через запятую, SQLAdmin сам преобразует в массив, если это PostgreSQL Array)",
-            "render_kw": {"placeholder": "Математика, Физика, Алгоритмы"}
+            "label": "Предметы (вводите через запятую)",
+            "description": "Пример: Математика, Физика, Алгоритмы",
+            # Задаем стили CSS прямо здесь, чтобы растянуть поле
+            "render_kw": {
+                "class": "form-control",
+                "rows": 3,
+                "style": "width: 100%; min-width: 100%;" 
+            }
         },
         "image_url": {
              "label": "Ссылка на фото"
         }
     }
-
 # --- План обучения: Направления ---
 class DirectionAdmin(ModelView, model=Direction):
     name = "Направление (План)"
