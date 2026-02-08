@@ -101,23 +101,19 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/js/tabler.min.js"></script>
     
+    <script src="{{ url_for('admin:statics', path='js/main.js') }}"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function() {
-          // 1. Исправляем ошибку "bootstrap is not defined", если она есть
+          // Ваш код исправления bootstrap...
           if (typeof bootstrap === 'undefined' && typeof window.tabler !== 'undefined') {
               window.bootstrap = window.tabler;
           }
-
-          // 2. Исправляем ссылки HTTP -> HTTPS в формах (лечит блокировку Mixed Content)
-          document.querySelectorAll('form').forEach(form => {
-              if (form.action && form.action.startsWith('http://') && window.location.protocol === 'https:') {
-                  console.log('Fixing HTTP form action:', form.action);
-                  form.action = form.action.replace('http://', 'https://');
-              }
-          });
+          // ...
       });
     </script>
 
     {% block tail %}{% endblock %}
+  </body>
+</html>
   </body>
 </html>
