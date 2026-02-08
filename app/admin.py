@@ -182,14 +182,6 @@ def setup_admin(app):
     templates_dir="app/templates"  # <-- ВАЖНО: Укажи путь к папке шаблонов
 )
     
-    # ПОДКЛЮЧЕНИЕ ДИЗАЙНА
-    # 1. Ссылка на FontAwesome (иконки)
-    # 2. Ссылка на наш новый файл admin_theme.css, который лежит в /static
-    admin.templates.env.globals["extra_css"] = """
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="/static/admin_theme.css">
-    """
-    
     admin.add_view(UserAdmin)
     admin.add_view(SpecialityAdmin)
     admin.add_view(DirectionAdmin)
