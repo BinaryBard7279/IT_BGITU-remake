@@ -196,8 +196,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 @media (min-width: 1024px) { .disciplines-grid, .features-grid { grid-template-columns: repeat(3, 1fr); } }
 
 .discipline-card { padding: 1.5rem; border-color: hsl(40, 15%, 88%, 0.5); }
-.discipline-icon { width: 4rem; height: 4rem; margin-bottom: 1.25rem; font-size: 1.75rem; transition: transform var(--transition); }
-.discipline-card:hover .discipline-icon { transform: scale(1.1) rotate(3deg); }
+.discipline-icon { width: 4rem; height: 4rem; margin-bottom: 1.25rem; font-size: 1.75rem; }
 .discipline-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
 .discipline-description { font-size: 0.875rem; color: var(--muted-foreground); }
 
