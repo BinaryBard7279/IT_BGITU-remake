@@ -170,14 +170,17 @@ class AchievementAdmin(ModelView, model=Achievement):
 # ... (код выше оставляем без изменений)
 
 def setup_admin(app):
+    # Добавь templates_dir="app/templates"
+    # Добавь templates_dir="app/templates"
     admin = Admin(
-        app, 
-        engine, 
-        authentication_backend=authentication_backend,
-        title="БГИТУ IT-Институт", # Это отобразится в заголовке вкладки
-        base_url="/admin",
-        logo_url=None # Убираем логотип-картинку, будет красивый текст шрифтом Inter
-    )
+    app, 
+    engine, 
+    authentication_backend=authentication_backend,
+    title="БГИТУ IT-Институт",
+    base_url="/admin",
+    logo_url=None,
+    templates_dir="app/templates"  # <-- ВАЖНО: Укажи путь к папке шаблонов
+)
     
     # ПОДКЛЮЧЕНИЕ ДИЗАЙНА
     # 1. Ссылка на FontAwesome (иконки)
