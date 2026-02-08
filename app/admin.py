@@ -169,6 +169,8 @@ class AchievementAdmin(ModelView, model=Achievement):
 
 # ... (код выше оставляем без изменений)
 
+# app/admin.py
+
 def setup_admin(app):
     admin = Admin(
         app, 
@@ -177,9 +179,10 @@ def setup_admin(app):
         title="БГИТУ IT-Институт",
         base_url="/admin",
         logo_url=None,
-        templates_dir="app/templates",
-        base_template="sqladmin/custom_layout.html"  # <--- ДОБАВЬ ЭТУ СТРОКУ
+        templates_dir="app/templates"
+        # УДАЛИ СТРОКУ: base_template="sqladmin/custom_layout.html"
     )
+    # ...
     
     # ... остальной код ...
     

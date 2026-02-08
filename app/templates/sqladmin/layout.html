@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% block title %}{{ admin.title }} - {{ admin.title }}{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    {% if admin.favicon_url %}
+    <link rel="shortcut icon" href="{{ admin.favicon_url }}" type="image/x-icon">
+    <link rel="icon" href="{{ admin.favicon_url }}" type="image/x-icon">
+    {% endif %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/css/tabler.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link rel="stylesheet" href="{{ url_for('static', path='admin_theme.css') }}">
+    <style>
+      @import url('https://rsms.me/inter/inter.css');
+      :root {
+        --tblr-font-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
+      }
+      body {
+        font-feature-settings: "cv03", "cv04", "cv11";
+      }
+    </style>
+    {% block head %}{% endblock %}
+  </head>
+  <body class="{% block body_class %} layout-fluid {% endblock %}">
+    <div class="page">
+      <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark main-sidebar">
+        <div class="container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <h1 class="navbar-brand navbar-brand-autodark brand-link">
+            {% if admin.logo_url %}
+            <a href="{{ admin.base_url }}/">
+              <img src="{{ admin.logo_url }}" alt="{{ admin.title }}" class="navbar-brand-image">
+            </a>
+            {% else %}
+            <a href="{{ admin.base_url }}/" class="text-decoration-none text-reset">
+              {{ admin.title }}
+            </a>
+            {% endif %}
+          </h1>
+          <div class="collapse navbar-collapse" id="sidebar-menu">
+            <ul class="navbar-nav pt-lg-3 nav-sidebar">
+              {% for view in admin.views %}
+                {% if view.is_visible(request) %}
+                <li class="nav-item">
+                  <a class="nav-link {% if view.identity == request.path_params.get('identity') %}active{% endif %}" href="{{ url_for('admin:list', identity=view.identity) }}">
+                    {% if view.icon %}
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <i class="{{ view.icon }}"></i>
+                    </span>
+                    {% endif %}
+                    <span class="nav-link-title">
+                      {{ view.name }}
+                    </span>
+                  </a>
+                </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+            <div class="mt-auto mx-3 mb-3">
+               <div class="dropdown">
+                  <a href="#" class="d-flex align-items-center text-reset text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                     <span class="avatar avatar-sm" style="background-image: url(https://www.gravatar.com/avatar/?d=mp)"></span>
+                     <div class="d-none d-xl-block ps-2">
+                        <div>Администратор</div>
+                        <div class="mt-1 small text-muted">Online</div>
+                     </div>
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                     <a href="{{ url_for('admin:logout') }}" class="dropdown-item">Выйти</a>
+                  </div>
+               </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <div class="page-wrapper content-wrapper">
+        {% block content %}{% endblock %}
+        <footer class="footer footer-transparent d-print-none main-footer">
+          <div class="container-xl">
+            <div class="row text-center align-items-center flex-row-reverse">
+              <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+                <ul class="list-inline list-inline-dots mb-0">
+                  <li class="list-inline-item">
+                    Copyright &copy; 2024
+                    <a href="https://github.com/aminalaee/sqladmin" class="link-secondary">SQLAdmin</a>.
+                    All rights reserved.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/js/tabler.min.js"></script>
+    {% block tail %}{% endblock %}
+  </body>
+</html>
