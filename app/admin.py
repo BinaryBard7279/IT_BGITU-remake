@@ -102,7 +102,7 @@ class TeacherAdmin(ModelView, model=Teacher):
     name_plural = "Преподаватели"
     icon = "fa-solid fa-chalkboard-user"
 
-    # В списке колонок (таблица) оставляем image_url, чтобы видеть результат
+    # Список колонок для ПРОСМОТРА (в таблице)
     column_list = [Teacher.image_url, Teacher.fio, Teacher.post]
     
     column_labels = {
@@ -110,16 +110,14 @@ class TeacherAdmin(ModelView, model=Teacher):
         Teacher.fio: "ФИО",
         Teacher.post: "Должность",
         Teacher.subjects: "Предметы",
-        "photo": "Загрузить новое фото" # Метка для нашего нового поля
+        "photo": "Загрузить новое фото"
     }
 
-    # В форме редактирования убираем image_url и добавляем photo
-    form_columns = [
-        Teacher.fio, 
-        Teacher.post, 
-        Teacher.subjects, 
-        "photo" # <-- Вместо image_url используем наше поле загрузки
-    ]
+    # --- ИСПРАВЛЕНИЕ ---
+    # Удаляем form_columns, так как "photo" вызывает ошибку KeyError (его нет в БД).
+    # Вместо этого используем form_excluded_columns, чтобы скрыть сырую ссылку.
+    form_excluded_columns = [Teacher.image_url] 
+    # -------------------
 
     # Показываем миниатюру в таблице
     column_formatters = {
@@ -130,7 +128,7 @@ class TeacherAdmin(ModelView, model=Teacher):
         "subjects": TextAreaField
     }
 
-    # Добавляем поле загрузки файла, которого нет в модели
+    # Добавляем виртуальное поле загрузки (оно добавится в конец формы автоматически)
     form_extra_fields = {
         "photo": FileField("Выберите фото")
     }
@@ -145,38 +143,26 @@ class TeacherAdmin(ModelView, model=Teacher):
         }
     }
 
-    # ЭТА ФУНКЦИЯ СРАБАТЫВАЕТ ПЕРЕД СОХРАНЕНИЕМ В БД
+    # Логика сохранения файла
     async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
-        # Получаем объект файла из формы
         upload_file = data.get("photo")
         
-        # Проверяем, был ли загружен файл (upload_file не None и имеет имя)
         if upload_file and getattr(upload_file, "filename", None):
-            # 1. Создаем уникальное имя файла
             extension = upload_file.filename.split(".")[-1]
             unique_filename = f"{uuid.uuid4()}.{extension}"
             
-            # 2. Определяем путь сохранения (app/uploads)
             save_directory = Path("app/uploads")
             save_directory.mkdir(parents=True, exist_ok=True)
             save_path = save_directory / unique_filename
             
-            # 3. Сохраняем файл на диск
-            # upload_file.file - это spooled temporary file, читаем его
             with open(save_path, "wb") as buffer:
                 shutil.copyfileobj(upload_file.file, buffer)
             
-            # 4. Записываем ПУТЬ к файлу в реальное поле модели
             model.image_url = f"/media/{unique_filename}"
         
-        # Если файл НЕ загрузили, но мы редактируем старого учителя - путь останется старым.
-        # Если создаем нового и файл не дали - можно поставить заглушку (опционально)
         elif is_created and not model.image_url:
-             # Можно задать картинку по умолчанию, если хотите
              pass
 
-        # Важно: удаляем 'photo' из данных, так как в БД такого поля нет, 
-        # иначе SQLAlchemy выдаст ошибку
         if "photo" in data:
             del data["photo"]
 
