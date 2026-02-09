@@ -160,7 +160,7 @@
     const innerHtml = data.map(t => {
       // Если есть URL картинки, используем img, иначе цветную заглушку
       const imgBlock = t.image_url 
-        ? `<img src="${esc(t.image_url)}" alt="${esc(t.fio)}" style="width:100%; height:100%; object-fit:cover;">`
+        ? `<img src="${esc(t.image_url)}" alt="${esc(t.fio)}" style="width:100%; height:100%; object-fit:cover; object-position: top center;">` 
         : `<div style="width:100%; height:100%; background:#ddd; display:flex; align-items:center; justify-content:center; color:#777;">Нет фото</div>`;
 
       return `
