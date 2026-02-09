@@ -1,11 +1,14 @@
 import os
 from typing import Any
 
-from fastapi import Request
+import shutil
+import uuid
+from pathlib import Path
+from fastapi import Request, UploadFile
 from sqladmin import Admin, ModelView
 from sqladmin.authentication import AuthenticationBackend
 from sqlalchemy import select
-from wtforms import PasswordField, TextAreaField, StringField
+from wtforms import PasswordField, TextAreaField, StringField, FileField
 
 from app.database import engine
 from app.models import User, Speciality, Feature, Direction, Discipline, Teacher, Subject, Achievement
@@ -99,33 +102,83 @@ class TeacherAdmin(ModelView, model=Teacher):
     name_plural = "Преподаватели"
     icon = "fa-solid fa-chalkboard-user"
 
+    # В списке колонок (таблица) оставляем image_url, чтобы видеть результат
     column_list = [Teacher.image_url, Teacher.fio, Teacher.post]
+    
     column_labels = {
         Teacher.image_url: "Фото",
         Teacher.fio: "ФИО",
         Teacher.post: "Должность",
-        Teacher.subjects: "Предметы"
+        Teacher.subjects: "Предметы",
+        "photo": "Загрузить новое фото" # Метка для нашего нового поля
     }
-    form_columns = [Teacher.fio, Teacher.post, Teacher.subjects, Teacher.image_url]
 
+    # В форме редактирования убираем image_url и добавляем photo
+    form_columns = [
+        Teacher.fio, 
+        Teacher.post, 
+        Teacher.subjects, 
+        "photo" # <-- Вместо image_url используем наше поле загрузки
+    ]
+
+    # Показываем миниатюру в таблице
     column_formatters = {
-        Teacher.image_url: lambda m, a: f'<img src="{m.image_url}" width="50" style="border-radius: 5px;">' if m.image_url else ""
+        Teacher.image_url: lambda m, a: f'<img src="{m.image_url}" width="50" style="border-radius: 5px; object-fit: cover;">' if m.image_url else "Нет фото"
     }
 
     form_overrides = {
         "subjects": TextAreaField
     }
+
+    # Добавляем поле загрузки файла, которого нет в модели
+    form_extra_fields = {
+        "photo": FileField("Выберите фото")
+    }
+
     form_args = {
         "subjects": {
             "label": "Предметы (вводите через запятую)",
             "render_kw": {
                 "class": "form-control",
-                "rows": 3,
-                "style": "width: 100%; min-width: 100%;" 
+                "rows": 3
             }
-        },
-        "image_url": {"label": "Ссылка на фото"}
+        }
     }
+
+    # ЭТА ФУНКЦИЯ СРАБАТЫВАЕТ ПЕРЕД СОХРАНЕНИЕМ В БД
+    async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
+        # Получаем объект файла из формы
+        upload_file = data.get("photo")
+        
+        # Проверяем, был ли загружен файл (upload_file не None и имеет имя)
+        if upload_file and getattr(upload_file, "filename", None):
+            # 1. Создаем уникальное имя файла
+            extension = upload_file.filename.split(".")[-1]
+            unique_filename = f"{uuid.uuid4()}.{extension}"
+            
+            # 2. Определяем путь сохранения (app/uploads)
+            save_directory = Path("app/uploads")
+            save_directory.mkdir(parents=True, exist_ok=True)
+            save_path = save_directory / unique_filename
+            
+            # 3. Сохраняем файл на диск
+            # upload_file.file - это spooled temporary file, читаем его
+            with open(save_path, "wb") as buffer:
+                shutil.copyfileobj(upload_file.file, buffer)
+            
+            # 4. Записываем ПУТЬ к файлу в реальное поле модели
+            model.image_url = f"/media/{unique_filename}"
+        
+        # Если файл НЕ загрузили, но мы редактируем старого учителя - путь останется старым.
+        # Если создаем нового и файл не дали - можно поставить заглушку (опционально)
+        elif is_created and not model.image_url:
+             # Можно задать картинку по умолчанию, если хотите
+             pass
+
+        # Важно: удаляем 'photo' из данных, так как в БД такого поля нет, 
+        # иначе SQLAlchemy выдаст ошибку
+        if "photo" in data:
+            del data["photo"]
 
 # --- ИСПРАВЛЕННЫЙ БЛОК ПЛАНА (Direction + Discipline) ---
 
