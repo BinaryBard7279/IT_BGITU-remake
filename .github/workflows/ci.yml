@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # 1. Проверка кода (защита от дурака)
+  # 1. Проверка кода
   check-code:
     runs-on: ubuntu-latest
     steps:
@@ -23,10 +23,8 @@ jobs:
 
       - name: Check for missing migrations
         run: |
-          # Создаем временную SQLite базу для проверки схемы
           export DATABASE_URL="sqlite:///./check.db"
-          # alembic check работает начиная с версии 1.9.0
-          alembic check || echo "⚠️ ВНИМАНИЕ: Похоже, вы забыли создать миграцию! (Или alembic check не поддерживается, пропускаем)"
+          alembic check || echo "⚠️ ВНИМАНИЕ: Проверьте миграции!"
 
   # 2. Сборка и отправка образа
   build-and-push:
@@ -48,9 +46,26 @@ jobs:
           push: true
           tags: binarybard7279/it-bgitu:latest
 
+  # 2.5 НОВЫЙ ШАГ: Копируем обновленный docker-compose.yml на сервер
+  update-configs:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Copy config files to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          # Копируем docker-compose.yml (где volumes) и Caddyfile
+          source: "docker-compose.yml,Caddyfile"
+          target: "/root/it-bgitu"
+
   # 3. Деплой на сервер
   deploy:
-    needs: build-and-push
+    needs: update-configs # Ждем, пока обновятся конфиги
     runs-on: ubuntu-latest
     steps:
       - uses: appleboy/ssh-action@master
@@ -61,25 +76,22 @@ jobs:
           script: |
             cd /root/it-bgitu
             
-            # 1. Создаем/перезаписываем .env файл с секретами базы
+            # 1. Секреты (без изменений)
             echo "DB_USER=${{ secrets.DB_USER }}" > .env
             echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
             echo "DB_HOST=db" >> .env
             echo "DB_PORT=5432" >> .env
-            
-            # 2. ДОБАВЛЯЕМ СЕКРЕТЫ ДЛЯ JWT (Без них jwt_manager.py упадет)
             echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
             echo "ALGORITHM=${{ secrets.ALGORITHM }}" >> .env
             echo "ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}" >> .env
             
-            # 3. Деплой
+            # 2. Деплой 
+            # Теперь здесь будет использоваться НОВЫЙ docker-compose.yml с volumes
             docker compose pull
             docker compose up -d --remove-orphans
             
-            # 4. Миграции
+            # 3. Миграции и очистка
             sleep 5
             docker compose exec -T app alembic upgrade head
-            
-            # 5. Очистка старых образов
             docker image prune -f
