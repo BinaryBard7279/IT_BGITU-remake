@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # 1. Проверка кода
+  # 1. Проверка кода 
   check-code:
     runs-on: ubuntu-latest
     steps:
