@@ -102,7 +102,7 @@ class TeacherAdmin(ModelView, model=Teacher):
     name_plural = "Преподаватели"
     icon = "fa-solid fa-chalkboard-user"
 
-    # Список колонок для ПРОСМОТРА (в таблице)
+    # Таблица (список)
     column_list = [Teacher.image_url, Teacher.fio, Teacher.post]
     
     column_labels = {
@@ -110,30 +110,20 @@ class TeacherAdmin(ModelView, model=Teacher):
         Teacher.fio: "ФИО",
         Teacher.post: "Должность",
         Teacher.subjects: "Предметы",
-        "photo": "Загрузить новое фото"
+        "photo": "Загрузить фото"
     }
 
-    # --- ИСПРАВЛЕНИЕ ---
-    # Удаляем form_columns, так как "photo" вызывает ошибку KeyError (его нет в БД).
-    # Вместо этого используем form_excluded_columns, чтобы скрыть сырую ссылку.
-    form_excluded_columns = [Teacher.image_url] 
-    # -------------------
-
-    # Показываем миниатюру в таблице
-    column_formatters = {
-        Teacher.image_url: lambda m, a: f'<img src="{m.image_url}" width="50" style="border-radius: 5px; object-fit: cover;">' if m.image_url else "Нет фото"
-    }
-
-    form_overrides = {
-        "subjects": TextAreaField
-    }
-
-    # Добавляем виртуальное поле загрузки (оно добавится в конец формы автоматически)
-    form_extra_fields = {
-        "photo": FileField("Выберите фото")
-    }
-
+    # --- ГЛАВНОЕ ИСПРАВЛЕНИЕ ---
+    # 1. Удаляем form_columns и form_excluded_columns, чтобы не путать админку.
+    # 2. image_url скрываем через стили (оно будет в коде страницы, но невидимым).
     form_args = {
+        "image_url": {
+            "label": "Ссылка на фото (генерируется автоматически)",
+            "render_kw": {
+                "readonly": True,
+                "style": "display: none;" # Скрываем текстовое поле
+            }
+        },
         "subjects": {
             "label": "Предметы (вводите через запятую)",
             "render_kw": {
@@ -143,10 +133,25 @@ class TeacherAdmin(ModelView, model=Teacher):
         }
     }
 
-    # Логика сохранения файла
+    form_overrides = {
+        "subjects": TextAreaField
+    }
+
+    # Поле загрузки файла
+    form_extra_fields = {
+        "photo": FileField("Выберите фото")
+    }
+
+    # Миниатюра в таблице
+    column_formatters = {
+        Teacher.image_url: lambda m, a: f'<img src="{m.image_url}" width="50" style="border-radius: 5px; object-fit: cover;">' if m.image_url else "Нет фото"
+    }
+
+    # Логика сохранения
     async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
         upload_file = data.get("photo")
         
+        # Если файл загружен
         if upload_file and getattr(upload_file, "filename", None):
             extension = upload_file.filename.split(".")[-1]
             unique_filename = f"{uuid.uuid4()}.{extension}"
@@ -160,12 +165,13 @@ class TeacherAdmin(ModelView, model=Teacher):
             
             model.image_url = f"/media/{unique_filename}"
         
+        # Если создаем нового и фото нет - ставим заглушку, чтобы база не ругалась (nullable=False)
         elif is_created and not model.image_url:
-             pass
+             model.image_url = "" # Или ссылка на дефолтную картинку
 
+        # Чистим данные от виртуального поля
         if "photo" in data:
             del data["photo"]
-
 # --- ИСПРАВЛЕННЫЙ БЛОК ПЛАНА (Direction + Discipline) ---
 
 class DisciplineInline(ModelView, model=Discipline):
