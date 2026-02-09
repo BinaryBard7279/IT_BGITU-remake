@@ -98,22 +98,16 @@ class FeatureAdmin(ModelView, model=Feature):
         "svg_code": {"label": "Класс иконки FontAwesome (например: fa-solid fa-code)"}
     }
 
-# app/admin.py
-# Убедись, что наверху есть эти импорты:
-# import shutil
-# import uuid
-# from pathlib import Path
-# from starlette.datastructures import UploadFile  <-- ВАЖНО
+# ВСТАВИТЬ В app/admin.py ВМЕСТО СТАРОГО TeacherAdmin
 
 class TeacherAdmin(ModelView, model=Teacher):
     name = "Преподаватель"
     name_plural = "Преподаватели"
     icon = "fa-solid fa-chalkboard-user"
 
-    # Список в таблице
     column_list = [Teacher.image_url, Teacher.fio, Teacher.post]
     
-    # 1. Используем ТОЛЬКО реальные поля из базы. Никаких "photo"!
+    # Поля формы
     form_columns = [Teacher.fio, Teacher.post, Teacher.subjects, Teacher.image_url]
 
     column_labels = {
@@ -123,7 +117,7 @@ class TeacherAdmin(ModelView, model=Teacher):
         Teacher.subjects: "Предметы"
     }
 
-    # 2. Подменяем типы полей: image_url станет файлом, subjects - текстовой областью
+    # Подмена типов полей
     form_overrides = {
         "subjects": TextAreaField,
         "image_url": FileField 
@@ -132,7 +126,7 @@ class TeacherAdmin(ModelView, model=Teacher):
     form_args = {
         "image_url": {
             "label": "Фотография",
-            "render_kw": {"accept": "image/*"} # Разрешаем только картинки
+            "render_kw": {"accept": "image/*"}
         },
         "subjects": {
             "label": "Предметы (вводите через запятую)",
@@ -144,38 +138,33 @@ class TeacherAdmin(ModelView, model=Teacher):
         Teacher.image_url: lambda m, a: f'<img src="{m.image_url}" width="50" style="border-radius: 5px; object-fit: cover;">' if m.image_url else "Нет фото"
     }
 
-    # 3. Перехватываем сохранение
+    # ЛОГИКА СОХРАНЕНИЯ (ИСПРАВЛЕННАЯ)
     async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
-        # Получаем то, что пришло в поле image_url (это может быть файл или ничего)
+        # 1. ОБРАБОТКА ФОТО
         input_file = data.get("image_url")
-        
-        # Проверяем, загрузил ли пользователь новый файл
-        # (Проверка: это объект UploadFile и у него есть имя)
         if input_file and hasattr(input_file, "filename") and input_file.filename:
-            # 3.1. Генерируем имя и сохраняем файл
             extension = input_file.filename.split(".")[-1]
             unique_filename = f"{uuid.uuid4()}.{extension}"
-            
             save_directory = Path("app/uploads")
             save_directory.mkdir(parents=True, exist_ok=True)
             save_path = save_directory / unique_filename
-            
             with open(save_path, "wb") as buffer:
                 shutil.copyfileobj(input_file.file, buffer)
-            
-            # 3.2. ВАЖНО: Заменяем объект файла на строку (путь), чтобы база приняла
             data["image_url"] = f"/media/{unique_filename}"
-            
         else:
-            # Если файл НЕ загрузили:
             if is_created:
-                # Если это создание нового препода — ставим пустую строку
                 data["image_url"] = ""
-            else:
-                # Если это редактирование — УДАЛЯЕМ ключ из data.
-                # Тогда SQLAlchemy не будет обновлять это поле, и старое фото останется.
-                if "image_url" in data:
-                    del data["image_url"]
+            elif "image_url" in data:
+                del data["image_url"]
+
+        # 2. ОБРАБОТКА ПРЕДМЕТОВ (FIX)
+        # Если пришла строка "Java, Python", превращаем её в список ["Java", "Python"]
+        subjects_input = data.get("subjects")
+        if isinstance(subjects_input, str):
+            # Убираем лишние символы, если они там есть (например скобки от прошлого бага)
+            clean_text = subjects_input.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
+            data["subjects"] = [s.strip() for s in clean_text.split(",") if s.strip()]
+
 # --- ИСПРАВЛЕННЫЙ БЛОК ПЛАНА (Direction + Discipline) ---
 
 class DisciplineInline(ModelView, model=Discipline):
