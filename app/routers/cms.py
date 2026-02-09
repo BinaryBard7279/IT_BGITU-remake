@@ -60,9 +60,6 @@ from app.jwt_manager import jwt_manager
 
 router = APIRouter(prefix="/admin/cms", tags=["CMS Panel"])
 
-# Uplod image
-# app/routers/cms.py
-
 @router.post("/upload")
 async def upload_image(
     file: UploadFile = File(...),
@@ -76,28 +73,23 @@ async def upload_image(
 
     file_extension = file.filename.split(".")[-1]
     unique_filename = f"{uuid.uuid4()}.{file_extension}"
-    
-    # --- ИСПРАВЛЕНИЕ НАЧАЛО ---
-    # Создаем объект пути
+
     save_directory = Path("app/uploads")
-    # Гарантируем, что папка существует (создаст, если нет)
     save_directory.mkdir(parents=True, exist_ok=True)
-    
+
     save_path = save_directory / unique_filename
-    # --- ИСПРАВЛЕНИЕ КОНЕЦ ---
-    
+
     try:
         with open(save_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     except Exception as e:
-        print(f"Upload Error: {e}") # Логируем ошибку в консоль сервера
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Ошибка сохранения файла"
         )
-        
+
     return {"url": f"/media/{unique_filename}"}
-# Subject
+
 @router.post("/subject")
 async def subject_create(
     subject_data: SubjectCreate,
@@ -206,7 +198,6 @@ async def subject_delete(
     
     return subject
 
-# Features
 @router.post("/feature")
 async def feature_create(
     feature_data: FeatureCreate,
@@ -315,7 +306,6 @@ async def feature_delete(
     
     return feature
 
-# Speciality
 @router.post("/speciality")
 async def speciality_create(
     speciality_data: SpecialityCreate,
@@ -425,7 +415,6 @@ async def speciality_delete(
     
     return speciality
 
-# Achievements
 @router.post("/achievements")
 async def achive_create(
     achive_data: AchievementCreate,
@@ -536,7 +525,6 @@ async def achive_delete(
     
     return achive
 
-# Directions
 @router.post("/directions")
 async def direction_create(
     direction_data: DirectionCreate,
@@ -663,7 +651,6 @@ async def direction_delete(
         )
 
 
-# Disciplines
 @router.post("/disciplines")
 async def discipline_create(
     discipline_data: DisciplineCreate,
@@ -822,7 +809,6 @@ async def discipline_delete(
 
 
 
-# Teachers
 @router.post("/teacher")
 async def teacher_create(
     teacher_data: TeacherCreate,

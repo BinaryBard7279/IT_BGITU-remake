@@ -8,12 +8,9 @@ from app.schemas.auth import Token, LoginRequest
 from app.security import verify_password, get_password_hash
 from app.jwt_manager import jwt_manager
 
-# ИЗМЕНЕНИЕ 1: Меняем префикс с "/admin" на "/api/auth", чтобы освободить место
 router = APIRouter(prefix="/api/auth", tags=["Authentification"])
 
-# ИЗМЕНЕНИЕ 2: Удаляем функцию admin_root (которая отдавала JSON со скриншота), она больше не нужна.
-
-@router.post("/login", response_model=Token) # Можно поменять путь на /login для ясности
+@router.post("/login", response_model=Token)
 async def login(
     login_data: LoginRequest,
     db: AsyncSession = Depends(get_db)
@@ -38,7 +35,6 @@ async def login(
     
     return Token(access_token=access_token)
 
-# Password to hash
 @router.post("/hash-password")
 async def hash_password_endpoint(password: str = Form(..., min_length=6)):
     """

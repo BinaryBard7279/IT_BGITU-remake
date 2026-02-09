@@ -98,16 +98,13 @@ class FeatureAdmin(ModelView, model=Feature):
         "svg_code": {"label": "Класс иконки FontAwesome (например: fa-solid fa-code)"}
     }
 
-# ВСТАВИТЬ В app/admin.py ВМЕСТО СТАРОГО TeacherAdmin
-
 class TeacherAdmin(ModelView, model=Teacher):
     name = "Преподаватель"
     name_plural = "Преподаватели"
     icon = "fa-solid fa-chalkboard-user"
 
     column_list = [Teacher.image_url, Teacher.fio, Teacher.post]
-    
-    # Поля формы
+
     form_columns = [Teacher.fio, Teacher.post, Teacher.subjects, Teacher.image_url]
 
     column_labels = {
@@ -117,10 +114,9 @@ class TeacherAdmin(ModelView, model=Teacher):
         Teacher.subjects: "Предметы"
     }
 
-    # Подмена типов полей
     form_overrides = {
         "subjects": TextAreaField,
-        "image_url": FileField 
+        "image_url": FileField
     }
 
     form_args = {
@@ -138,9 +134,7 @@ class TeacherAdmin(ModelView, model=Teacher):
         Teacher.image_url: lambda m, a: f'<img src="{m.image_url}" width="50" style="border-radius: 5px; object-fit: cover;">' if m.image_url else "Нет фото"
     }
 
-    # ЛОГИКА СОХРАНЕНИЯ (ИСПРАВЛЕННАЯ)
     async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
-        # 1. ОБРАБОТКА ФОТО
         input_file = data.get("image_url")
         if input_file and hasattr(input_file, "filename") and input_file.filename:
             extension = input_file.filename.split(".")[-1]
@@ -157,29 +151,21 @@ class TeacherAdmin(ModelView, model=Teacher):
             elif "image_url" in data:
                 del data["image_url"]
 
-        # 2. ОБРАБОТКА ПРЕДМЕТОВ (FIX)
-        # Если пришла строка "Java, Python", превращаем её в список ["Java", "Python"]
         subjects_input = data.get("subjects")
         if isinstance(subjects_input, str):
-            # Убираем лишние символы, если они там есть (например скобки от прошлого бага)
             clean_text = subjects_input.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
             data["subjects"] = [s.strip() for s in clean_text.split(",") if s.strip()]
 
-# --- ИСПРАВЛЕННЫЙ БЛОК ПЛАНА (Direction + Discipline) ---
-
 class DisciplineInline(ModelView, model=Discipline):
-    # Колонки в таблице просмотра
     column_list = [Discipline.name, Discipline.group, Discipline.start_term, Discipline.end_term]
-    
-    # ИСПРАВЛЕНИЕ: Убрали form_excluded_columns, оставили только form_columns.
-    # SQLAdmin покажет только те поля, что перечислены здесь.
+
     form_columns = [
-        Discipline.name, 
-        Discipline.group, 
-        Discipline.start_term, 
+        Discipline.name,
+        Discipline.group,
+        Discipline.start_term,
         Discipline.end_term
     ]
-    
+
     column_labels = {
         Discipline.name: "Дисциплина",
         Discipline.group: "Группа (Общие/Спец)",
@@ -191,17 +177,15 @@ class DisciplineAdmin(ModelView, model=Discipline):
     name = "Дисциплина"
     name_plural = "Все дисциплины"
     icon = "fa-solid fa-book"
-    
-    # Что показывать в таблице
+
     column_list = [
-        Discipline.id, 
-        Discipline.name, 
-        Discipline.group, 
-        Discipline.direction,  # Покажет название направления
+        Discipline.id,
+        Discipline.name,
+        Discipline.group,
+        Discipline.direction,
         Discipline.start_term
     ]
-    
-    # Русские названия колонок
+
     column_labels = {
         Discipline.id: "ID",
         Discipline.name: "Название",
@@ -210,33 +194,27 @@ class DisciplineAdmin(ModelView, model=Discipline):
         Discipline.start_term: "Начало (сем.)",
         Discipline.end_term: "Конец (сем.)"
     }
-    
-    # Поля для формы создания/редактирования
+
     form_columns = [
-        Discipline.name, 
-        Discipline.direction, # Здесь будет выпадающий список направлений
-        Discipline.group, 
-        Discipline.start_term, 
+        Discipline.name,
+        Discipline.direction,
+        Discipline.group,
+        Discipline.start_term,
         Discipline.end_term
     ]
-    
-    # Добавляем поиск и сортировку для удобства
+
     column_searchable_list = [Discipline.name, Discipline.group]
     column_sortable_list = [Discipline.name, Discipline.start_term, Discipline.direction_id]
+
 class DirectionAdmin(ModelView, model=Direction):
     name = "Направление (План)"
     name_plural = "Направления (План)"
     icon = "fa-solid fa-route"
-    
+
     column_list = [Direction.id, Direction.name]
     column_labels = {Direction.id: "ID", Direction.name: "Название направления"}
-    
-    # Оставляем пустым или не указываем form_columns вообще, 
-    # чтобы он показал стандартные поля + inline_models
-    
-    inline_models = [DisciplineInline]
 
-# --------------------------------------------------------
+    inline_models = [DisciplineInline]
 
 class SubjectAdmin(ModelView, model=Subject):
     name = "Технология (Стек)"

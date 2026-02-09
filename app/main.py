@@ -12,12 +12,8 @@ from app.admin import setup_admin
 
 app = FastAPI(title="IT BGITU Remake")
 
-# --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-# Убрали forwarded_allow_ips из middleware (оно есть в uvicorn.run внизу)
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
-# -------------------------
 
-# Middleware для HTTPS фикса (чтобы удаление работало)
 class ForceHTTPSMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         proto = request.headers.get("x-forwarded-proto")
@@ -27,36 +23,31 @@ class ForceHTTPSMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(ForceHTTPSMiddleware)
 
-# Настройка сессий
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key-change-me")
 app.add_middleware(
-    SessionMiddleware, 
+    SessionMiddleware,
     secret_key=SECRET_KEY,
     https_only=True,
     same_site="lax"
 )
 
-# Статика и медиа
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 os.makedirs("app/uploads", exist_ok=True)
 app.mount("/media", StaticFiles(directory="app/uploads"), name="upload")
 
 templates = Jinja2Templates(directory="app/templates")
 
-# Роутеры
 app.include_router(public.router)
 app.include_router(auth.router)
-app.include_router(cms.router) 
+app.include_router(cms.router)
 
-# Админка
 setup_admin(app)
 
 if __name__ == "__main__":
-    # forwarded_allow_ips='*' остается ЗДЕСЬ, в запуске сервера
     uvicorn.run(
-        "app.main:app", 
-        host="0.0.0.0", 
-        port=8000, 
-        forwarded_allow_ips='*', 
+        "app.main:app",
+        host="0.0.0.0",
+        port=8000,
+        forwarded_allow_ips='*',
         reload=True
     )

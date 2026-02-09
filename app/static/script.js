@@ -1,4 +1,3 @@
-/* БГИТУ IT-Институт — Dynamic Logic */
 (() => {
   'use strict';
 
@@ -32,8 +31,7 @@
   // ================= 1. UTIL & HELPERS =================
   const esc = s => (s ? String(s).replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t])) : '');
   const getById = id => document.getElementById(id);
-  
-  // Цветовая палитра для динамической генерации
+
   const COLORS = ['bg-pastel-sky', 'bg-pastel-mint', 'bg-pastel-peach', 'bg-pastel-lavender', 'bg-pastel-coral', 'bg-pastel-sage'];
   const BORDERS = ['border-sky', 'border-mint', 'border-peach', 'border-lavender', 'border-coral', 'border-sage'];
   const getColor = (i) => COLORS[i % COLORS.length];
@@ -64,9 +62,8 @@
       renderFeatures(features);
       renderTeachers(teachers);
       renderAchievements(achievements);
-      initRoadmap(directions); // Инициализация логики плана с селектом
+      initRoadmap(directions);
 
-      // Инициализируем анимации появления после рендера
       initObservers();
 
     } catch (err) {
@@ -76,7 +73,6 @@
 
   // ================= 3. RENDER FUNCTIONS =================
 
-  // --- Направления (Carousel) ---
   function renderSpecialities(data) {
     const dTrack = getById('directionsTrack');
     const dDots = getById('directionsDots');
@@ -84,7 +80,7 @@
 
     dTrack.innerHTML = data.map(d => `
       <div class="direction-slide">
-        <div class="direction-card"> 
+        <div class="direction-card">
           <div class="direction-card-head"><h3 class="direction-title">${esc(d.name)}</h3></div>
           <div class="direction-attrs">
             <div class="direction-attr"><span class="direction-attr-icon">${ICONS.q}</span><div><span class="direction-attr-label">Квалификация</span><span class="direction-attr-value">${esc(d.qualification)}</span></div></div>
@@ -94,10 +90,9 @@
           <p class="direction-description">${esc(d.description)}</p>
         </div>
       </div>`).join('');
-    
+
     dDots.innerHTML = data.map((_, i) => `<button class="directions-dot ${i===0?'is-active':''}" aria-label="Слайд ${i+1}"></button>`).join('');
-    
-    // Логика карусели
+
     const dots = dDots.children;
     const count = data.length;
     let idx = 0;

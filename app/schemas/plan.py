@@ -1,7 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List
 
-# Direction
 class DirectionBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
 
@@ -16,7 +15,6 @@ class Direction(DirectionBase):
     id: int
 
 
-# Discipline
 class DisciplineBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=225)
     start_term: int = Field(..., ge=1, le=12)
@@ -33,12 +31,10 @@ class DisciplineUpdate(BaseModel):
     end_term: Optional[int] = Field(None, ge=1, le=12)
     direction_id: Optional[int] = Field(None, gt=0)
 
-# шаблон для ответов API
 class Discipline(DisciplineBase):
     model_config = ConfigDict(from_attributes=True)
     id: int = Field(..., gt=0)
 
 
-# для вывода вложенных данных
-class Direction_Disciplines(Direction): # наследуем
-    disciplines: List[Discipline] = []  # добавляем
+class Direction_Disciplines(Direction):
+    disciplines: List[Discipline] = []

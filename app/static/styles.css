@@ -1,29 +1,27 @@
 /* БГИТУ IT-Институт — Final Fixed Styles + Lenis Support */
 
 :root {
-  /* Цвета */
   --background: hsl(40, 20%, 98%);
   --foreground: hsl(30, 10%, 15%);
-  
+
   --card: hsl(40, 30%, 97%);
   --card-foreground: hsl(30, 10%, 15%);
-  
+
   --primary: hsl(30, 10%, 20%);
   --primary-foreground: hsl(40, 20%, 98%);
-  
+
   --secondary: hsl(40, 15%, 94%);
   --secondary-foreground: hsl(30, 10%, 20%);
-  
+
   --muted: hsl(40, 10%, 92%);
   --muted-foreground: hsl(30, 8%, 45%);
-  
+
   --accent: hsl(40, 25%, 90%);
   --border: hsl(40, 15%, 88%);
-  
+
   --radius: 0.75rem;
   --transition: 0.3s ease;
 
-  /* Пастельная палитра */
   --pastel-sky: hsl(200, 60%, 75%);
   --pastel-mint: hsl(160, 45%, 70%);
   --pastel-peach: hsl(25, 70%, 80%);
@@ -42,8 +40,7 @@ html.lenis, html.lenis body { height: auto; }
 /* ================= БАЗА ================= */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { 
-  /* scroll-behavior: smooth;  <-- УДАЛЕНО, чтобы работала инерция Lenis */
+html {
 }
 
 body {
@@ -67,7 +64,6 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .text-muted-foreground { color: var(--muted-foreground); }
 .text-foreground { color: var(--foreground); }
 
-/* Фоны */
 .bg-pastel-sky { background-color: var(--pastel-sky); }
 .bg-pastel-mint { background-color: var(--pastel-mint); }
 .bg-pastel-peach { background-color: var(--pastel-peach); }
@@ -76,12 +72,10 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .bg-pastel-sage { background-color: var(--pastel-sage); }
 .bg-secondary { background-color: var(--secondary); }
 
-/* Заголовки */
 .section-header { text-align: center; margin-bottom: 4rem; }
 .section-title { font-size: clamp(1.875rem, 4vw, 2.25rem); font-weight: 700; margin-bottom: 1rem; }
 .section-description { font-size: 1.125rem; color: var(--muted-foreground); max-width: 42rem; margin: 0 auto; }
 
-/* Кнопки */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
   font-size: 0.875rem; font-weight: 500; padding: 0.5rem 1rem;
@@ -95,7 +89,6 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; }
 .btn-full { width: 100%; }
 
-/* Анимации */
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }

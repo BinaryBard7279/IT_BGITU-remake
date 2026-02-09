@@ -46,26 +46,24 @@ async def health_check(db: AsyncSession = Depends(get_db)):
     except Exception as e:
         print(f"DB Error: {e}")
         return {"db_status": False, "error": str(e)}
-    
 
-# Гет запросы для подвязки к фронту
 
-@router.get("/achievements", response_model=List[AchievementSchema])        # достижения
+@router.get("/achievements", response_model=List[AchievementSchema])
 async def get_all_achievements(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Achievement).order_by(Achievement.id))
     return result.scalars().all()
 
-@router.get("/features", response_model=List[FeatureSchema])                # преимущества
+@router.get("/features", response_model=List[FeatureSchema])
 async def get_all_features(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Feature).order_by(Feature.id))
 
     return result.scalars().all()
 
-@router.get("/directions-with-disciplines")                                 # план - вложенная структура
+@router.get("/directions-with-disciplines")
 async def get_all_directions_with_disciplines(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Direction).options(selectinload(Direction.disciplines)).order_by(Direction.id))
     directions = result.scalars().all()
-    
+
     return [{
         "id": d.id,
         "name": d.name,
@@ -79,19 +77,19 @@ async def get_all_directions_with_disciplines(db: AsyncSession = Depends(get_db)
         } for disc in d.disciplines]
     } for d in directions]
 
-@router.get("/speciality", response_model=List[SpecialitySchema])           # специальности
+@router.get("/speciality", response_model=List[SpecialitySchema])
 async def get_all_speciality(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Speciality).order_by(Speciality.id))
 
     return result.scalars().all()
 
-@router.get("/subjects", response_model=List[SubjectSchema])                # предметы 
+@router.get("/subjects", response_model=List[SubjectSchema])
 async def get_all_subjects(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Subject).order_by(Subject.id))
 
     return result.scalars().all()
 
-@router.get("/teachers", response_model=List[TeacherSchema])                # преподаватели 
+@router.get("/teachers", response_model=List[TeacherSchema])
 async def get_all_teachers(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Teacher).order_by(Teacher.fio))
 
