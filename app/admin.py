@@ -102,58 +102,52 @@ class TeacherAdmin(ModelView, model=Teacher):
     name_plural = "Преподаватели"
     icon = "fa-solid fa-chalkboard-user"
 
-    # Таблица (список)
+    # Что показываем в таблице
     column_list = [Teacher.image_url, Teacher.fio, Teacher.post]
     
+    # ПОРЯДОК ПОЛЕЙ В ФОРМЕ. 
+    # image_url здесь есть, поэтому кнопка ГАРАНТИРОВАННО будет
+    form_columns = [Teacher.fio, Teacher.post, Teacher.subjects, Teacher.image_url]
+
     column_labels = {
         Teacher.image_url: "Фото",
         Teacher.fio: "ФИО",
         Teacher.post: "Должность",
-        Teacher.subjects: "Предметы",
-        "photo": "Загрузить фото"
+        Teacher.subjects: "Предметы"
     }
 
-    # --- ГЛАВНОЕ ИСПРАВЛЕНИЕ ---
-    # 1. Удаляем form_columns и form_excluded_columns, чтобы не путать админку.
-    # 2. image_url скрываем через стили (оно будет в коде страницы, но невидимым).
+    # ПРЕВРАЩАЕМ TEKСТОВОЕ ПОЛЕ В ФАЙЛОВОЕ
+    form_overrides = {
+        "subjects": TextAreaField,
+        "image_url": FileField 
+    }
+
     form_args = {
         "image_url": {
-            "label": "Ссылка на фото (генерируется автоматически)",
-            "render_kw": {
-                "readonly": True,
-                "style": "display: none;" # Скрываем текстовое поле
-            }
+            "label": "Загрузить фото",
+            "description": "Выберите файл (оставьте пустым, если не хотите менять фото)"
         },
         "subjects": {
             "label": "Предметы (вводите через запятую)",
-            "render_kw": {
-                "class": "form-control",
-                "rows": 3
-            }
+            "render_kw": {"class": "form-control", "rows": 3}
         }
     }
 
-    form_overrides = {
-        "subjects": TextAreaField
-    }
-
-    # Поле загрузки файла
-    form_extra_fields = {
-        "photo": FileField("Выберите фото")
-    }
-
-    # Миниатюра в таблице
     column_formatters = {
         Teacher.image_url: lambda m, a: f'<img src="{m.image_url}" width="50" style="border-radius: 5px; object-fit: cover;">' if m.image_url else "Нет фото"
     }
 
-    # Логика сохранения
+    # ГЛАВНАЯ МАГИЯ СОХРАНЕНИЯ
     async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
-        upload_file = data.get("photo")
+        from app.database import engine
+        from sqlalchemy import select
+
+        # Получаем файл из формы
+        input_file = data.get("image_url")
         
-        # Если файл загружен
-        if upload_file and getattr(upload_file, "filename", None):
-            extension = upload_file.filename.split(".")[-1]
+        # 1. Если файл загружен - сохраняем
+        if input_file and getattr(input_file, "filename", None):
+            extension = input_file.filename.split(".")[-1]
             unique_filename = f"{uuid.uuid4()}.{extension}"
             
             save_directory = Path("app/uploads")
@@ -161,17 +155,24 @@ class TeacherAdmin(ModelView, model=Teacher):
             save_path = save_directory / unique_filename
             
             with open(save_path, "wb") as buffer:
-                shutil.copyfileobj(upload_file.file, buffer)
+                shutil.copyfileobj(input_file.file, buffer)
             
             model.image_url = f"/media/{unique_filename}"
-        
-        # Если создаем нового и фото нет - ставим заглушку, чтобы база не ругалась (nullable=False)
-        elif is_created and not model.image_url:
-             model.image_url = "" # Или ссылка на дефолтную картинку
-
-        # Чистим данные от виртуального поля
-        if "photo" in data:
-            del data["photo"]
+            
+        # 2. Если файл НЕ загружен
+        else:
+            if is_created:
+                # Если создаем нового и забыли фото - ставим заглушку, чтобы не было ошибки
+                model.image_url = "" 
+            else:
+                # Если редактируем и поле пустое - ВОССТАНАВЛИВАЕМ старое значение из БД
+                # (иначе оно перезапишется на пустоту)
+                async with engine.connect() as conn:
+                    stmt = select(Teacher.image_url).where(Teacher.id == model.id)
+                    result = await conn.execute(stmt)
+                    old_url = result.scalar()
+                    if old_url:
+                        model.image_url = old_url
 # --- ИСПРАВЛЕННЫЙ БЛОК ПЛАНА (Direction + Discipline) ---
 
 class DisciplineInline(ModelView, model=Discipline):
