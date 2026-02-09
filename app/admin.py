@@ -1,10 +1,10 @@
 import os
-from typing import Any
-
 import shutil
 import uuid
 from pathlib import Path
-from fastapi import Request, UploadFile
+from typing import Any
+
+from fastapi import Request
 from sqladmin import Admin, ModelView
 from sqladmin.authentication import AuthenticationBackend
 from sqlalchemy import select
@@ -13,9 +13,41 @@ from wtforms import PasswordField, TextAreaField, StringField, FileField
 from app.database import engine
 from app.models import User, Speciality, Feature, Direction, Discipline, Teacher, Subject, Achievement
 from app.security import verify_password, get_password_hash
-from starlette.datastructures import UploadFile
+
+# --- CONFIG & UTILS ---
+
+# Путь для сохранения картинок (согласован с твоим Docker volume)
+UPLOAD_DIR = Path("app/uploads")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+def save_file_from_form(file_storage) -> str | None:
+    """
+    Сохраняет файл, пришедший из формы WTForms/SQLAdmin.
+    Возвращает веб-путь (/media/filename.ext) или None.
+    """
+    if not file_storage or not hasattr(file_storage, "filename"):
+        return None
+    
+    filename = file_storage.filename
+    if not filename:
+        return None
+
+    # Генерируем уникальное имя, чтобы не затереть старые файлы
+    extension = filename.split(".")[-1]
+    unique_name = f"{uuid.uuid4()}.{extension}"
+    file_path = UPLOAD_DIR / unique_name
+    
+    # Сохраняем на диск
+    try:
+        with open(file_path, "wb") as f:
+            shutil.copyfileobj(file_storage.file, f)
+        return f"/media/{unique_name}"
+    except Exception as e:
+        print(f"Error saving file: {e}")
+        return None
 
 # --- AUTHENTICATION ---
+
 class AdminAuth(AuthenticationBackend):
     async def login(self, request: Request) -> bool:
         form = await request.form()
@@ -48,16 +80,10 @@ class UserAdmin(ModelView, model=User):
     icon = "fa-solid fa-user-shield"
     
     column_list = [User.id, User.name, User.email]
-    column_labels = {User.id: "ID", User.name: "Имя", User.email: "Email", User.hashed_password: "Хэш пароля"}
-    column_details_exclude_list = [User.hashed_password]
     form_columns = [User.name, User.email, User.hashed_password]
     
-    form_overrides = {
-        "hashed_password": PasswordField
-    }
-    form_args = {
-        "hashed_password": {"label": "Пароль (оставьте пустым, если не меняете)"}
-    }
+    form_overrides = { "hashed_password": PasswordField }
+    form_args = { "hashed_password": {"label": "Пароль (оставьте пустым, если не меняете)"} }
 
     async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
         password = data.get("hashed_password")
@@ -66,48 +92,12 @@ class UserAdmin(ModelView, model=User):
         elif not is_created and "hashed_password" in data:
             del data["hashed_password"]
 
-class SpecialityAdmin(ModelView, model=Speciality):
-    name = "Специальность"
-    name_plural = "Специальности"
-    icon = "fa-solid fa-graduation-cap"
-
-    column_list = [Speciality.name, Speciality.qualification, Speciality.term]
-    column_labels = {
-        Speciality.name: "Название", 
-        Speciality.qualification: "Квалификация", 
-        Speciality.term: "Срок обучения",
-        Speciality.direction: "Направление (текст)",
-        Speciality.description: "Описание"
-    }
-    form_columns = [Speciality.name, Speciality.qualification, Speciality.term, Speciality.direction, Speciality.description]
-    form_overrides = {"description": TextAreaField}
-
-class FeatureAdmin(ModelView, model=Feature):
-    name = "Преимущество"
-    name_plural = "Преимущества"
-    icon = "fa-solid fa-star"
-
-    column_list = [Feature.title, Feature.svg_code]
-    column_labels = {
-        Feature.title: "Заголовок", 
-        Feature.description: "Описание", 
-        Feature.svg_code: "Иконка (код/класс)"
-    }
-    form_overrides = {"description": TextAreaField, "svg_code": StringField}
-    form_args = {
-        "svg_code": {"label": "Класс иконки FontAwesome (например: fa-solid fa-code)"}
-    }
-
-# ВСТАВИТЬ В app/admin.py ВМЕСТО СТАРОГО TeacherAdmin
-
 class TeacherAdmin(ModelView, model=Teacher):
     name = "Преподаватель"
     name_plural = "Преподаватели"
     icon = "fa-solid fa-chalkboard-user"
 
     column_list = [Teacher.image_url, Teacher.fio, Teacher.post]
-    
-    # Поля формы
     form_columns = [Teacher.fio, Teacher.post, Teacher.subjects, Teacher.image_url]
 
     column_labels = {
@@ -117,134 +107,59 @@ class TeacherAdmin(ModelView, model=Teacher):
         Teacher.subjects: "Предметы"
     }
 
-    # Подмена типов полей
-    form_overrides = {
-        "subjects": TextAreaField,
-        "image_url": FileField 
-    }
-
+    # Говорим админке, что это поле для файла
+    form_overrides = { "image_url": FileField }
+    
     form_args = {
-        "image_url": {
-            "label": "Фотография",
-            "render_kw": {"accept": "image/*"}
-        },
         "subjects": {
             "label": "Предметы (вводите через запятую)",
-            "render_kw": {"class": "form-control", "rows": 3}
+            "render_kw": {"placeholder": "Java, Python, Базы данных"} 
         }
     }
 
+    # Красивый вывод картинки в таблице
     column_formatters = {
-        Teacher.image_url: lambda m, a: f'<img src="{m.image_url}" width="50" style="border-radius: 5px; object-fit: cover;">' if m.image_url else "Нет фото"
+        Teacher.image_url: lambda m, a: f'<img src="{m.image_url}" width="50" height="50" style="object-fit: cover; border-radius: 4px;">' if m.image_url else "—"
     }
 
-    # ЛОГИКА СОХРАНЕНИЯ (ИСПРАВЛЕННАЯ)
     async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
-        # 1. ОБРАБОТКА ФОТО
-        input_file = data.get("image_url")
-        if input_file and hasattr(input_file, "filename") and input_file.filename:
-            extension = input_file.filename.split(".")[-1]
-            unique_filename = f"{uuid.uuid4()}.{extension}"
-            save_directory = Path("app/uploads")
-            save_directory.mkdir(parents=True, exist_ok=True)
-            save_path = save_directory / unique_filename
-            with open(save_path, "wb") as buffer:
-                shutil.copyfileobj(input_file.file, buffer)
-            data["image_url"] = f"/media/{unique_filename}"
+        # 1. ЛОГИКА СОХРАНЕНИЯ ФОТО
+        file_obj = data.get("image_url")
+        saved_path = save_file_from_form(file_obj)
+        
+        if saved_path:
+            data["image_url"] = saved_path
         else:
-            if is_created:
-                data["image_url"] = ""
-            elif "image_url" in data:
+            # Если файл не выбран при редактировании, удаляем ключ, чтобы не стереть текущий путь в БД
+            if not is_created and "image_url" in data:
                 del data["image_url"]
 
-        # 2. ОБРАБОТКА ПРЕДМЕТОВ (FIX)
-        # Если пришла строка "Java, Python", превращаем её в список ["Java", "Python"]
-        subjects_input = data.get("subjects")
-        if isinstance(subjects_input, str):
-            # Убираем лишние символы, если они там есть (например скобки от прошлого бага)
-            clean_text = subjects_input.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
-            data["subjects"] = [s.strip() for s in clean_text.split(",") if s.strip()]
+        # 2. ЛОГИКА СПИСКА ПРЕДМЕТОВ (String -> Array)
+        # Превращаем строку "Математика, Физика" в список ["Математика", "Физика"]
+        subjects_raw = data.get("subjects")
+        if isinstance(subjects_raw, str):
+            clean_list = [s.strip() for s in subjects_raw.split(",") if s.strip()]
+            data["subjects"] = clean_list
 
-# --- ИСПРАВЛЕННЫЙ БЛОК ПЛАНА (Direction + Discipline) ---
+class SpecialityAdmin(ModelView, model=Speciality):
+    name = "Специальность"
+    name_plural = "Специальности"
+    icon = "fa-solid fa-graduation-cap"
+    column_list = [Speciality.name, Speciality.qualification]
+    form_overrides = {"description": TextAreaField}
 
-class DisciplineInline(ModelView, model=Discipline):
-    # Колонки в таблице просмотра
-    column_list = [Discipline.name, Discipline.group, Discipline.start_term, Discipline.end_term]
-    
-    # ИСПРАВЛЕНИЕ: Убрали form_excluded_columns, оставили только form_columns.
-    # SQLAdmin покажет только те поля, что перечислены здесь.
-    form_columns = [
-        Discipline.name, 
-        Discipline.group, 
-        Discipline.start_term, 
-        Discipline.end_term
-    ]
-    
-    column_labels = {
-        Discipline.name: "Дисциплина",
-        Discipline.group: "Группа (Общие/Спец)",
-        Discipline.start_term: "С семестра",
-        Discipline.end_term: "По семестр"
-    }
-
-class DisciplineAdmin(ModelView, model=Discipline):
-    name = "Дисциплина"
-    name_plural = "Все дисциплины"
-    icon = "fa-solid fa-book"
-    
-    # Что показывать в таблице
-    column_list = [
-        Discipline.id, 
-        Discipline.name, 
-        Discipline.group, 
-        Discipline.direction,  # Покажет название направления
-        Discipline.start_term
-    ]
-    
-    # Русские названия колонок
-    column_labels = {
-        Discipline.id: "ID",
-        Discipline.name: "Название",
-        Discipline.group: "Группа",
-        Discipline.direction: "Направление",
-        Discipline.start_term: "Начало (сем.)",
-        Discipline.end_term: "Конец (сем.)"
-    }
-    
-    # Поля для формы создания/редактирования
-    form_columns = [
-        Discipline.name, 
-        Discipline.direction, # Здесь будет выпадающий список направлений
-        Discipline.group, 
-        Discipline.start_term, 
-        Discipline.end_term
-    ]
-    
-    # Добавляем поиск и сортировку для удобства
-    column_searchable_list = [Discipline.name, Discipline.group]
-    column_sortable_list = [Discipline.name, Discipline.start_term, Discipline.direction_id]
-class DirectionAdmin(ModelView, model=Direction):
-    name = "Направление (План)"
-    name_plural = "Направления (План)"
-    icon = "fa-solid fa-route"
-    
-    column_list = [Direction.id, Direction.name]
-    column_labels = {Direction.id: "ID", Direction.name: "Название направления"}
-    
-    # Оставляем пустым или не указываем form_columns вообще, 
-    # чтобы он показал стандартные поля + inline_models
-    
-    inline_models = [DisciplineInline]
-
-# --------------------------------------------------------
+class FeatureAdmin(ModelView, model=Feature):
+    name = "Преимущество"
+    name_plural = "Преимущества"
+    icon = "fa-solid fa-star"
+    column_list = [Feature.title, Feature.svg_code]
+    form_overrides = {"description": TextAreaField}
 
 class SubjectAdmin(ModelView, model=Subject):
     name = "Технология (Стек)"
     name_plural = "Технологии (Стек)"
     icon = "fa-solid fa-layer-group"
-    
     column_list = [Subject.name, Subject.svg_code]
-    column_labels = {Subject.name: "Название", Subject.description: "Описание", Subject.svg_code: "Иконка"}
     form_args = {
         "svg_code": {"label": "Класс иконки FontAwesome (например: fa-brands fa-python)"}
     }
@@ -253,11 +168,36 @@ class AchievementAdmin(ModelView, model=Achievement):
     name = "Достижение"
     name_plural = "Достижения"
     icon = "fa-solid fa-trophy"
-    
     column_list = [Achievement.theme, Achievement.title]
-    column_labels = {Achievement.theme: "Тема (тег)", Achievement.title: "Заголовок", Achievement.description: "Описание"}
     form_overrides = {"description": TextAreaField}
 
+# --- PLAN (Directions + Disciplines) ---
+
+class DisciplineAdmin(ModelView, model=Discipline):
+    name = "Дисциплина"
+    name_plural = "Дисциплины"
+    icon = "fa-solid fa-book"
+    
+    column_list = [Discipline.name, Discipline.direction, Discipline.start_term, Discipline.group]
+    column_sortable_list = [Discipline.start_term, Discipline.direction_id]
+    column_searchable_list = [Discipline.name]
+    
+    form_columns = [
+        Discipline.name, 
+        Discipline.direction, 
+        Discipline.group, 
+        Discipline.start_term, 
+        Discipline.end_term
+    ]
+
+class DirectionAdmin(ModelView, model=Direction):
+    name = "Направление"
+    name_plural = "Направления"
+    icon = "fa-solid fa-route"
+    column_list = [Direction.name]
+    
+    # Inline models временно отключены для стабильности работы AsyncIO
+    # inline_models = [DisciplineInline] 
 
 # --- SETUP ---
 
@@ -268,13 +208,12 @@ def setup_admin(app):
         authentication_backend=authentication_backend,
         title="БГИТУ IT-Институт",
         base_url="/admin",
-        logo_url=None,
         templates_dir="app/templates"
     )
     
     admin.add_view(UserAdmin)
     admin.add_view(SpecialityAdmin)
-    admin.add_view(DirectionAdmin) 
+    admin.add_view(DirectionAdmin)
     admin.add_view(DisciplineAdmin)
     admin.add_view(TeacherAdmin)
     admin.add_view(FeatureAdmin)
