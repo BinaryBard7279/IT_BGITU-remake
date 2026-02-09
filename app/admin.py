@@ -149,6 +149,42 @@ class DisciplineInline(ModelView, model=Discipline):
         Discipline.end_term: "По семестр"
     }
 
+class DisciplineAdmin(ModelView, model=Discipline):
+    name = "Дисциплина"
+    name_plural = "Все дисциплины"
+    icon = "fa-solid fa-book"
+    
+    # Что показывать в таблице
+    column_list = [
+        Discipline.id, 
+        Discipline.name, 
+        Discipline.group, 
+        Discipline.direction,  # Покажет название направления
+        Discipline.start_term
+    ]
+    
+    # Русские названия колонок
+    column_labels = {
+        Discipline.id: "ID",
+        Discipline.name: "Название",
+        Discipline.group: "Группа",
+        Discipline.direction: "Направление",
+        Discipline.start_term: "Начало (сем.)",
+        Discipline.end_term: "Конец (сем.)"
+    }
+    
+    # Поля для формы создания/редактирования
+    form_columns = [
+        Discipline.name, 
+        Discipline.direction, # Здесь будет выпадающий список направлений
+        Discipline.group, 
+        Discipline.start_term, 
+        Discipline.end_term
+    ]
+    
+    # Добавляем поиск и сортировку для удобства
+    column_searchable_list = [Discipline.name, Discipline.group]
+    column_sortable_list = [Discipline.name, Discipline.start_term, Discipline.direction_id]
 class DirectionAdmin(ModelView, model=Direction):
     name = "Направление (План)"
     name_plural = "Направления (План)"
@@ -201,6 +237,7 @@ def setup_admin(app):
     admin.add_view(UserAdmin)
     admin.add_view(SpecialityAdmin)
     admin.add_view(DirectionAdmin) 
+    admin.add_view(DisciplineAdmin)
     admin.add_view(TeacherAdmin)
     admin.add_view(FeatureAdmin)
     admin.add_view(SubjectAdmin)
