@@ -13,6 +13,7 @@ from wtforms import PasswordField, TextAreaField, StringField, FileField
 from app.database import engine
 from app.models import User, Speciality, Feature, Direction, Discipline, Teacher, Subject, Achievement
 from app.security import verify_password, get_password_hash
+from starlette.datastructures import UploadFile
 
 # --- AUTHENTICATION ---
 class AdminAuth(AuthenticationBackend):
@@ -97,90 +98,84 @@ class FeatureAdmin(ModelView, model=Feature):
         "svg_code": {"label": "Класс иконки FontAwesome (например: fa-solid fa-code)"}
     }
 
+# app/admin.py
+# Убедись, что наверху есть эти импорты:
+# import shutil
+# import uuid
+# from pathlib import Path
+# from starlette.datastructures import UploadFile  <-- ВАЖНО
+
 class TeacherAdmin(ModelView, model=Teacher):
     name = "Преподаватель"
     name_plural = "Преподаватели"
     icon = "fa-solid fa-chalkboard-user"
 
-    # --- 1. СПИСОК (Таблица) ---
+    # Список в таблице
     column_list = [Teacher.image_url, Teacher.fio, Teacher.post]
     
+    # 1. Используем ТОЛЬКО реальные поля из базы. Никаких "photo"!
+    form_columns = [Teacher.fio, Teacher.post, Teacher.subjects, Teacher.image_url]
+
     column_labels = {
         Teacher.image_url: "Фото",
         Teacher.fio: "ФИО",
         Teacher.post: "Должность",
-        Teacher.subjects: "Предметы",
-        "photo": "Загрузить фото" # Метка для нашего виртуального поля
+        Teacher.subjects: "Предметы"
     }
 
-    # --- 2. ФОРМА РЕДАКТИРОВАНИЯ ---
-    # Мы явно указываем поля. Важно: 'photo' - это наше виртуальное поле.
-    # image_url мы ИСКЛЮЧАЕМ из формы, чтобы туда не пытались писать руками.
-    form_columns = [
-        Teacher.fio, 
-        Teacher.post, 
-        Teacher.subjects,
-        "photo" 
-    ]
-
-    # Настраиваем типы полей
+    # 2. Подменяем типы полей: image_url станет файлом, subjects - текстовой областью
     form_overrides = {
-        "subjects": TextAreaField
-    }
-
-    # Добавляем поле загрузки, которого нет в базе
-    form_extra_fields = {
-        "photo": FileField("Выберите фото")
+        "subjects": TextAreaField,
+        "image_url": FileField 
     }
 
     form_args = {
+        "image_url": {
+            "label": "Фотография",
+            "render_kw": {"accept": "image/*"} # Разрешаем только картинки
+        },
         "subjects": {
             "label": "Предметы (вводите через запятую)",
             "render_kw": {"class": "form-control", "rows": 3}
-        },
-        "photo": {
-            "label": "Загрузить фото",
-            "render_kw": {"accept": "image/*"} # Разрешаем только картинки
         }
     }
 
-    # Показываем красивую картинку в таблице
     column_formatters = {
         Teacher.image_url: lambda m, a: f'<img src="{m.image_url}" width="50" style="border-radius: 5px; object-fit: cover;">' if m.image_url else "Нет фото"
     }
 
-    # --- 3. ЛОГИКА СОХРАНЕНИЯ ---
+    # 3. Перехватываем сохранение
     async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
-        # Получаем объект файла из нашего виртуального поля 'photo'
-        upload_file = data.get("photo")
+        # Получаем то, что пришло в поле image_url (это может быть файл или ничего)
+        input_file = data.get("image_url")
         
-        # Если файл был загружен (это объект UploadFile и у него есть имя)
-        if upload_file and getattr(upload_file, "filename", None):
-            # Генерируем уникальное имя
-            extension = upload_file.filename.split(".")[-1]
+        # Проверяем, загрузил ли пользователь новый файл
+        # (Проверка: это объект UploadFile и у него есть имя)
+        if input_file and hasattr(input_file, "filename") and input_file.filename:
+            # 3.1. Генерируем имя и сохраняем файл
+            extension = input_file.filename.split(".")[-1]
             unique_filename = f"{uuid.uuid4()}.{extension}"
             
-            # Сохраняем на диск
             save_directory = Path("app/uploads")
             save_directory.mkdir(parents=True, exist_ok=True)
             save_path = save_directory / unique_filename
             
             with open(save_path, "wb") as buffer:
-                shutil.copyfileobj(upload_file.file, buffer)
+                shutil.copyfileobj(input_file.file, buffer)
             
-            # ЗАПИСЫВАЕМ ПУТЬ В МОДЕЛЬ (в поле image_url)
-            model.image_url = f"/media/{unique_filename}"
-        
-        # Если файл НЕ загрузили, но мы создаем нового препода
-        elif is_created and not model.image_url:
-             # Можно поставить заглушку или оставить пустым (если в БД разрешено null)
-             # В вашей модели nullable=False, поэтому лучше поставить заглушку или пустую строку
-             model.image_url = "" 
-
-        # ОЧЕНЬ ВАЖНО: Удаляем виртуальное поле 'photo' из данных, 
-        # чтобы SQLAdmin не пытался записать его в базу (там нет такой колонки)
-        if "photo" in data:
-            del data["photo"]
+            # 3.2. ВАЖНО: Заменяем объект файла на строку (путь), чтобы база приняла
+            data["image_url"] = f"/media/{unique_filename}"
+            
+        else:
+            # Если файл НЕ загрузили:
+            if is_created:
+                # Если это создание нового препода — ставим пустую строку
+                data["image_url"] = ""
+            else:
+                # Если это редактирование — УДАЛЯЕМ ключ из data.
+                # Тогда SQLAlchemy не будет обновлять это поле, и старое фото останется.
+                if "image_url" in data:
+                    del data["image_url"]
 # --- ИСПРАВЛЕННЫЙ БЛОК ПЛАНА (Direction + Discipline) ---
 
 class DisciplineInline(ModelView, model=Discipline):
