@@ -95,6 +95,3 @@ async def get_all_teachers(db: AsyncSession = Depends(get_db)):
 
     return result.scalars().all()
 
-@router.get("/favicon.ico", include_in_schema=False)
-async def favicon():
-    return FileResponse(os.path.join("app", "static", "favicon.ico"))
