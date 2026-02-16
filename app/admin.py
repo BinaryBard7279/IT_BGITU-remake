@@ -247,7 +247,6 @@ def setup_admin(app):
         title="БГИТУ IT-Институт",
         base_url="/admin",
         logo_url=None,
-        templates_dir="app/templates"
     )
     
     admin.add_view(UserAdmin)
