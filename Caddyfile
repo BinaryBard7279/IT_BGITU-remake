@@ -20,7 +20,7 @@ admin.vinogradovnikita.ru {
 }
 
 pgadmin.vinogradovnikita.ru {
-    basicauth {
+    basic_auth {
         admin $2a$04$B1lIu6YvkDK23uUAV4Zb.u1UIqG/fAdnp4mYyMtpQZQCBu9WLRf1W
     }
     reverse_proxy pgadmin:80

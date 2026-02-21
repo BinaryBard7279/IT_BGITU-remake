@@ -19,6 +19,8 @@ app.add_middleware(
 
 # 2. ВЕРНУЛИ ЭТУ СТРОЧКУ! Теперь FastAPI сам гарантированно отдаст стили и скрипты
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+os.makedirs("app/uploads", exist_ok=True)
+app.mount("/media", StaticFiles(directory="app/uploads"), name="upload")
 
 templates = Jinja2Templates(directory="app/templates")
 
