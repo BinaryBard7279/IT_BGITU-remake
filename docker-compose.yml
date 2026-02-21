@@ -7,14 +7,13 @@ services:
     expose:
       - "8000"
     env_file:
-      - .env
-    environment:
-      - DEBUG=True
-      - SENTRY_DSN=${SENTRY_DSN}
+      - .env  # <-- Это будет .env на сервере, созданный из secrets
     depends_on:
       - db
+    # --- ВАЖНОЕ ИЗМЕНЕНИЕ: Сохраняем картинки на диск ---
     volumes:
       - media_data:/code/app/uploads
+    # ----------------------------------------------------
     networks:
       - itnet
 
@@ -38,9 +37,9 @@ services:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_USER: "${DB_USER}"
-      POSTGRES_PASSWORD: "${DB_PASS}"
-      POSTGRES_DB: "${DB_NAME}"
+      POSTGRES_USER: ${DB_USER} # Читает из .env на сервере
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -62,7 +61,7 @@ volumes:
   caddy_data:
   caddy_config:
   pgadmin_data:
-  media_data:
+  media_data: # <-- Создаем хранилище для картинок
 
 networks:
   itnet:
