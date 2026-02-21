@@ -4,8 +4,6 @@ pydantic
 sqlalchemy       
 asyncpg          
 python-dotenv    
-asyncpg
-sqlalchemy
 alembic
 passlib[bcrypt]
 python-jose[cryptography]
@@ -19,3 +17,5 @@ opentelemetry-sdk
 opentelemetry-instrumentation-fastapi
 opentelemetry-instrumentation-sqlalchemy
 opentelemetry-exporter-zipkin
+pyinstrument
+httpx
