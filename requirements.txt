@@ -4,8 +4,6 @@ pydantic
 sqlalchemy       
 asyncpg          
 python-dotenv    
-asyncpg
-sqlalchemy
 alembic
 passlib[bcrypt]
 python-jose[cryptography]
@@ -14,3 +12,9 @@ python-multipart
 Jinja2
 sqladmin[full]>=0.19.0
 wtforms
+sentry-sdk[fastapi]
+pyinstrument
+pytest-benchmark
+pytest-asyncio
+httpx
+locust

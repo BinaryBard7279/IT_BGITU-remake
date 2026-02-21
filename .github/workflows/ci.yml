@@ -73,10 +73,9 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
+          # ... внутри шага deploy
           script: |
             cd /root/it-bgitu
-            
-            # 1. Секреты (без изменений)
             echo "DB_USER=${{ secrets.DB_USER }}" > .env
             echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
@@ -85,13 +84,4 @@ jobs:
             echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
             echo "ALGORITHM=${{ secrets.ALGORITHM }}" >> .env
             echo "ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}" >> .env
-            
-            # 2. Деплой 
-            # Теперь здесь будет использоваться НОВЫЙ docker-compose.yml с volumes
-            docker compose pull
-            docker compose up -d --remove-orphans
-            
-            # 3. Миграции и очистка
-            sleep 5
-            docker compose exec -T app alembic upgrade head
-            docker image prune -f
+            echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env
