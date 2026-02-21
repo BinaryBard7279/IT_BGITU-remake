@@ -17,7 +17,6 @@ services:
     networks:
       - itnet
 
-# docker-compose.yml
   caddy:
     image: caddy:latest
     restart: always
@@ -28,10 +27,11 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
-      # Добавляем доступы к папкам приложения
       - ./app/static:/code/app/static:ro 
       - media_data:/code/app/uploads:ro
-# ...
+    # --- ВОТ ЭТО ТО, ЧТО БЫЛО УПУЩЕНО ---
+    networks:
+      - itnet
 
   db:
     image: postgres:15
