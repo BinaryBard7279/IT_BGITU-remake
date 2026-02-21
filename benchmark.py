@@ -8,8 +8,8 @@ ITERATIONS = 5
 
 # ВАЖНО: Укажи здесь реальные данные админа из твоей базы
 ADMIN_CREDENTIALS = {
-    "username": "admin@example.com",
-    "password": "StrongPass123"
+    "username": "admin@bgitu.ru",
+    "password": "admin123"
 }
 
 PUBLIC_ENDPOINTS = [
