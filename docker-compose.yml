@@ -8,12 +8,14 @@ services:
       - "8000"
     env_file:
       - .env  # <-- Это будет .env на сервере, созданный из secrets
+    environment:
+      # Указываем приложению, куда слать трейсы
+      - OTEL_EXPORTER_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
     depends_on:
       - db
-    # --- ВАЖНОЕ ИЗМЕНЕНИЕ: Сохраняем картинки на диск ---
+      - zipkin
     volumes:
       - media_data:/code/app/uploads
-    # ----------------------------------------------------
     networks:
       - itnet
 
@@ -37,7 +39,7 @@ services:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER} # Читает из .env на сервере
+      POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
     volumes:
@@ -56,12 +58,21 @@ services:
     networks:
       - itnet
 
+  # --- НОВЫЙ СЕРВИС: ZIPKIN ---
+  zipkin:
+    image: openzipkin/zipkin:latest
+    restart: always
+    ports:
+      - "9411:9411" # Доступ к веб-интерфейсу Zipkin
+    networks:
+      - itnet
+
 volumes:
   postgres_data:
   caddy_data:
   caddy_config:
   pgadmin_data:
-  media_data: # <-- Создаем хранилище для картинок
+  media_data:
 
 networks:
   itnet:
