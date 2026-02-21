@@ -45,6 +45,8 @@ async def get_initial_state(db: AsyncSession = Depends(get_db)):
     feat_res = await db.execute(select(Feature).order_by(Feature.id))
     teach_res = await db.execute(select(Teacher).order_by(Teacher.fio))
     achiv_res = await db.execute(select(Achievement).order_by(Achievement.id))
+    
+    # ИСПРАВЛЕНИЕ: Добавили вызов .unique(), чтобы SQLAlchemy не ругался на JOIN
     dir_res = await db.execute(select(Direction).options(selectinload(Direction.disciplines)).order_by(Direction.id))
 
     return {
@@ -53,5 +55,5 @@ async def get_initial_state(db: AsyncSession = Depends(get_db)):
         "features": feat_res.scalars().all(),
         "teachers": teach_res.scalars().all(),
         "achievements": achiv_res.scalars().all(),
-        "directions": dir_res.scalars().all()
+        "directions": dir_res.scalars().unique().all() # <-- Ошибка скрывалась здесь
     }
