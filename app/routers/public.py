@@ -1,26 +1,16 @@
 from fastapi import APIRouter, Depends
-from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text
 from sqlalchemy.future import select
 from app.database import get_db
 from sqlalchemy.orm import selectinload
-from typing import List
-import os
-import asyncio
 
 from app.models.speciality import Speciality
 from app.models.feature import Feature
-from app.models.plan import Direction, Discipline
+from app.models.plan import Direction
 from app.models.teacher import Teacher
 from app.models.subject import Subject
 from app.models.achievement import Achievement
 
-from app.schemas.speciality import Speciality as SpecialitySchema
-from app.schemas.feature import Feature as FeatureSchema
-from app.schemas.teacher import Teacher as TeacherSchema
-from app.schemas.subject import Subject as SubjectSchema
-from app.schemas.achievement import Achievement as AchievementSchema
 
 router = APIRouter(tags=["Landing"])
 

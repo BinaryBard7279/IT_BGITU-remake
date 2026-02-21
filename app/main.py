@@ -4,8 +4,6 @@ from fastapi import FastAPI
 # StaticFiles больше не нужен в основном приложении, так как статику отдаст Caddy
 # from fastapi.staticfiles import StaticFiles 
 from fastapi.templating import Jinja2Templates
-from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.routers import auth, public # cms убрали
