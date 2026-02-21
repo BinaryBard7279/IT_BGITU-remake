@@ -28,11 +28,6 @@ async def get_initial_state(db: AsyncSession = Depends(get_db)):
     """
     Агрегирующий эндпоинт. Заменяет 6 отдельных запросов к БД.
     """
-@router.get("/api/initial-state")
-async def get_initial_state(db: AsyncSession = Depends(get_db)):
-    """
-    Агрегирующий эндпоинт. Заменяет 6 отдельных запросов к БД.
-    """
     # В SQLAlchemy async сессиях нельзя делать конкурентные вызовы gather на одной сессии.
     # Поэтому выполняем последовательно, но за ОДИН HTTP-запрос.
     
