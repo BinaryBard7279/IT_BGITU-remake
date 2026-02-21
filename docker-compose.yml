@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     environment:
-      - DEBUG=False
+      - DEBUG=True
       - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - db
