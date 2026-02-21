@@ -47,25 +47,18 @@
   // ================= 2. FETCH DATA =================
   async function loadData() {
     try {
-      // Запрашиваем все данные параллельно
-      const [specialities, subjects, features, teachers, achievements, directions] = await Promise.all([
-        fetch('/speciality').then(r => r.json()),
-        fetch('/subjects').then(r => r.json()),
-        fetch('/features').then(r => r.json()),
-        fetch('/teachers').then(r => r.json()),
-        fetch('/achievements').then(r => r.json()),
-        fetch('/directions-with-disciplines').then(r => r.json())
-      ]);
+      // ОПТИМИЗАЦИЯ: 1 запрос вместо 6
+      const res = await fetch('/api/initial-state');
+      const data = await res.json();
 
-      renderSpecialities(specialities);
-      renderSubjects(subjects);
-      renderFeatures(features);
-      renderTeachers(teachers);
-      renderAchievements(achievements);
-      initRoadmap(directions);
+      renderSpecialities(data.specialities);
+      renderSubjects(data.subjects);
+      renderFeatures(data.features);
+      renderTeachers(data.teachers);
+      renderAchievements(data.achievements);
+      initRoadmap(data.directions);
 
       initObservers();
-
     } catch (err) {
       console.error('Ошибка загрузки данных:', err);
     }
@@ -330,55 +323,24 @@
     rGrid.addEventListener('mouseleave', () => rTip.style.display = 'none');
   }
   // ================= 4. PHYSICS & UI (Старый код) =================
-  function initFacultyPhysics(fTrack) {
-      const inner = fTrack.firstElementChild;
-      let off = 0, max = 0, isD = false, start, startOff, last, vel = 0, rafP;
-      
-      const upd = () => { max = Math.max(0, inner.scrollWidth - fTrack.clientWidth); if(off>max) off=max; inner.style.transform = `translateX(-${off}px)`; };
-      new ResizeObserver(upd).observe(fTrack);
-      
-      const move = x => {
-        if(!isD) return;
-        let n = startOff + (start - x);
-        if(n<0 || n>max) n = startOff + (start-x)*0.5;
-        off = n; vel = x - last; last = x;
-        inner.style.transform = `translateX(-${off}px)`;
-      };
-      
-      const inertia = () => {
-        if(Math.abs(vel)<0.1) return fTrack.classList.remove('faculty-inertia');
-        vel*=0.89; off-=vel*1.2;
-        if(off<0){off=0;vel=0} else if(off>max){off=max;vel=0}
-        inner.style.transform = `translateX(-${off}px)`;
-        rafP = requestAnimationFrame(inertia);
-      };
-      
-      const end = () => {
-        if(!isD) return;
-        isD = false; fTrack.classList.remove('faculty-dragging');
-        if(off<0||off>max) { fTrack.classList.add('faculty-inertia'); off=Math.max(0,Math.min(max,off)); inner.style.transform=`translateX(-${off}px)`; }
-        else inertia();
-      };
-      
-      const startDrag = x => { cancelAnimationFrame(rafP); fTrack.classList.add('faculty-dragging'); fTrack.classList.remove('faculty-inertia'); isD=true; start=last=x; startOff=off; vel=0; };
-
-      fTrack.addEventListener('mousedown', e => { e.preventDefault(); startDrag(e.pageX); });
-      window.addEventListener('mousemove', e => move(e.pageX));
-      window.addEventListener('mouseup', end);
-      window.addEventListener('mouseleave', end);
-      fTrack.addEventListener('touchstart', e => startDrag(e.touches[0].pageX), {passive:true});
-      window.addEventListener('touchmove', e => move(e.touches[0].pageX), {passive:false});
-      window.addEventListener('touchend', end);
-
-      const scroll = d => {
-        const w = inner.firstElementChild ? inner.firstElementChild.offsetWidth + 24 : 300;
-        off = Math.max(0, Math.min(max, off + d * w));
-        fTrack.classList.remove('faculty-inertia');
-        inner.style.transform = `translateX(-${off}px)`;
-        startOff = off; last = off;
-      };
-      getById('facultyPrev')?.addEventListener('click', () => scroll(-1));
-      getById('facultyNext')?.addEventListener('click', () => scroll(1));
+ function initObservers() {
+    // Reveal анимации (уже было)
+    const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}}), {threshold:0.1, rootMargin:'0px 0px -50px 0px'});
+    document.querySelectorAll('.reveal').forEach(e => obs.observe(e));
+    
+    // ОПТИМИЗАЦИЯ ScrollSpy: Заменяем window.addEventListener('scroll') на IntersectionObserver
+    const links = document.querySelectorAll('.nav-link');
+    const sections = ['roadmap', 'faculty', 'features', 'disciplines', 'directions'].map(id => document.getElementById(id)).filter(Boolean);
+    
+    const spyObs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                links.forEach(l => l.classList.toggle('active', l.dataset.target === entry.target.id));
+            }
+        });
+    }, { rootMargin: '-30% 0px -70% 0px' }); // Триггер в верхней трети экрана
+    
+    sections.forEach(sec => spyObs.observe(sec));
   }
 
   function initObservers() {
@@ -401,21 +363,6 @@
   const header = getById('header');
   window.addEventListener('scroll', () => requestAnimationFrame(() => header.classList.toggle('scrolled', window.scrollY > 50)), {passive:true});
 
-  // Nav ScrollSpy
-  let tick = false;
-  const links = document.querySelectorAll('.nav-link');
-  window.addEventListener('scroll', () => {
-    if(!tick) {
-      window.requestAnimationFrame(() => {
-        const curr = ['roadmap','faculty','features','disciplines','directions'].find(id => {
-           const el = getById(id); return el && window.scrollY >= el.offsetTop - 300;
-        });
-        links.forEach(l => l.classList.toggle('active', l.dataset.target === curr));
-        tick = false;
-      });
-      tick = true;
-    }
-  }, {passive:true});
 
   // Form Submit
   const form = getById('applyForm');

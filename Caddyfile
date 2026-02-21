@@ -1,7 +1,27 @@
-www.vinogradovnikita.ru {
-    redir https://vinogradovnikita.ru{uri}
-}
+vinogradovnikita.ru {
+    # ОПТИМИЗАЦИЯ: Алгоритм сжатия zstd
+    encode zstd gzip
 
+    # Отдача медиа-файлов
+    handle_path /media/* {
+        root * /code/app/uploads
+        header Cache-Control "public, max-age=31536000"
+        file_server
+    }
+
+    # Отдача статики
+    handle_path /static/* {
+        root * /code/app/static
+        header Cache-Control "public, max-age=31536000"
+        file_server
+    }
+
+    # Все остальное летит в FastAPI
+    handle {
+        reverse_proxy app:8000
+    }
+}
+# ...
 vinogradovnikita.ru {
     reverse_proxy app:8000
 }
