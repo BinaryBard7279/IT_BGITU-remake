@@ -14,5 +14,3 @@ python-multipart
 Jinja2
 sqladmin[full]>=0.19.0
 wtforms
-aiofiles
-gunicorn

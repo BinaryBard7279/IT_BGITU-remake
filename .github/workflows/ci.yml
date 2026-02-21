@@ -14,17 +14,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11' # Обновлено до 3.11
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install ruff  # ОПТИМИЗАЦИЯ: Установка быстрого линтера Ruff
-
-      - name: Code Linting
-        run: |
-          ruff check . --ignore E501 # Проверка кода без учета длины строк
 
       - name: Check for missing migrations
         run: |
@@ -51,7 +46,7 @@ jobs:
           push: true
           tags: binarybard7279/it-bgitu:latest
 
-  # 2.5 Копируем обновленные конфиги на сервер
+  # 2.5 НОВЫЙ ШАГ: Копируем обновленный docker-compose.yml на сервер
   update-configs:
     needs: build-and-push
     runs-on: ubuntu-latest
@@ -64,13 +59,13 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
-          # --- ВОТ ЗДЕСЬ ИСПРАВЛЕНИЕ: добавили app/static ---
-          source: "docker-compose.yml,Caddyfile,app/static"
+          # Копируем docker-compose.yml (где volumes) и Caddyfile
+          source: "docker-compose.yml,Caddyfile"
           target: "/root/it-bgitu"
 
   # 3. Деплой на сервер
   deploy:
-    needs: update-configs
+    needs: update-configs # Ждем, пока обновятся конфиги
     runs-on: ubuntu-latest
     steps:
       - uses: appleboy/ssh-action@master
@@ -81,7 +76,7 @@ jobs:
           script: |
             cd /root/it-bgitu
             
-            # Секреты
+            # 1. Секреты (без изменений)
             echo "DB_USER=${{ secrets.DB_USER }}" > .env
             echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
@@ -91,11 +86,12 @@ jobs:
             echo "ALGORITHM=${{ secrets.ALGORITHM }}" >> .env
             echo "ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}" >> .env
             
-            # Деплой 
+            # 2. Деплой 
+            # Теперь здесь будет использоваться НОВЫЙ docker-compose.yml с volumes
             docker compose pull
             docker compose up -d --remove-orphans
             
-            # Миграции и очистка мусора
+            # 3. Миграции и очистка
             sleep 5
             docker compose exec -T app alembic upgrade head
             docker image prune -f

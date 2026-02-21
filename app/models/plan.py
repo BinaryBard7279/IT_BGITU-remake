@@ -22,7 +22,7 @@ class Discipline(Base):
     start_term = Column(Integer, nullable=False)
     end_term = Column(Integer, nullable=False)
     group = Column(String, nullable=False, server_default='Общие')
-    direction_id = Column(Integer, ForeignKey('directions.id', ondelete='CASCADE'), nullable=False, index=True)
+    direction_id = Column(Integer, ForeignKey('directions.id', ondelete='CASCADE'), nullable=False)
 
     direction = relationship("Direction", back_populates="disciplines")
 

@@ -27,9 +27,9 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
-      - ./app/static:/code/app/static:ro 
-      - media_data:/code/app/uploads:ro
-    # --- ВОТ ЭТО ТО, ЧТО БЫЛО УПУЩЕНО ---
+    depends_on:
+      - app
+      - pgadmin
     networks:
       - itnet
 
