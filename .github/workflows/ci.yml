@@ -64,7 +64,8 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
-          source: "docker-compose.yml,Caddyfile"
+          # --- ВОТ ЗДЕСЬ ИСПРАВЛЕНИЕ: добавили app/static ---
+          source: "docker-compose.yml,Caddyfile,app/static"
           target: "/root/it-bgitu"
 
   # 3. Деплой на сервер
