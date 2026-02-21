@@ -1,5 +1,4 @@
 import os
-import uvicorn
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles  # <-- 1. ВЕРНУЛИ ИМПОРТ
 from fastapi.templating import Jinja2Templates
