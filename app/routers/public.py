@@ -21,11 +21,13 @@ from app.schemas.teacher import Teacher as TeacherSchema
 from app.schemas.subject import Subject as SubjectSchema
 from app.schemas.achievement import Achievement as AchievementSchema
 
+# [PERF] Импорт нашего таймера
+from app.performance import PerfTimer
+
 router = APIRouter(tags=["Landing"])
 
 @router.get("/") 
 async def read_root():
-
     file_path = os.path.join("app", "templates", "index.html")
     return FileResponse(file_path)
 
@@ -56,42 +58,44 @@ async def get_all_achievements(db: AsyncSession = Depends(get_db)):
 @router.get("/features", response_model=List[FeatureSchema])
 async def get_all_features(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Feature).order_by(Feature.id))
-
     return result.scalars().all()
+
 
 @router.get("/directions-with-disciplines")
 async def get_all_directions_with_disciplines(db: AsyncSession = Depends(get_db)):
+    # SQL-запрос замеряется автоматически через события SQLAlchemy
     result = await db.execute(select(Direction).options(selectinload(Direction.disciplines)).order_by(Direction.id))
     directions = result.scalars().all()
 
-    return [{
-        "id": d.id,
-        "name": d.name,
-        "disciplines": [{
-            "id": disc.id,
-            "name": disc.name,
-            "start_term": disc.start_term,
-            "end_term": disc.end_term,
-            "group": disc.group,
-            "direction_id": disc.direction_id
-        } for disc in d.disciplines]
-    } for d in directions]
+    # [PERF] Замеряем время упаковки данных в JSON (чистый CPU time)
+    with PerfTimer("Упаковка JSON Roadmap"):
+        response_data = [{
+            "id": d.id,
+            "name": d.name,
+            "disciplines": [{
+                "id": disc.id,
+                "name": disc.name,
+                "start_term": disc.start_term,
+                "end_term": disc.end_term,
+                "group": disc.group,
+                "direction_id": disc.direction_id
+            } for disc in d.disciplines]
+        } for d in directions]
+
+    return response_data
+
 
 @router.get("/speciality", response_model=List[SpecialitySchema])
 async def get_all_speciality(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Speciality).order_by(Speciality.id))
-
     return result.scalars().all()
 
 @router.get("/subjects", response_model=List[SubjectSchema])
 async def get_all_subjects(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Subject).order_by(Subject.id))
-
     return result.scalars().all()
 
 @router.get("/teachers", response_model=List[TeacherSchema])
 async def get_all_teachers(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Teacher).order_by(Teacher.fio))
-
     return result.scalars().all()
-

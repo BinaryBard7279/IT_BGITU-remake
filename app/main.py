@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import datetime
 import uvicorn
 from fastapi import FastAPI, Request
@@ -17,10 +18,14 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+
+# [PERF] Импорт нашей новой системы логирования
+from app.performance import perf_logger, PERF_LOG_ENABLED
 # -----------------------------------
 
-# from app.routers import auth, cms, public
+# Импорты роутеров
 from app.routers import public
+# from app.routers import auth, cms
 from app.admin import setup_admin
 
 # --- Настройка OpenTelemetry (Zipkin) ---
@@ -37,6 +42,27 @@ SQLAlchemyInstrumentor().instrument()
 
 app = FastAPI(title="IT BGITU Remake")
 
+# [PERF] Наш новый легковесный секундомер HTTP-запросов
+class PerformanceMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if not PERF_LOG_ENABLED:
+            return await call_next(request)
+
+        start_time = time.perf_counter()
+        response = await call_next(request)
+        process_time = (time.perf_counter() - start_time) * 1000
+
+        path = request.url.path
+        # Игнорируем запросы за статикой, чтобы не засорять логи консоли
+        if not path.startswith(("/static", "/media")):
+            perf_logger.info(f"ENDPOINT | {process_time:>8.2f} ms | {request.method} {path}")
+            
+        # Добавляем заголовок Server-Timing для анализа во вкладке Network в браузере
+        response.headers["Server-Timing"] = f"app;desc=\"FastAPI Server\";dur={process_time:.2f}"
+        
+        return response
+
+app.add_middleware(PerformanceMiddleware)
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 class ForceHTTPSMiddleware(BaseHTTPMiddleware):
@@ -84,18 +110,22 @@ app.add_middleware(
     same_site="lax"
 )
 
+# Монтирование статики и медиа
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 os.makedirs("app/uploads", exist_ok=True)
 app.mount("/media", StaticFiles(directory="app/uploads"), name="upload")
 
 templates = Jinja2Templates(directory="app/templates")
 
+# Подключение роутеров
 app.include_router(public.router)
 # app.include_router(auth.router)
 # app.include_router(cms.router)
 
+# Подключение админки
 setup_admin(app)
 
+# Инструментирование FastAPI для Zipkin
 FastAPIInstrumentor.instrument_app(app)
 
 if __name__ == "__main__":
