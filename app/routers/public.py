@@ -7,7 +7,6 @@ from app.database import get_db
 from sqlalchemy.orm import selectinload
 from typing import List
 import os
-import asyncio
 
 from app.models.speciality import Speciality
 from app.models.feature import Feature
@@ -80,7 +79,6 @@ async def get_all_directions_with_disciplines(db: AsyncSession = Depends(get_db)
 
 @router.get("/speciality", response_model=List[SpecialitySchema])
 async def get_all_speciality(db: AsyncSession = Depends(get_db)):
-    await asyncio.sleep(3)
     result = await db.execute(select(Speciality).order_by(Speciality.id))
 
     return result.scalars().all()
