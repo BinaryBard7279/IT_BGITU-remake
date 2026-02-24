@@ -19,7 +19,8 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 # -----------------------------------
 
-from app.routers import auth, cms, public
+# from app.routers import auth, cms, public
+from app.routers import public
 from app.admin import setup_admin
 
 # --- Настройка OpenTelemetry (Zipkin) ---
@@ -90,8 +91,8 @@ app.mount("/media", StaticFiles(directory="app/uploads"), name="upload")
 templates = Jinja2Templates(directory="app/templates")
 
 app.include_router(public.router)
-app.include_router(auth.router)
-app.include_router(cms.router)
+# app.include_router(auth.router)
+# app.include_router(cms.router)
 
 setup_admin(app)
 

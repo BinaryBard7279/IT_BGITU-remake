@@ -7,13 +7,13 @@ class SubjectBase(BaseModel):
     description: str = Field(..., min_length=1)
     svg_code: Optional[str] = None
 
-class SubjectCreate(SubjectBase):
-    pass
+# class SubjectCreate(SubjectBase):
+#     pass
 
-class SubjectUpdate(BaseModel):
-    name: Optional[str] = Field(None, max_length=225)
-    description: Optional[str] = Field(None, min_length=1)
-    svg_code: Optional[str] = None
+# class SubjectUpdate(BaseModel):
+#     name: Optional[str] = Field(None, max_length=225)
+#     description: Optional[str] = Field(None, min_length=1)
+#     svg_code: Optional[str] = None
 
 class Subject(SubjectBase):
     model_config = ConfigDict(from_attributes=True)
