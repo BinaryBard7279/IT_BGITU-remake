@@ -147,15 +147,16 @@
       </div>
     `}).join('');
   }
+
   // --- Преподаватели (Teachers) ---
   function renderTeachers(data) {
     const fTrack = getById('facultyTrack');
     if (!fTrack) return;
 
     const innerHtml = data.map(t => {
-      // Если есть URL картинки, используем img, иначе цветную заглушку
+      // Включена ленивая загрузка (loading="lazy")
       const imgBlock = t.image_url 
-        ? `<img src="${esc(t.image_url)}" alt="${esc(t.fio)}" style="width:100%; height:100%; object-fit:cover; object-position: top center;">` 
+        ? `<img src="${esc(t.image_url)}" alt="${esc(t.fio)}" loading="lazy" style="width:100%; height:100%; object-fit:cover; object-position: top center;">` 
         : `<div style="width:100%; height:100%; background:#ddd; display:flex; align-items:center; justify-content:center; color:#777;">Нет фото</div>`;
 
       return `
@@ -191,7 +192,6 @@
     `).join('');
   }
 
-  // --- Roadmap Logic (План) ---
   // --- Roadmap Logic (План с группировкой и упаковкой) ---
   function initRoadmap(directionsData) {
     const rSelect = getById('roadmapSelect');
@@ -329,7 +329,8 @@
     }, { passive: true });
     rGrid.addEventListener('mouseleave', () => rTip.style.display = 'none');
   }
-  // ================= 4. PHYSICS & UI (Старый код) =================
+  
+  // ================= 4. PHYSICS & UI =================
   function initFacultyPhysics(fTrack) {
       const inner = fTrack.firstElementChild;
       let off = 0, max = 0, isD = false, start, startOff, last, vel = 0, rafP;

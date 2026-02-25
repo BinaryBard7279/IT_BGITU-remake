@@ -1,3 +1,4 @@
+# app/admin.py
 import os
 from typing import Any
 
@@ -14,6 +15,10 @@ from app.database import engine
 from app.models import User, Speciality, Feature, Direction, Discipline, Teacher, Subject, Achievement
 from app.security import verify_password, get_password_hash
 from starlette.datastructures import UploadFile
+
+# --- НОВЫЕ ИМПОРТЫ ДЛЯ ОПТИМИЗАЦИИ ФОТО ---
+from PIL import Image
+import io
 
 # --- AUTHENTICATION ---
 class AdminAuth(AuthenticationBackend):
@@ -137,13 +142,28 @@ class TeacherAdmin(ModelView, model=Teacher):
     async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
         input_file = data.get("image_url")
         if input_file and hasattr(input_file, "filename") and input_file.filename:
-            extension = input_file.filename.split(".")[-1]
-            unique_filename = f"{uuid.uuid4()}.{extension}"
+            # Читаем файл в память асинхронно
+            image_bytes = await input_file.read()
+            
+            # Открываем изображение через Pillow
+            img = Image.open(io.BytesIO(image_bytes))
+            
+            # Конвертируем в RGB (убираем альфа-канал, если это PNG, для корректного сжатия)
+            if img.mode in ("RGBA", "P"):
+                img = img.convert("RGB")
+                
+            # Пропорциональный ресайз (максимум 720x720 px)
+            img.thumbnail((720, 720), Image.Resampling.LANCZOS)
+            
+            # Сохраняем в формате WebP
+            unique_filename = f"{uuid.uuid4()}.webp"
             save_directory = Path("app/uploads")
             save_directory.mkdir(parents=True, exist_ok=True)
             save_path = save_directory / unique_filename
-            with open(save_path, "wb") as buffer:
-                shutil.copyfileobj(input_file.file, buffer)
+            
+            # Сохраняем с оптимизацией
+            img.save(save_path, format="WEBP", quality=80, method=6)
+            
             data["image_url"] = f"/media/{unique_filename}"
         else:
             if is_created:
