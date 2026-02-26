@@ -4,6 +4,7 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 
 from app.database import get_db
 
@@ -17,8 +18,8 @@ TEST_DATABASE_URL = os.getenv(
     "postgresql+asyncpg://postgres:postgres@localhost:5432/test_db"
 )
 
-# Создаем движок специально для тестов
-test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+# Создаем движок специально для тестов (NullPool отключает пулинг для избежания коллизий)
+test_engine = create_async_engine(TEST_DATABASE_URL, echo=False, poolclass=NullPool)
 TestingSessionLocal = sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 # Фикстура: Подменяем зависимость БД в FastAPI на нашу тестовую
