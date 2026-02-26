@@ -5,7 +5,8 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.database import Base, get_db
+from app.database import get_db
+from app.models import Base
 
 # Импортируем твое приложение и модели
 from app.main import app
