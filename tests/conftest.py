@@ -6,10 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.database import get_db
-from app.models import Base
 
 # Импортируем твое приложение и модели
 from app.main import app
+from app.models import Base
 
 # CI будет передавать этот URL. Если его нет, используем локальный
 TEST_DATABASE_URL = os.getenv(
