@@ -46,7 +46,7 @@ jobs:
 
       - name: Run Pytest (Тестирование API и БД)
         env:
-          # Указываем приложению URL к временной БД GitHub Actions
+          PYTHONPATH: .  
           TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/test_db
           SECRET_KEY: dummy_ci_secret_key
           ENABLE_PERF_LOGGING: False
