@@ -1,6 +1,8 @@
 # app/schemas/feature.py
-from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class FeatureBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=225)

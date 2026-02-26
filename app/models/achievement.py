@@ -1,5 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Text
+
 from app.models import Base
+
 
 class Achievement(Base):
     __tablename__ = 'achievements'

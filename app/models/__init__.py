@@ -2,13 +2,13 @@ from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
-from app.models.user import User
-from app.models.speciality import Speciality
-from app.models.feature import Feature
-from app.models.plan import Direction, Discipline
-from app.models.teacher import Teacher
-from app.models.subject import Subject
-from app.models.achievement import Achievement
+from app.models.achievement import Achievement  # noqa: E402
+from app.models.feature import Feature  # noqa: E402
+from app.models.plan import Direction, Discipline  # noqa: E402
+from app.models.speciality import Speciality  # noqa: E402
+from app.models.subject import Subject  # noqa: E402
+from app.models.teacher import Teacher  # noqa: E402
+from app.models.user import User  # noqa: E402
 
 __all__ = [
     "Base",

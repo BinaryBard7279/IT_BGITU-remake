@@ -1,5 +1,7 @@
+from typing import List
+
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional, List
+
 
 class TeacherBase(BaseModel):
     fio: str = Field(..., min_length=1, max_length=100)

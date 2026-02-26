@@ -1,0 +1,13 @@
+[tool.ruff]
+# Базовые настройки форматера и линтера
+line-length = 100
+target-version = "py312"
+exclude = [".git", "__pycache__", "venv", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"] # Ошибки, фатальные баги, предупреждения и сортировка импортов
+ignore = ["E501"] # Игнорируем ошибки слишком длинных строк (FastAPI роуты часто длинные)
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

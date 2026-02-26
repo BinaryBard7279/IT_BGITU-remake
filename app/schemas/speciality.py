@@ -1,6 +1,9 @@
+from typing import List
+
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional, List
+
 from .feature import Feature
+
 
 class SpecialityBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=225)
@@ -8,7 +11,7 @@ class SpecialityBase(BaseModel):
     term: int = Field(..., ge=1, le=10)
     direction: str = Field(..., min_length=1, max_length=100)
     description: str = Field(..., min_length=1)
-    
+
 # class SpecialityCreate(SpecialityBase):
 #     pass
 

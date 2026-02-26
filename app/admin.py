@@ -1,24 +1,32 @@
 # app/admin.py
+import io
 import os
-from typing import Any
-
-import shutil
 import uuid
 from pathlib import Path
-from fastapi import Request, UploadFile
-from sqladmin import Admin, ModelView
-from sqladmin.authentication import AuthenticationBackend
-from sqlalchemy import select
-from wtforms import PasswordField, TextAreaField, StringField, FileField
+from typing import Any
 
-from app.database import engine
-from app.models import User, Speciality, Feature, Direction, Discipline, Teacher, Subject, Achievement
-from app.security import verify_password, get_password_hash
-from starlette.datastructures import UploadFile
+from fastapi import Request
 
 # --- НОВЫЕ ИМПОРТЫ ДЛЯ ОПТИМИЗАЦИИ ФОТО ---
 from PIL import Image
-import io
+from sqladmin import Admin, ModelView
+from sqladmin.authentication import AuthenticationBackend
+from sqlalchemy import select
+from wtforms import FileField, PasswordField, StringField, TextAreaField
+
+from app.database import engine
+from app.models import (
+    Achievement,
+    Direction,
+    Discipline,
+    Feature,
+    Speciality,
+    Subject,
+    Teacher,
+    User,
+)
+from app.security import get_password_hash, verify_password
+
 
 # --- AUTHENTICATION ---
 class AdminAuth(AuthenticationBackend):
@@ -51,12 +59,12 @@ class UserAdmin(ModelView, model=User):
     name = "Администратор"
     name_plural = "Администраторы"
     icon = "fa-solid fa-user-shield"
-    
+
     column_list = [User.id, User.name, User.email]
     column_labels = {User.id: "ID", User.name: "Имя", User.email: "Email", User.hashed_password: "Хэш пароля"}
     column_details_exclude_list = [User.hashed_password]
     form_columns = [User.name, User.email, User.hashed_password]
-    
+
     form_overrides = {
         "hashed_password": PasswordField
     }
@@ -78,8 +86,8 @@ class SpecialityAdmin(ModelView, model=Speciality):
 
     column_list = [Speciality.name, Speciality.qualification, Speciality.term]
     column_labels = {
-        Speciality.name: "Название", 
-        Speciality.qualification: "Квалификация", 
+        Speciality.name: "Название",
+        Speciality.qualification: "Квалификация",
         Speciality.term: "Срок обучения",
         Speciality.direction: "Направление (текст)",
         Speciality.description: "Описание"
@@ -94,8 +102,8 @@ class FeatureAdmin(ModelView, model=Feature):
 
     column_list = [Feature.title, Feature.svg_code]
     column_labels = {
-        Feature.title: "Заголовок", 
-        Feature.description: "Описание", 
+        Feature.title: "Заголовок",
+        Feature.description: "Описание",
         Feature.svg_code: "Иконка (код/класс)"
     }
     form_overrides = {"description": TextAreaField, "svg_code": StringField}
@@ -144,26 +152,26 @@ class TeacherAdmin(ModelView, model=Teacher):
         if input_file and hasattr(input_file, "filename") and input_file.filename:
             # Читаем файл в память асинхронно
             image_bytes = await input_file.read()
-            
+
             # Открываем изображение через Pillow
             img = Image.open(io.BytesIO(image_bytes))
-            
+
             # Конвертируем в RGB (убираем альфа-канал, если это PNG, для корректного сжатия)
             if img.mode in ("RGBA", "P"):
                 img = img.convert("RGB")
-                
+
             # Пропорциональный ресайз (максимум 720x720 px)
             img.thumbnail((720, 720), Image.Resampling.LANCZOS)
-            
+
             # Сохраняем в формате WebP
             unique_filename = f"{uuid.uuid4()}.webp"
             save_directory = Path("app/uploads")
             save_directory.mkdir(parents=True, exist_ok=True)
             save_path = save_directory / unique_filename
-            
+
             # Сохраняем с оптимизацией
             img.save(save_path, format="WEBP", quality=80, method=6)
-            
+
             data["image_url"] = f"/media/{unique_filename}"
         else:
             if is_created:
@@ -240,7 +248,7 @@ class SubjectAdmin(ModelView, model=Subject):
     name = "Технология (Стек)"
     name_plural = "Технологии (Стек)"
     icon = "fa-solid fa-layer-group"
-    
+
     column_list = [Subject.name, Subject.svg_code]
     column_labels = {Subject.name: "Название", Subject.description: "Описание", Subject.svg_code: "Иконка"}
     form_args = {
@@ -251,7 +259,7 @@ class AchievementAdmin(ModelView, model=Achievement):
     name = "Достижение"
     name_plural = "Достижения"
     icon = "fa-solid fa-trophy"
-    
+
     column_list = [Achievement.theme, Achievement.title]
     column_labels = {Achievement.theme: "Тема (тег)", Achievement.title: "Заголовок", Achievement.description: "Описание"}
     form_overrides = {"description": TextAreaField}
@@ -261,17 +269,17 @@ class AchievementAdmin(ModelView, model=Achievement):
 
 def setup_admin(app):
     admin = Admin(
-        app, 
-        engine, 
+        app,
+        engine,
         authentication_backend=authentication_backend,
         title="БГИТУ IT-Институт",
         base_url="/admin",
         logo_url=None,
     )
-    
+
     admin.add_view(UserAdmin)
     admin.add_view(SpecialityAdmin)
-    admin.add_view(DirectionAdmin) 
+    admin.add_view(DirectionAdmin)
     admin.add_view(DisciplineAdmin)
     admin.add_view(TeacherAdmin)
     admin.add_view(FeatureAdmin)

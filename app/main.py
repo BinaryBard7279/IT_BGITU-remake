@@ -1,20 +1,22 @@
 import os
 import time
+
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+
+# from app.routers import auth, cms
+from app.admin import setup_admin
 
 # --- Наша легковесная система мониторинга ---
-from app.performance import perf_logger, PERF_LOG_ENABLED
+from app.performance import PERF_LOG_ENABLED, perf_logger
 
 # Импорты роутеров
 from app.routers import public
-# from app.routers import auth, cms
-from app.admin import setup_admin
 
 app = FastAPI(title="IT BGITU Remake")
 
@@ -32,10 +34,10 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
         # Игнорируем запросы за статикой
         if not path.startswith(("/static", "/media")):
             perf_logger.info(f"ENDPOINT | {process_time:>8.2f} ms | {request.method} {path}")
-            
+
         # Заголовок для вкладки Network в браузере
         response.headers["Server-Timing"] = f"app;desc=\"FastAPI Server\";dur={process_time:.2f}"
-        
+
         return response
 
 app.add_middleware(PerformanceMiddleware)

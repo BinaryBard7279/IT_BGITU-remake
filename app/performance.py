@@ -1,8 +1,9 @@
-import time
 import logging
 import os
+import time
 from functools import wraps
-from typing import Callable, Any
+from typing import Callable
+
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
@@ -52,7 +53,7 @@ class PerfTimer:
                 duration = (time.perf_counter() - start) * 1000
                 perf_logger.info(f"FUNC(A)  | {duration:>8.2f} ms | {self.name or func.__name__}")
             return result
-        
+
         # Если нужно оборачивать синхронные функции
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
@@ -84,11 +85,11 @@ def setup_db_profiling(engine: Engine):
     def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
         if context and hasattr(context, '_query_start_time'):
             total_time = (time.perf_counter() - context._query_start_time) * 1000
-            
+
             # Чистим SQL-запрос от лишних пробелов и переносов строк для красивого лога
             clean_stmt = " ".join(statement.split())
             # Обрезаем слишком длинные запросы до 150 символов
             if len(clean_stmt) > 150:
                 clean_stmt = clean_stmt[:147] + "..."
-                
+
             perf_logger.info(f"DATABASE | {total_time:>8.2f} ms | {clean_stmt}")

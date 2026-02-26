@@ -1,6 +1,8 @@
 # app/models/subject.py
 from sqlalchemy import Column, Integer, String, Text
+
 from app.models import Base
+
 
 class Subject(Base):
     __tablename__ = 'subjects'

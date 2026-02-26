@@ -1,95 +1,70 @@
-name: Deploy IT_BGITU
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  # 1. Проверка кода 
-  check-code:
+  # === ЭТАП 1: ТЕСТИРОВАНИЕ И ЛИНТИНГ ===
+  test:
     runs-on: ubuntu-latest
+    
+    # Поднимаем временный PostgreSQL прямо внутри GitHub Actions
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.12"
+          cache: "pip"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Check for missing migrations
-        run: |
-          export DATABASE_URL="sqlite:///./check.db"
-          alembic check || echo "⚠️ ВНИМАНИЕ: Проверьте миграции!"
+      - name: Run Ruff (Линтер и Форматер)
+        run: ruff check .
 
-  # 2. Сборка и отправка образа
-  build-and-push:
-    needs: check-code  
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+      - name: Run Pytest (Тестирование API и БД)
+        env:
+          # Указываем приложению URL к временной БД GitHub Actions
+          TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/test_db
+          SECRET_KEY: dummy_ci_secret_key
+          ENABLE_PERF_LOGGING: False
+        run: pytest -v
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: binarybard7279/it-bgitu:latest
-
-  # 2.5 НОВЫЙ ШАГ: Копируем обновленный docker-compose.yml на сервер
-  update-configs:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Copy config files to server
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          # Копируем docker-compose.yml (где volumes) и Caddyfile
-          source: "docker-compose.yml,Caddyfile"
-          target: "/root/it-bgitu"
-
-  # 3. Деплой на сервер
+  # === ЭТАП 2: ДЕПЛОЙ НА ПРОД ===
   deploy:
-    needs: update-configs # Ждем, пока обновятся конфиги
+    needs: test # ВАЖНО: Ждет успешного завершения job "test"
     runs-on: ubuntu-latest
     steps:
-      - uses: appleboy/ssh-action@master
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             cd /root/it-bgitu
-            
-            # 1. Секреты (без изменений)
-            echo "DB_USER=${{ secrets.DB_USER }}" > .env
-            echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-            echo "DB_HOST=db" >> .env
-            echo "DB_PORT=5432" >> .env
-            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-            
-            # 2. Деплой 
-            # Теперь здесь будет использоваться НОВЫЙ docker-compose.yml с volumes
-            docker compose pull
-            docker compose up -d --remove-orphans
-            
-            # 3. Миграции и очистка
-            sleep 5
-            docker compose exec -T app alembic upgrade head
-            docker image prune -f
+            git pull origin main
+            docker compose down
+            docker compose up -d --build

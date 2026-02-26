@@ -1,5 +1,6 @@
+
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional
+
 
 class AchievementBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=225)

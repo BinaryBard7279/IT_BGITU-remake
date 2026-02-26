@@ -1,6 +1,8 @@
 # app/models/feature.py
 from sqlalchemy import Column, Integer, String, Text
+
 from app.models import Base
+
 
 class Feature(Base):
     __tablename__ = 'features'

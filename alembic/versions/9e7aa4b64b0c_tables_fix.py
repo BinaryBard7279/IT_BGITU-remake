@@ -7,9 +7,9 @@ Create Date: 2026-02-05 15:34:41.268438
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = '9e7aa4b64b0c'
@@ -32,18 +32,18 @@ def upgrade() -> None:
     op.create_index(op.f('ix_achievements_id'), 'achievements', ['id'], unique=False)
     op.create_index(op.f('ix_achievements_theme'), 'achievements', ['theme'], unique=False)
     op.create_index(op.f('ix_achievements_title'), 'achievements', ['title'], unique=False)
-    
+
     # 2. ПЕРВОЕ - удаляем foreign key constraint из directions
     op.drop_constraint(op.f('directions_track_id_fkey'), 'directions', type_='foreignkey')
-    
+
     # 3. ВТОРОЕ - удаляем колонку track_id из directions
     op.drop_column('directions', 'track_id')
-    
+
     # 4. ТОЛЬКО ПОТОМ - удаляем таблицу tracks
     op.drop_index(op.f('ix_tracks_id'), table_name='tracks')
     op.drop_index(op.f('ix_tracks_name'), table_name='tracks')
     op.drop_table('tracks')  # УБРАТЬ cascade='cascade' - не нужно
-    
+
     # 5. Обновляем features
     op.add_column('features', sa.Column('title', sa.String(), nullable=False))
     op.drop_index(op.f('ix_features_subtitle'), table_name='features')
@@ -51,7 +51,7 @@ def upgrade() -> None:
     op.drop_constraint(op.f('features_speciality_id_fkey'), 'features', type_='foreignkey')
     op.drop_column('features', 'subtitle')
     op.drop_column('features', 'speciality_id')
-    
+
     # 6. Удаляем image_url из specialities
     op.drop_column('specialities', 'image_url')
     # ### end Alembic commands ###

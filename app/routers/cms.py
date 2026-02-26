@@ -20,15 +20,15 @@
 # from app.models.achievement import Achievement
 
 # from app.schemas.speciality import (
-#     SpecialityCreate, 
-#     SpecialityUpdate, 
+#     SpecialityCreate,
+#     SpecialityUpdate,
 #     Speciality as SpecialitySchema,
 #     Speciality_Features
 # )
 # from app.schemas.feature import (
-#     FeatureBase, 
-#     FeatureCreate, 
-#     FeatureUpdate, 
+#     FeatureBase,
+#     FeatureCreate,
+#     FeatureUpdate,
 #     Feature as FeatureSchema
 # )
 # from app.schemas.plan import (
@@ -43,9 +43,9 @@
 #     Teacher as TeacherSchema
 # )
 # from app.schemas.subject import (
-#     SubjectBase, 
-#     SubjectCreate, 
-#     SubjectUpdate, 
+#     SubjectBase,
+#     SubjectCreate,
+#     SubjectUpdate,
 #     Subject as SubjectSchema
 # )
 # from app.schemas.achievement import (
@@ -105,7 +105,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Такой предмет уже существует"
 #         )
-    
+
 #     subject = Subject(**subject_data.model_dump())
 #     try:
 #         db.add(subject)
@@ -117,7 +117,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при создании предмета"
 #         )
-    
+
 #     return subject
 
 # @router.put("/subject/{subject_id}")
@@ -132,15 +132,15 @@
 #     """
 #     result = await db.execute(select(Subject).where(Subject.id == subject_id))
 #     subject = result.scalar_one_or_none()
-    
+
 #     if not subject:
 #         raise HTTPException(
 #             status_code=status.HTTP_404_NOT_FOUND,
 #             detail="Предмет не найден"
 #         )
-    
+
 #     update_data = subject_data.model_dump(exclude_unset=True)
-    
+
 #     if "name" in update_data:
 #         result = await db.execute(
 #             select(Subject).where(
@@ -153,10 +153,10 @@
 #                 status_code=status.HTTP_400_BAD_REQUEST,
 #                 detail="Предмет с таким названием уже существует"
 #             )
-    
+
 #     for field, value in update_data.items():
 #         setattr(subject, field, value)
-    
+
 #     try:
 #         await db.commit()
 #         await db.refresh(subject)
@@ -166,7 +166,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при обновлении предмета"
 #         )
-    
+
 #     return subject
 
 # @router.delete("/subject/{subject_id}")
@@ -186,7 +186,7 @@
 #             status_code=status.HTTP_404_NOT_FOUND,
 #             detail="Предмет не найден"
 #         )
-    
+
 #     try:
 #         await db.delete(subject)
 #         await db.commit()
@@ -195,7 +195,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при удалении"
 #         )
-    
+
 #     return subject
 
 # @router.post("/feature")
@@ -213,7 +213,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Такое объект уже существует"
 #         )
-    
+
 #     feature = Feature(**feature_data.model_dump())
 #     try:
 #         db.add(feature)
@@ -225,7 +225,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при создании объекта"
 #         )
-    
+
 #     return feature
 
 # @router.put("/feature/{feature_id}")
@@ -246,9 +246,9 @@
 #             status_code=status.HTTP_404_NOT_FOUND,
 #             detail="Обект не найден"
 #         )
-    
+
 #     update_data = feature_data.model_dump(exclude_unset=True)
-    
+
 #     if "title" in update_data:
 #         result = await db.execute(
 #             select(Feature).where(
@@ -261,10 +261,10 @@
 #                 status_code=status.HTTP_400_BAD_REQUEST,
 #                 detail="Объект с таким названием уже существует"
 #             )
-    
+
 #     for field, value in update_data.items():
 #         setattr(feature, field, value)
-    
+
 #     try:
 #         await db.commit()
 #         await db.refresh(feature)
@@ -274,9 +274,9 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при обновлении объекта"
 #         )
-    
+
 #     return feature
-    
+
 # @router.delete("/feature/{feature_id}")
 # async def feature_delete(
 #     feature_id: int,
@@ -294,7 +294,7 @@
 #             status_code=status.HTTP_404_NOT_FOUND,
 #             detail="Объект не найден"
 #         )
-    
+
 #     try:
 #         await db.delete(feature)
 #         await db.commit()
@@ -303,7 +303,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при удалении объекта"
 #         )
-    
+
 #     return feature
 
 # @router.post("/speciality")
@@ -322,7 +322,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Спесиальность с таким названием уже существует"
 #         )
-    
+
 #     speciality = Speciality(**speciality_data.model_dump())
 #     try:
 #         db.add(speciality)
@@ -334,7 +334,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при создании специальности"
 #         )
-    
+
 #     return speciality
 
 # @router.put("/speciality/{speciality_id}")
@@ -355,9 +355,9 @@
 #             status_code=status.HTTP_404_NOT_FOUND,
 #             detail="Специальность не найдена"
 #         )
-    
+
 #     update_data = speciality_data.model_dump(exclude_unset=True)
-    
+
 #     if "name" in update_data:
 #         result = await db.execute(
 #             select(Speciality).where(
@@ -370,10 +370,10 @@
 #                 status_code=status.HTTP_400_BAD_REQUEST,
 #                 detail="Специальность с таким названием уже существует"
 #             )
-    
+
 #     for field, value in update_data.items():
 #         setattr(speciality, field, value)
-    
+
 #     try:
 #         await db.commit()
 #         await db.refresh(speciality)
@@ -383,7 +383,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при обновлении специальности"
 #         )
-    
+
 #     return speciality
 
 # @router.delete("/speciality/{speciality_id}")
@@ -403,7 +403,7 @@
 #             status_code=status.HTTP_404_NOT_FOUND,
 #             detail="Специальность не найдена"
 #         )
-    
+
 #     try:
 #         await db.delete(speciality)
 #         await db.commit()
@@ -412,7 +412,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при удалении специальности"
 #         )
-    
+
 #     return speciality
 
 # @router.post("/achievements")
@@ -443,7 +443,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Проблема с созданием достижения"
 #         )
-    
+
 #     return achive
 
 # @router.put("/achievements/{achive_id}")
@@ -458,15 +458,15 @@
 #     """
 #     result = await db.execute(select(Achievement).where(Achievement.id == achive_id))
 #     achive = result.scalar_one_or_none()
-    
+
 #     if not achive:
 #         raise HTTPException(
 #             status_code=status.HTTP_404_NOT_FOUND,
 #             detail="Достижение не найдено"
 #         )
-    
+
 #     update_data = achive_data.model_dump(exclude_unset=True)
-    
+
 #     if "title" in update_data:
 #         result = await db.execute(
 #             select(Achievement).where(
@@ -479,10 +479,10 @@
 #                 status_code=status.HTTP_400_BAD_REQUEST,
 #                 detail="Достижение с таким названием уже существует"
 #             )
-    
+
 #     for field, value in update_data.items():
 #         setattr(achive, field, value)
-    
+
 #     try:
 #         await db.commit()
 #         await db.refresh(achive)
@@ -492,7 +492,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при обновлении достижения"
 #         )
-    
+
 #     return achive
 
 # @router.delete("/achievements/{achive_id}")
@@ -512,7 +512,7 @@
 #             status_code=status.HTTP_404_NOT_FOUND,
 #             detail="Достижение не найдено"
 #         )
-    
+
 #     try:
 #         await db.delete(achive)
 #         await db.commit()
@@ -522,7 +522,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при удалении достижения"
 #         )
-    
+
 #     return achive
 
 # @router.post("/directions")
@@ -543,7 +543,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Направление с таким названием уже существует"
 #         )
-    
+
 #     direction = Direction(**direction_data.model_dump())
 
 #     try:
@@ -556,7 +556,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при создании направления"
 #         )
-    
+
 #     return direction
 
 
@@ -574,15 +574,15 @@
 #         select(Direction).where(Direction.id == direction_id)
 #     )
 #     direction = result.scalar_one_or_none()
-    
+
 #     if not direction:
 #         raise HTTPException(
 #             status_code=status.HTTP_404_NOT_FOUND,
 #             detail="Направление не найдено"
 #         )
-    
+
 #     update_data = direction_data.model_dump(exclude_unset=True)
-    
+
 #     if "name" in update_data:
 #         result = await db.execute(
 #             select(Direction).where(
@@ -595,10 +595,10 @@
 #                 status_code=status.HTTP_400_BAD_REQUEST,
 #                 detail="Направление с таким названием уже существует"
 #             )
-    
+
 #     for field, value in update_data.items():
 #         setattr(direction, field, value)
-    
+
 #     try:
 #         await db.commit()
 #         await db.refresh(direction)
@@ -608,7 +608,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при обновлении направления"
 #         )
-    
+
 #     return direction
 
 # @router.delete("/directions/{direction_id}")
@@ -634,7 +634,7 @@
 #         select(func.count(Discipline.id)).where(Discipline.direction_id == direction_id)
 #     )
 #     discipline_count = result.scalar()
-    
+
 #     try:
 #         await db.delete(direction)
 #         await db.commit()
@@ -642,7 +642,7 @@
 #             "message": "Направление успешно удалено",
 #             "deleted_disciplines_count": discipline_count
 #         }
-        
+
 #     except Exception as e:
 #         await db.rollback()
 #         raise HTTPException(
@@ -674,19 +674,19 @@
 #         select(Direction).where(Direction.id == discipline_data.direction_id)
 #     )
 #     direction = result.scalar_one_or_none()
-    
+
 #     if not direction:
 #         raise HTTPException(
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Указанное направление не существует"
 #         )
-    
+
 #     if discipline_data.start_term > discipline_data.end_term:
 #         raise HTTPException(
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Начальный семестр не может быть больше конечного"
 #         )
-    
+
 #     discipline = Discipline(**discipline_data.model_dump())
 
 #     try:
@@ -700,7 +700,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при создании дисциплины"
 #         )
-    
+
 #     return discipline
 
 # @router.put("/disciplines/{discipline_id}")
@@ -717,13 +717,13 @@
 #         select(Discipline).where(Discipline.id == discipline_id)
 #     )
 #     discipline = result.scalar_one_or_none()
-    
+
 #     if not discipline:
 #         raise HTTPException(
 #             status_code=status.HTTP_404_NOT_FOUND,
 #             detail="Дисциплина не найдена"
 #         )
-    
+
 #     update_data = discipline_data.model_dump(exclude_unset=True)
 
 #     if "name" in update_data:
@@ -748,19 +748,19 @@
 #                 status_code=status.HTTP_400_BAD_REQUEST,
 #                 detail="Указанное направление не существует"
 #             )
-        
+
 #     start_term = update_data.get("start_term", discipline.start_term)
 #     end_term = update_data.get("end_term", discipline.end_term)
-    
+
 #     if start_term > end_term:
 #         raise HTTPException(
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Начальный семестр не может быть больше конечного"
 #         )
-    
+
 #     for field, value in update_data.items():
 #         setattr(discipline, field, value)
-    
+
 #     try:
 #         await db.commit()
 #         await db.refresh(discipline)
@@ -770,7 +770,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при обновлении дисциплины"
 #         )
-    
+
 #     return discipline
 
 
@@ -793,7 +793,7 @@
 #             status_code=status.HTTP_404_NOT_FOUND,
 #             detail="Дисциплина не найдена"
 #         )
-    
+
 #     try:
 #         await db.delete(discipline)
 #         await db.commit()
@@ -803,7 +803,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail=f"Ошибка при удалении дисциплины: {str(e)}"
 #         )
-    
+
 #     return discipline
 
 
@@ -824,7 +824,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Преподаватель с таким ФИО уже существует"
 #         )
-    
+
 #     teacher = (Teacher(**teacher_data.model_dump()))
 
 #     try:
@@ -837,9 +837,9 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при создании преподавателя"
 #         )
-    
+
 #     return teacher
-    
+
 # @router.put("/teacher/{teacher_id}")
 # async def teacher_update(
 #     teacher_id: int,
@@ -858,9 +858,9 @@
 #             status_code=status.HTTP_404_NOT_FOUND,
 #             detail="Преподаватель не найден"
 #         )
-    
+
 #     update_data = teacher_data.model_dump(exclude_unset=True)
-    
+
 #     if "fio" in update_data:
 #         result = await db.execute(
 #             select(Teacher).where(
@@ -873,10 +873,10 @@
 #                 status_code=status.HTTP_400_BAD_REQUEST,
 #                 detail="Преподаватель уже существует"
 #             )
-    
+
 #     for field, value in update_data.items():
 #         setattr(teacher, field, value)
-    
+
 #     try:
 #         await db.commit()
 #         await db.refresh(teacher)
@@ -886,7 +886,7 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при обновлении данных"
 #         )
-    
+
 #     return teacher
 
 # @router.delete("/teacher/{teacher_id}")
@@ -906,7 +906,7 @@
 #             status_code=status.HTTP_404_NOT_FOUND,
 #             detail="Преподаватель не найден"
 #         )
-    
+
 #     try:
 #         await db.delete(teacher)
 #         await db.commit()
@@ -915,5 +915,5 @@
 #             status_code=status.HTTP_400_BAD_REQUEST,
 #             detail="Ошибка при удалении"
 #         )
-    
+
 #     return teacher

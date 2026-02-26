@@ -1,32 +1,32 @@
+import os
+from typing import List
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.database import get_db
 from sqlalchemy.orm import selectinload
-from typing import List
-import os
 
-from app.models.speciality import Speciality
-from app.models.feature import Feature
-from app.models.plan import Direction, Discipline
-from app.models.teacher import Teacher
-from app.models.subject import Subject
+from app.database import get_db
 from app.models.achievement import Achievement
-
-from app.schemas.speciality import Speciality as SpecialitySchema
-from app.schemas.feature import Feature as FeatureSchema
-from app.schemas.teacher import Teacher as TeacherSchema
-from app.schemas.subject import Subject as SubjectSchema
-from app.schemas.achievement import Achievement as AchievementSchema
+from app.models.feature import Feature
+from app.models.plan import Direction
+from app.models.speciality import Speciality
+from app.models.subject import Subject
+from app.models.teacher import Teacher
 
 # [PERF] Импорт нашего таймера
 from app.performance import PerfTimer
+from app.schemas.achievement import Achievement as AchievementSchema
+from app.schemas.feature import Feature as FeatureSchema
+from app.schemas.speciality import Speciality as SpecialitySchema
+from app.schemas.subject import Subject as SubjectSchema
+from app.schemas.teacher import Teacher as TeacherSchema
 
 router = APIRouter(tags=["Landing"])
 
-@router.get("/") 
+@router.get("/")
 async def read_root():
     file_path = os.path.join("app", "templates", "index.html")
     return FileResponse(file_path)

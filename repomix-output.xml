@@ -93,8 +93,11 @@ benchmark.py
 Caddyfile
 DEV_GUIDE.md
 Dockerfile
+pyproject.toml
 README.md
 requirements.txt
+tests/conftest.py
+tests/test_api.py
 </directory_structure>
 
 <files>
@@ -822,6 +825,95 @@ User-agent: * Disallow: /
 3. Где смотреть данные:
 
 Прод: https://admin.vinogradovnikita.ru (пароль спросишь)
+</file>
+
+<file path="pyproject.toml">
+[tool.ruff]
+# Базовые настройки форматера и линтера
+line-length = 100
+target-version = "py312"
+exclude = [".git", "__pycache__", "venv", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"] # Ошибки, фатальные баги, предупреждения и сортировка импортов
+ignore = ["E501"] # Игнорируем ошибки слишком длинных строк (FastAPI роуты часто длинные)
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+</file>
+
+<file path="tests/conftest.py">
+import os
+import pytest
+import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+
+# Импортируем твое приложение и модели
+from app.main import app
+from app.database import Base, get_db
+
+# CI будет передавать этот URL. Если его нет, используем локальный
+TEST_DATABASE_URL = os.getenv(
+    "TEST_DATABASE_URL", 
+    "postgresql+asyncpg://postgres:postgres@localhost:5432/test_db"
+)
+
+# Создаем движок специально для тестов
+test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+TestingSessionLocal = sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
+
+# Фикстура: Подменяем зависимость БД в FastAPI на нашу тестовую
+async def override_get_db():
+    async with TestingSessionLocal() as session:
+        yield session
+
+app.dependency_overrides[get_db] = override_get_db
+
+# Фикстура: Создаем таблицы перед тестами и удаляем после
+@pytest_asyncio.fixture(autouse=True, scope="session")
+async def prepare_database():
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+# Фикстура: Эмулятор браузера/клиента для выполнения запросов
+@pytest_asyncio.fixture
+async def client():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
+</file>
+
+<file path="tests/test_api.py">
+import pytest
+
+@pytest.mark.asyncio
+async def test_health_check(client):
+    """Тест: Проверяет, что БД отвечает и математика работает"""
+    response = await client.get("/api/health")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["db_status"] is True
+    assert data["math_result"] == 155
+
+@pytest.mark.asyncio
+async def test_get_specialities_empty(client):
+    """Тест: Эндпоинт отдает 200 OK (даже если БД пока пустая)"""
+    response = await client.get("/speciality")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+@pytest.mark.asyncio
+async def test_get_directions_with_disciplines(client):
+    """Тест: Твой сложный роут собирается без ошибок"""
+    response = await client.get("/directions-with-disciplines")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
 </file>
 
 <file path="alembic/versions/5714656b74cd_add_svg_code_to_features_and_subjects.py">
@@ -2081,101 +2173,76 @@ pgadmin.vinogradovnikita.ru {
 </file>
 
 <file path=".github/workflows/ci.yml">
-name: Deploy IT_BGITU
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  # 1. Проверка кода 
-  check-code:
+  # === ЭТАП 1: ТЕСТИРОВАНИЕ И ЛИНТИНГ ===
+  test:
     runs-on: ubuntu-latest
+    
+    # Поднимаем временный PostgreSQL прямо внутри GitHub Actions
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.12"
+          cache: "pip"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Check for missing migrations
-        run: |
-          export DATABASE_URL="sqlite:///./check.db"
-          alembic check || echo "⚠️ ВНИМАНИЕ: Проверьте миграции!"
+      - name: Run Ruff (Линтер и Форматер)
+        run: ruff check .
 
-  # 2. Сборка и отправка образа
-  build-and-push:
-    needs: check-code  
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+      - name: Run Pytest (Тестирование API и БД)
+        env:
+          # Указываем приложению URL к временной БД GitHub Actions
+          TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/test_db
+          SECRET_KEY: dummy_ci_secret_key
+          ENABLE_PERF_LOGGING: False
+        run: pytest -v
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: binarybard7279/it-bgitu:latest
-
-  # 2.5 НОВЫЙ ШАГ: Копируем обновленный docker-compose.yml на сервер
-  update-configs:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Copy config files to server
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          # Копируем docker-compose.yml (где volumes) и Caddyfile
-          source: "docker-compose.yml,Caddyfile"
-          target: "/root/it-bgitu"
-
-  # 3. Деплой на сервер
+  # === ЭТАП 2: ДЕПЛОЙ НА ПРОД ===
   deploy:
-    needs: update-configs # Ждем, пока обновятся конфиги
+    needs: test # ВАЖНО: Ждет успешного завершения job "test"
     runs-on: ubuntu-latest
     steps:
-      - uses: appleboy/ssh-action@master
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             cd /root/it-bgitu
-            
-            # 1. Секреты (без изменений)
-            echo "DB_USER=${{ secrets.DB_USER }}" > .env
-            echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-            echo "DB_HOST=db" >> .env
-            echo "DB_PORT=5432" >> .env
-            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-            
-            # 2. Деплой 
-            # Теперь здесь будет использоваться НОВЫЙ docker-compose.yml с volumes
-            docker compose pull
-            docker compose up -d --remove-orphans
-            
-            # 3. Миграции и очистка
-            sleep 5
-            docker compose exec -T app alembic upgrade head
-            docker image prune -f
+            git pull origin main
+            docker compose down
+            docker compose up -d --build
 </file>
 
 <file path="app/routers/cms.py">
@@ -3250,15 +3317,16 @@ jobs:
       </div>
     `}).join('');
   }
+
   // --- Преподаватели (Teachers) ---
   function renderTeachers(data) {
     const fTrack = getById('facultyTrack');
     if (!fTrack) return;
 
     const innerHtml = data.map(t => {
-      // Если есть URL картинки, используем img, иначе цветную заглушку
+      // Включена ленивая загрузка (loading="lazy")
       const imgBlock = t.image_url 
-        ? `<img src="${esc(t.image_url)}" alt="${esc(t.fio)}" style="width:100%; height:100%; object-fit:cover; object-position: top center;">` 
+        ? `<img src="${esc(t.image_url)}" alt="${esc(t.fio)}" loading="lazy" style="width:100%; height:100%; object-fit:cover; object-position: top center;">` 
         : `<div style="width:100%; height:100%; background:#ddd; display:flex; align-items:center; justify-content:center; color:#777;">Нет фото</div>`;
 
       return `
@@ -3294,7 +3362,6 @@ jobs:
     `).join('');
   }
 
-  // --- Roadmap Logic (План) ---
   // --- Roadmap Logic (План с группировкой и упаковкой) ---
   function initRoadmap(directionsData) {
     const rSelect = getById('roadmapSelect');
@@ -3432,7 +3499,8 @@ jobs:
     }, { passive: true });
     rGrid.addEventListener('mouseleave', () => rTip.style.display = 'none');
   }
-  // ================= 4. PHYSICS & UI (Старый код) =================
+  
+  // ================= 4. PHYSICS & UI =================
   function initFacultyPhysics(fTrack) {
       const inner = fTrack.firstElementChild;
       let off = 0, max = 0, isD = false, start, startOff, last, vel = 0, rafP;
@@ -3904,7 +3972,11 @@ python-multipart
 Jinja2
 sqladmin[full]>=0.19.0
 wtforms
-httpx
+Pillow==10.2.0
+ruff==0.3.2
+pytest==8.1.1
+pytest-asyncio==0.23.5
+httpx==0.27.0
 </file>
 
 <file path="app/routers/public.py">
@@ -4100,6 +4172,7 @@ if __name__ == "__main__":
 </file>
 
 <file path="app/admin.py">
+# app/admin.py
 import os
 from typing import Any
 
@@ -4116,6 +4189,10 @@ from app.database import engine
 from app.models import User, Speciality, Feature, Direction, Discipline, Teacher, Subject, Achievement
 from app.security import verify_password, get_password_hash
 from starlette.datastructures import UploadFile
+
+# --- НОВЫЕ ИМПОРТЫ ДЛЯ ОПТИМИЗАЦИИ ФОТО ---
+from PIL import Image
+import io
 
 # --- AUTHENTICATION ---
 class AdminAuth(AuthenticationBackend):
@@ -4239,13 +4316,28 @@ class TeacherAdmin(ModelView, model=Teacher):
     async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
         input_file = data.get("image_url")
         if input_file and hasattr(input_file, "filename") and input_file.filename:
-            extension = input_file.filename.split(".")[-1]
-            unique_filename = f"{uuid.uuid4()}.{extension}"
+            # Читаем файл в память асинхронно
+            image_bytes = await input_file.read()
+            
+            # Открываем изображение через Pillow
+            img = Image.open(io.BytesIO(image_bytes))
+            
+            # Конвертируем в RGB (убираем альфа-канал, если это PNG, для корректного сжатия)
+            if img.mode in ("RGBA", "P"):
+                img = img.convert("RGB")
+                
+            # Пропорциональный ресайз (максимум 720x720 px)
+            img.thumbnail((720, 720), Image.Resampling.LANCZOS)
+            
+            # Сохраняем в формате WebP
+            unique_filename = f"{uuid.uuid4()}.webp"
             save_directory = Path("app/uploads")
             save_directory.mkdir(parents=True, exist_ok=True)
             save_path = save_directory / unique_filename
-            with open(save_path, "wb") as buffer:
-                shutil.copyfileobj(input_file.file, buffer)
+            
+            # Сохраняем с оптимизацией
+            img.save(save_path, format="WEBP", quality=80, method=6)
+            
             data["image_url"] = f"/media/{unique_filename}"
         else:
             if is_created:
