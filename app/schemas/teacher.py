@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class TeacherBase(BaseModel):
     fio: str = Field(..., min_length=1, max_length=100)
     post: str = Field(..., min_length=1, max_length=100)
-    subjects: List[str] = Field(..., min_items=1, max_items=100)
+    subjects: List[str] = Field(..., min_length=1, max_length=100)
     image_url: str = Field(...)
 
 # class TeacherCreate(TeacherBase):
