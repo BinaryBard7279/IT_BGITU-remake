@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 
+
 class FaqBase(BaseModel):
     question: str = Field(..., min_length=1, max_length=255)
     answer: str = Field(..., min_length=1)

@@ -19,12 +19,12 @@ from app.models import (
     Achievement,
     Direction,
     Discipline,
+    Faq,
     Feature,
     Speciality,
     Subject,
     Teacher,
     User,
-    Faq,
 )
 from app.security import get_password_hash, verify_password
 

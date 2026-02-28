@@ -10,21 +10,21 @@ from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.models.achievement import Achievement
+from app.models.faq import Faq
 from app.models.feature import Feature
 from app.models.plan import Direction
 from app.models.speciality import Speciality
 from app.models.subject import Subject
 from app.models.teacher import Teacher
-from app.models.faq import Faq
 
 # [PERF] Импорт нашего таймера
 from app.performance import PerfTimer
 from app.schemas.achievement import Achievement as AchievementSchema
+from app.schemas.faq import Faq as FaqSchema
 from app.schemas.feature import Feature as FeatureSchema
 from app.schemas.speciality import Speciality as SpecialitySchema
 from app.schemas.subject import Subject as SubjectSchema
 from app.schemas.teacher import Teacher as TeacherSchema
-from app.schemas.faq import Faq as FaqSchema
 
 router = APIRouter(tags=["Landing"])
 
