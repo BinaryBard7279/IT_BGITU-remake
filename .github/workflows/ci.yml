@@ -105,6 +105,8 @@ jobs:
             
             # 3. Накатываем миграции
             sleep 5
+            # Принудительно синхронизируем историю миграций БД с текущим кодом
+            docker compose exec -T app alembic stamp head
             docker compose exec -T app alembic upgrade head
             
             # 4. Чистим старые образы, чтобы не забивать память сервера
