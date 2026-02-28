@@ -63,17 +63,28 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
+          # Используем set -e, чтобы скрипт падал при любой ошибке (защита от "ложного успеха")
           script: |
+            set -e
             cd /root/it-bgitu
             
-            # 1. Принудительно скачиваем и применяем код из ветки main, игнорируя локальные конфликты на VPS
+            # 1. Восстанавливаем Git, если папка не является репозиторием
+            if [ ! -d ".git" ]; then
+              echo "Git repository missing! Initializing..."
+              git init
+              git branch -m main
+              # Подключаем удаленный репозиторий напрямую через переменную GitHub
+              git remote add origin https://github.com/${{ github.repository }}.git
+            fi
+            
+            # 2. Принудительно скачиваем и применяем код
             git fetch origin
             git reset --hard origin/main
             
-            # 2. Пересобираем и перезапускаем контейнеры
+            # 3. Пересобираем контейнеры
             docker compose down
             docker compose up -d --build
             
-            # 3. Даем базе данных пару секунд на запуск, затем накатываем миграции
+            # 4. Миграции
             sleep 3
             docker compose exec -T app alembic upgrade head
