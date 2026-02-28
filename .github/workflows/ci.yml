@@ -103,9 +103,6 @@ jobs:
             docker compose pull
             docker compose up -d --remove-orphans
             
-            # 3. Накатываем миграции
-            sleep 5
-            
             # Амнезия для Alembic: удаляем старую таблицу с историей напрямую через PostgreSQL
             docker compose exec -T -e PGPASSWORD="${{ secrets.DB_PASS }}" db psql -U "${{ secrets.DB_USER }}" -d "${{ secrets.DB_NAME }}" -c "DROP TABLE IF EXISTS alembic_version;"
             

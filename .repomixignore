@@ -8,19 +8,3 @@ repomix-output.xml
 repomix-output.txt
 .env.local
 
-# --- НОВОЕ ДЛЯ ОПТИМИЗАЦИИ ---
-
-# Игнорируем миграции (ИИ достаточно папки app/models)
-alembic/
-alembic.ini
-
-# Игнорируем фронтенд, если решаем бэкенд-задачи 
-# (закомментируйте эти строки, если вам нужна помощь с JS/CSS/HTML)
-; app/static/
-; app/templates/
-
-# Игнорируем файлы, которые полностью закомментированы или пока не нужны
-app/routers/cms.py
-app/routers/auth.py
-app/dependencies.py
-app/jwt_manager.py
