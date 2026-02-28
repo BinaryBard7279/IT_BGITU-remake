@@ -18,3 +18,5 @@
 3. Где смотреть данные:
 
 Прод: https://admin.vinogradovnikita.ru (пароль спросишь)
+
+4. Перед комитом пиши в консоли ruff check --fix .

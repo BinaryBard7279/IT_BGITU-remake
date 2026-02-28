@@ -53,7 +53,6 @@ jobs:
         run: pytest -v
 
   # === ЭТАП 2: ДЕПЛОЙ НА ПРОД ===
-  # === ЭТАП 2: ДЕПЛОЙ НА ПРОД ===
   deploy:
     needs: test # ВАЖНО: Ждет успешного завершения job "test"
     runs-on: ubuntu-latest
@@ -66,6 +65,15 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             cd /root/it-bgitu
-            git pull origin main
+            
+            # 1. Принудительно скачиваем и применяем код из ветки main, игнорируя локальные конфликты на VPS
+            git fetch origin
+            git reset --hard origin/main
+            
+            # 2. Пересобираем и перезапускаем контейнеры
             docker compose down
             docker compose up -d --build
+            
+            # 3. Даем базе данных пару секунд на запуск, затем накатываем миграции
+            sleep 3
+            docker compose exec -T app alembic upgrade head
