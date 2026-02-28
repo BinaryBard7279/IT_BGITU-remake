@@ -15,6 +15,7 @@ from app.models.plan import Direction
 from app.models.speciality import Speciality
 from app.models.subject import Subject
 from app.models.teacher import Teacher
+from app.models.faq import Faq
 
 # [PERF] Импорт нашего таймера
 from app.performance import PerfTimer
@@ -23,6 +24,7 @@ from app.schemas.feature import Feature as FeatureSchema
 from app.schemas.speciality import Speciality as SpecialitySchema
 from app.schemas.subject import Subject as SubjectSchema
 from app.schemas.teacher import Teacher as TeacherSchema
+from app.schemas.faq import Faq as FaqSchema
 
 router = APIRouter(tags=["Landing"])
 
@@ -53,6 +55,11 @@ async def health_check(db: AsyncSession = Depends(get_db)):
 @router.get("/achievements", response_model=List[AchievementSchema])
 async def get_all_achievements(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Achievement).order_by(Achievement.id))
+    return result.scalars().all()
+
+@router.get("/faqs", response_model=List[FaqSchema])
+async def get_all_faqs(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Faq).order_by(Faq.id))
     return result.scalars().all()
 
 @router.get("/features", response_model=List[FeatureSchema])

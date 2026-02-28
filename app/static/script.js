@@ -48,13 +48,14 @@
   async function loadData() {
     try {
       // Запрашиваем все данные параллельно
-      const [specialities, subjects, features, teachers, achievements, directions] = await Promise.all([
+      const [specialities, subjects, features, teachers, achievements, directions, faqs] = await Promise.all([
         fetch('/speciality').then(r => r.json()),
         fetch('/subjects').then(r => r.json()),
         fetch('/features').then(r => r.json()),
         fetch('/teachers').then(r => r.json()),
         fetch('/achievements').then(r => r.json()),
-        fetch('/directions-with-disciplines').then(r => r.json())
+        fetch('/directions-with-disciplines').then(r => r.json()),
+        fetch('/faqs').then(r => r.json())
       ]);
 
       renderSpecialities(specialities);
@@ -63,6 +64,7 @@
       renderTeachers(teachers);
       renderAchievements(achievements);
       initRoadmap(directions);
+      renderFaqs(faqs);
 
       initObservers();
 
@@ -188,6 +190,19 @@
         </div>
         <h3 class="achievement-title">${esc(a.title)}</h3>
         <p class="achievement-desc">${esc(a.description)}</p>
+      </div>
+    `).join('');
+  }
+
+  function renderFaqs(data) {
+    const container = getById('faqContainer');
+    if (!container) return;
+    container.innerHTML = data.map(item => `
+      <div class="faq-item">
+        <button class="faq-question"><span>${esc(item.question)}</span><span class="faq-icon">+</span></button>
+        <div class="faq-answer">
+          <p>${esc(item.answer)}</p>
+        </div>
       </div>
     `).join('');
   }

@@ -6,6 +6,7 @@ from .speciality import Speciality, Speciality_Features, SpecialityBase
 from .subject import Subject, SubjectBase
 from .teacher import Teacher, TeacherBase
 from .user import User, UserBase
+from .faq import Faq, FaqBase
 
 __all__ = [
     # Feature
@@ -31,6 +32,9 @@ __all__ = [
 
     # Achievement
     'AchievementBase', 'Achievement',
+
+    # Faq
+    'FaqBase', 'Faq',
 
     # Health Check
     'HealthCheck',

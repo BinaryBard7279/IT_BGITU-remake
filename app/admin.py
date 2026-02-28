@@ -24,6 +24,7 @@ from app.models import (
     Subject,
     Teacher,
     User,
+    Faq,
 )
 from app.security import get_password_hash, verify_password
 
@@ -265,6 +266,16 @@ class AchievementAdmin(ModelView, model=Achievement):
     form_overrides = {"description": TextAreaField}
 
 
+class FaqAdmin(ModelView, model=Faq):
+    name = "Вопрос-ответ (FAQ)"
+    name_plural = "Вопросы-ответы (FAQ)"
+    icon = "fa-solid fa-circle-question"
+
+    column_list = [Faq.question]
+    column_labels = {Faq.question: "Вопрос", Faq.answer: "Ответ"}
+    form_overrides = {"answer": TextAreaField}
+
+
 # --- SETUP ---
 
 def setup_admin(app):
@@ -285,3 +296,4 @@ def setup_admin(app):
     admin.add_view(FeatureAdmin)
     admin.add_view(SubjectAdmin)
     admin.add_view(AchievementAdmin)
+    admin.add_view(FaqAdmin)
