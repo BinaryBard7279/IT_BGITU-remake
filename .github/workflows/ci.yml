@@ -105,7 +105,11 @@ jobs:
             
             # 3. Накатываем миграции
             sleep 5
-            # Принудительно синхронизируем историю миграций БД с текущим кодом
+            
+            # Амнезия для Alembic: удаляем старую таблицу с историей напрямую через PostgreSQL
+            docker compose exec -T -e PGPASSWORD="${{ secrets.DB_PASS }}" db psql -U "${{ secrets.DB_USER }}" -d "${{ secrets.DB_NAME }}" -c "DROP TABLE IF EXISTS alembic_version;"
+            
+            # Теперь база чиста от старых хешей. Ставим актуальную метку миграций.
             docker compose exec -T app alembic stamp head
             docker compose exec -T app alembic upgrade head
             
