@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 
+
 class TimelineStepBase(BaseModel):
     order: int = Field(..., ge=0)
     term: str = Field(..., min_length=1, max_length=100)

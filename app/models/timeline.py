@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text
+
 from app.models import Base
+
 
 class TimelineStep(Base):
     __tablename__ = 'timeline_steps'

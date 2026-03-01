@@ -21,12 +21,12 @@ from app.models import (
     Discipline,
     Faq,
     Feature,
+    Setting,
     Speciality,
     Subject,
     Teacher,
-    User,
-    Setting,
     TimelineStep,
+    User,
 )
 from app.security import get_password_hash, verify_password
 
@@ -295,9 +295,9 @@ class TimelineStepAdmin(ModelView, model=TimelineStep):
 
     column_list = [TimelineStep.order, TimelineStep.term, TimelineStep.title]
     column_labels = {
-        TimelineStep.order: "Порядок (1, 2, 3...)", 
-        TimelineStep.term: "Семестры", 
-        TimelineStep.title: "Заголовок", 
+        TimelineStep.order: "Порядок (1, 2, 3...)",
+        TimelineStep.term: "Семестры",
+        TimelineStep.title: "Заголовок",
         TimelineStep.description: "Описание",
         TimelineStep.color_class: "Цвет"
     }

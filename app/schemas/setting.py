@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 
+
 class SettingBase(BaseModel):
     key: str = Field(..., min_length=1, max_length=100)
     value: str = Field(..., min_length=1)
