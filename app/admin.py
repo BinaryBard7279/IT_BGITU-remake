@@ -25,6 +25,8 @@ from app.models import (
     Subject,
     Teacher,
     User,
+    Setting,
+    TimelineStep,
 )
 from app.security import get_password_hash, verify_password
 
@@ -276,6 +278,36 @@ class FaqAdmin(ModelView, model=Faq):
     form_overrides = {"answer": TextAreaField}
 
 
+class SettingAdmin(ModelView, model=Setting):
+    name = "Текст сайта (Настройки)"
+    name_plural = "Тексты сайта (Настройки)"
+    icon = "fa-solid fa-gear"
+
+    column_list = [Setting.key, Setting.description, Setting.value]
+    column_labels = {Setting.key: "Ключ (обязательно на англ, напр: hero_title)", Setting.value: "Значение (Текст)", Setting.description: "Описание для вас"}
+    form_overrides = {"value": TextAreaField}
+    column_searchable_list = [Setting.key, Setting.description]
+
+class TimelineStepAdmin(ModelView, model=TimelineStep):
+    name = "Этап обучения (Timeline)"
+    name_plural = "Этапы обучения (Timeline)"
+    icon = "fa-solid fa-stream"
+
+    column_list = [TimelineStep.order, TimelineStep.term, TimelineStep.title]
+    column_labels = {
+        TimelineStep.order: "Порядок (1, 2, 3...)", 
+        TimelineStep.term: "Семестры", 
+        TimelineStep.title: "Заголовок", 
+        TimelineStep.description: "Описание",
+        TimelineStep.color_class: "Цвет"
+    }
+    form_overrides = {"description": TextAreaField}
+    form_args = {
+        "color_class": {"label": "CSS класс цвета (bg-pastel-sky, bg-pastel-mint, bg-pastel-peach, bg-pastel-lavender)"}
+    }
+    column_sortable_list = [TimelineStep.order]
+
+
 # --- SETUP ---
 
 def setup_admin(app):
@@ -297,3 +329,5 @@ def setup_admin(app):
     admin.add_view(SubjectAdmin)
     admin.add_view(AchievementAdmin)
     admin.add_view(FaqAdmin)
+    admin.add_view(TimelineStepAdmin)
+    admin.add_view(SettingAdmin)

@@ -7,6 +7,8 @@ from .speciality import Speciality, Speciality_Features, SpecialityBase
 from .subject import Subject, SubjectBase
 from .teacher import Teacher, TeacherBase
 from .user import User, UserBase
+from .setting import Setting, SettingBase
+from .timeline import TimelineStep, TimelineStepBase
 
 __all__ = [
     # Feature
@@ -38,4 +40,8 @@ __all__ = [
 
     # Health Check
     'HealthCheck',
+
+    # Setting & Timeline
+    'SettingBase', 'Setting',
+    'TimelineStepBase', 'TimelineStep',
 ]

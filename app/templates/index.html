@@ -22,7 +22,7 @@
   <header id="header">
     <div class="container">
       <nav class="header-nav">
-        <a href="#" class="logo">БГИТУ <span class="text-muted-foreground font-normal">IT-Институт</span></a>
+        <a href="#" class="logo" id="setting_nav_logo">БГИТУ <span class="text-muted-foreground font-normal">IT-Институт</span></a>
         
         <ul class="nav-links">
           <li><button class="nav-link" data-target="directions">Направления</button></li>
@@ -32,7 +32,7 @@
           <li><button class="nav-link" data-target="roadmap">План</button></li>
         </ul>
         
-        <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary btn-sm header-cta">Подать заявление</a>
+        <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary btn-sm header-cta" id="setting_nav_btn_link"><span id="setting_nav_btn_text">Подать заявление</span></a>
       </nav>
     </div>
   </header>
@@ -42,11 +42,11 @@
       <div class="container">
         <div class="hero-grid">
           <div class="hero-content reveal">
-            <h1 class="hero-title">Вкатись в IT <br><span class="text-muted-foreground">с БГИТУ</span></h1>
-            <p class="hero-description">Пройди путь от первой строчки кода до офера в топовой компании. Оплачиваемая практика с 3 курса, военный билет и государственное портфолио проектов.</p>
+            <h1 class="hero-title" id="setting_hero_title">Вкатись в IT <br><span class="text-muted-foreground">с БГИТУ</span></h1>
+            <p class="hero-description" id="setting_hero_desc">Пройди путь от первой строчки кода до офера в топовой компании. Оплачиваемая практика с 3 курса, военный билет и государственное портфолио проектов.</p>
             <div class="hero-buttons">
-              <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary btn-lg">Подать заявление</a>
-              <a href="#directions" class="btn btn-outline btn-lg">Узнать больше</a>
+              <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary btn-lg" id="setting_hero_btn1_link"><span id="setting_hero_btn1_text">Подать заявление</span></a>
+              <a href="#directions" class="btn btn-outline btn-lg" id="setting_hero_btn2_link"><span id="setting_hero_btn2_text">Узнать больше</span></a>
             </div>
           </div>
           
@@ -68,8 +68,8 @@
     <section id="directions" class="section section-alt">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Направления обучения</h2>
-          <p class="section-description">Выберите программу, соответствующую вашим интересам</p>
+          <h2 class="section-title" id="setting_directions_title">Направления обучения</h2>
+          <p class="section-description" id="setting_directions_desc">Выберите программу, соответствующую вашим интересам</p>
         </div>
         <div class="directions-carousel reveal">
           <div class="directions-track-wrap">
@@ -90,8 +90,8 @@
     <section id="disciplines" class="section section-alt">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Ключевые дисциплины</h2>
-          <p class="section-description">Актуальный технологический стек</p>
+          <h2 class="section-title" id="setting_disciplines_title">Ключевые дисциплины</h2>
+          <p class="section-description" id="setting_disciplines_desc">Актуальный технологический стек</p>
         </div>
         
         <div class="disciplines-grid" id="subjectsGrid">
@@ -102,8 +102,8 @@
     <section id="features" class="section section-alt">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Почему выбирают нас</h2>
-          <p class="section-description">Фокус на карьере и личной траектории студента</p>
+          <h2 class="section-title" id="setting_features_title">Почему выбирают нас</h2>
+          <p class="section-description" id="setting_features_desc">Фокус на карьере и личной траектории студента</p>
         </div>
         
         <div class="features-grid" id="featuresGrid">
@@ -114,8 +114,8 @@
     <section id="faculty" class="section">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Преподаватели</h2>
-          <p class="section-description">Практикующие специалисты ведущих IT-компаний</p>
+          <h2 class="section-title" id="setting_faculty_title">Преподаватели</h2>
+          <p class="section-description" id="setting_faculty_desc">Практикующие специалисты ведущих IT-компаний</p>
         </div>
         <div class="faculty-tape">
           <button class="faculty-arrow faculty-prev" id="facultyPrev"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -129,8 +129,8 @@
     <section id="roadmap" class="section section-alt">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Учебный план</h2>
-          <p class="section-description">8 семестров интенсивного обучения</p>
+          <h2 class="section-title" id="setting_roadmap_title">Учебный план</h2>
+          <p class="section-description" id="setting_roadmap_desc">8 семестров интенсивного обучения</p>
           <div style="text-align: center; margin-bottom: 1rem;">
               <select id="roadmapSelect" class="form-select" style="max-width: 300px; display: inline-block;">
                   <option value="" disabled selected>Загрузка планов...</option>
@@ -156,47 +156,12 @@
     <section id="curriculum-timeline" class="section">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Путь студента</h2>
-          <p class="section-description">Пошаговое развитие от новичка до инженера</p>
+          <h2 class="section-title" id="setting_timeline_title">Путь студента</h2>
+          <p class="section-description" id="setting_timeline_desc">Пошаговое развитие от новичка до инженера</p>
         </div>
         <div class="timeline-wrapper">
-          <div class="timeline-line"></div>
-          
-          <div class="timeline-item reveal">
-            <div class="timeline-marker bg-pastel-sky">1</div>
-            <div class="timeline-content hover-lift">
-              <span class="timeline-term">1–2 семестры</span>
-              <h3 class="timeline-heading">Шаг 1. Фундаментальные знания</h3>
-              <p class="timeline-desc">Информатика, алгоритмизация и программирование (C++/C#), базы данных, математика и физика.</p>
-            </div>
-          </div>
-
-          <div class="timeline-item reveal">
-            <div class="timeline-marker bg-pastel-mint">2</div>
-            <div class="timeline-content hover-lift">
-              <span class="timeline-term">3–4 семестры</span>
-              <h3 class="timeline-heading">Шаг 2. Проекты и практики</h3>
-              <p class="timeline-desc">Совместная работа над проектом, учебная практика (ознакомительная, технологическая), первые командные задачи.</p>
-            </div>
-          </div>
-
-          <div class="timeline-item reveal">
-            <div class="timeline-marker bg-pastel-peach">3</div>
-            <div class="timeline-content hover-lift">
-              <span class="timeline-term">5–7 семестры</span>
-              <h3 class="timeline-heading">Шаг 3. Специализация и стажировки</h3>
-              <p class="timeline-desc">Frontend, Backend, 1C, мобильная разработка, системное администрирование, ML/AI, тестирование ПО.</p>
-            </div>
-          </div>
-
-          <div class="timeline-item reveal">
-            <div class="timeline-marker bg-pastel-lavender">4</div>
-            <div class="timeline-content hover-lift">
-              <span class="timeline-term">8 семестр</span>
-              <h3 class="timeline-heading">Шаг 4. Целевой диплом и трудоустройство</h3>
-              <p class="timeline-desc">Дипломный проект, связанный с реальными задачами предприятий. Выход на позиции Junior/Middle разработчика.</p>
-            </div>
-          </div>
+            <div class="timeline-line"></div>
+        </div>
 
         </div>
       </div>
@@ -205,8 +170,8 @@
     <section id="achievements" class="section">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Достижения</h2>
-          <p class="section-description">Хакатоны, гранты и карьеры студентов</p>
+          <h2 class="section-title" id="setting_achievements_title">Достижения</h2>
+          <p class="section-description" id="setting_achievements_desc">Хакатоны, гранты и карьеры студентов</p>
         </div>
         <div class="achievements-grid" id="achievementsGrid">
             </div>
@@ -216,8 +181,8 @@
     <section id="apply" class="section section-alt">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Абитуриенту</h2>
-          <p class="section-description">Все, что нужно знать для поступления</p>
+          <h2 class="section-title" id="setting_apply_title">Абитуриенту</h2>
+          <p class="section-description" id="setting_apply_desc">Все, что нужно знать для поступления</p>
         </div>
         <div class="apply-grid">
           <div class="faq-column reveal" id="faqContainer">
@@ -249,15 +214,15 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-section">
-          <h3 class="footer-brand">БГИТУ <span class="logo-accent">IT</span></h3>
-          <p style="font-size: 0.9rem; margin-bottom: 1rem; opacity: 0.8;">Твой карьерный лифт в ИТ-индустрию Брянска и России.</p>
-          <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary footer-cta">Подать документы</a>
+          <h3 class="footer-brand" id="setting_footer_brand">БГИТУ <span class="logo-accent">IT</span></h3>
+          <p style="font-size: 0.9rem; margin-bottom: 1rem; opacity: 0.8;" id="setting_footer_desc">Твой карьерный лифт в ИТ-индустрию Брянска и России.</p>
+          <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary footer-cta" id="setting_footer_btn_link"><span id="setting_footer_btn_text">Подать документы</span></a>
         </div>
         <div class="footer-section">
           <h4 class="footer-heading">Контакты</h4>
           <ul class="footer-contacts">
-            <li class="footer-contact"><a href="mailto:it@bgitu.ru">it@bgitu.ru</a></li>
-            <li class="footer-contact"><span>Приемная комиссия: +7 (4832) 64-99-12</span></li>
+            <li class="footer-contact"><a href="mailto:it@bgitu.ru" id="setting_footer_email">it@bgitu.ru</a></li>
+            <li class="footer-contact"><span id="setting_footer_phone">Приемная комиссия: +7 (4832) 64-99-12</span></li>
           </ul>
         </div>
         <div class="footer-section">
@@ -269,7 +234,7 @@
         </div>
         <div class="footer-section">
           <h4 class="footer-heading">Мы в сети</h4>
-          <a href="https://vk.com/it_bgitu" target="_blank" class="footer-social">VK: IT-Институт БГИТУ</a>
+          <a href="https://vk.com/it_bgitu" target="_blank" class="footer-social" id="setting_footer_vk_link"><span id="setting_footer_vk_text">VK: IT-Институт БГИТУ</span></a>
         </div>
       </div>
       

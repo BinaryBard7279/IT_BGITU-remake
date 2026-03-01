@@ -10,6 +10,8 @@ from app.models.speciality import Speciality  # noqa: E402
 from app.models.subject import Subject  # noqa: E402
 from app.models.teacher import Teacher  # noqa: E402
 from app.models.user import User  # noqa: E402
+from app.models.setting import Setting  # noqa: E402
+from app.models.timeline import TimelineStep  # noqa: E402
 
 __all__ = [
     "Base",
@@ -22,4 +24,6 @@ __all__ = [
     "Subject",
     "Achievement",
     "Faq",
+    "Setting",
+    "TimelineStep",
 ]

@@ -48,14 +48,16 @@
   async function loadData() {
     try {
       // Запрашиваем все данные параллельно
-      const [specialities, subjects, features, teachers, achievements, directions, faqs] = await Promise.all([
+      const [specialities, subjects, features, teachers, achievements, directions, faqs, settings, timeline] = await Promise.all([
         fetch('/speciality').then(r => r.json()),
         fetch('/subjects').then(r => r.json()),
         fetch('/features').then(r => r.json()),
         fetch('/teachers').then(r => r.json()),
         fetch('/achievements').then(r => r.json()),
         fetch('/directions-with-disciplines').then(r => r.json()),
-        fetch('/faqs').then(r => r.json())
+        fetch('/faqs').then(r => r.json()),
+        fetch('/settings').then(r => r.json()),
+        fetch('/timeline').then(r => r.json())
       ]);
 
       renderSpecialities(specialities);
@@ -65,6 +67,11 @@
       renderAchievements(achievements);
       initRoadmap(directions);
       renderFaqs(faqs);
+      
+      // Новые функции
+      applySettings(settings);
+      renderTimeline(timeline);
+      populateApplySelect(directions);
 
       initObservers();
 
@@ -205,6 +212,47 @@
         </div>
       </div>
     `).join('');
+  }
+
+  // --- НОВЫЕ ФУНКЦИИ ДЛЯ CMS ---
+  function applySettings(data) {
+    data.forEach(setting => {
+      const el = getById(`setting_${setting.key}`);
+      if (el) {
+        // Умная проверка: если ключ заканчивается на _link и это тег <a>, меняем ссылку (href)
+        if (setting.key.endsWith('_link') && el.hasAttribute('href')) {
+          el.href = setting.value;
+        } else {
+          el.innerHTML = setting.value; // Иначе меняем сам текст
+        }
+      }
+    });
+  }
+
+  function renderTimeline(data) {
+    const wrapper = document.querySelector('.timeline-wrapper');
+    if (!wrapper || !data.length) return;
+    
+    wrapper.innerHTML = '<div class="timeline-line"></div>' + data.map((step, i) => `
+      <div class="timeline-item reveal">
+        <div class="timeline-marker ${esc(step.color_class)}">${i + 1}</div>
+        <div class="timeline-content hover-lift">
+          <span class="timeline-term">${esc(step.term)}</span>
+          <h3 class="timeline-heading">${esc(step.title)}</h3>
+          <p class="timeline-desc">${esc(step.description)}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function populateApplySelect(directions) {
+    const select = getById('leadDirection');
+    if (!select || !directions.length) return;
+    
+    const firstOption = select.options[0].outerHTML; // Оставляем плейсхолдер
+    select.innerHTML = firstOption + directions.map(d => 
+      `<option value="${esc(d.name)}">${esc(d.name)}</option>`
+    ).join('');
   }
 
   // --- Roadmap Logic (План с группировкой и упаковкой) ---

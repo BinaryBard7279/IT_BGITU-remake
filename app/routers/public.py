@@ -13,18 +13,22 @@ from app.models.achievement import Achievement
 from app.models.faq import Faq
 from app.models.feature import Feature
 from app.models.plan import Direction
+from app.models.setting import Setting
 from app.models.speciality import Speciality
 from app.models.subject import Subject
 from app.models.teacher import Teacher
+from app.models.timeline import TimelineStep
 
 # [PERF] Импорт нашего таймера
 from app.performance import PerfTimer
 from app.schemas.achievement import Achievement as AchievementSchema
 from app.schemas.faq import Faq as FaqSchema
 from app.schemas.feature import Feature as FeatureSchema
+from app.schemas.setting import Setting as SettingSchema
 from app.schemas.speciality import Speciality as SpecialitySchema
 from app.schemas.subject import Subject as SubjectSchema
 from app.schemas.teacher import Teacher as TeacherSchema
+from app.schemas.timeline import TimelineStep as TimelineStepSchema
 
 router = APIRouter(tags=["Landing"])
 
@@ -105,4 +109,14 @@ async def get_all_subjects(db: AsyncSession = Depends(get_db)):
 @router.get("/teachers", response_model=List[TeacherSchema])
 async def get_all_teachers(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Teacher).order_by(Teacher.fio))
+    return result.scalars().all()
+
+@router.get("/settings", response_model=List[SettingSchema])
+async def get_all_settings(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Setting))
+    return result.scalars().all()
+
+@router.get("/timeline", response_model=List[TimelineStepSchema])
+async def get_timeline(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(TimelineStep).order_by(TimelineStep.order))
     return result.scalars().all()

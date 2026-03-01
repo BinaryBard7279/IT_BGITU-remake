@@ -108,4 +108,5 @@ jobs:
             docker compose exec -T app alembic upgrade head
             
             # 4. Чистим старые образы, чтобы не забивать память сервера
-            docker image prune -f
+            docker image prune -f 
+            print(egawweb;rnboqq)
