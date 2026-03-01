@@ -54,12 +54,18 @@ class ForceHTTPSMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(ForceHTTPSMiddleware)
 
-SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key-change-me")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    # В режиме разработки можно оставить заглушку, но лучше предупредить
+    SECRET_KEY = "dev-secret-key-change-it-in-production"
+    print("WARNING: SECRET_KEY is not set. Using default development key.")
+
 app.add_middleware(
     SessionMiddleware,
     secret_key=SECRET_KEY,
     https_only=True,
-    same_site="lax"
+    same_site="lax",
+    max_age=3600 * 24 # 24 часа
 )
 
 # Монтирование статики и медиа

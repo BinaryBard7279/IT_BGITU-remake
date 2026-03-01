@@ -48,8 +48,10 @@ alembic.ini
 alembic/env.py
 alembic/README
 alembic/script.py.mako
+alembic/versions/1c363b695405_add_settings_and_timeline.py
 alembic/versions/5714656b74cd_add_svg_code_to_features_and_subjects.py
 alembic/versions/9e7aa4b64b0c_tables_fix.py
+alembic/versions/c9cbfedf1dff_add_faqs_table.py
 alembic/versions/dfd32316669c_add_group_to_disciplines.py
 alembic/versions/e0f5b3a489f8_create_users_table.py
 alembic/versions/f010c6bcde6b_reorganize_models_structure.py
@@ -66,9 +68,11 @@ app/models/achievement.py
 app/models/faq.py
 app/models/feature.py
 app/models/plan.py
+app/models/setting.py
 app/models/speciality.py
 app/models/subject.py
 app/models/teacher.py
+app/models/timeline.py
 app/models/user.py
 app/performance.py
 app/routers/__init__.py
@@ -82,9 +86,11 @@ app/schemas/faq.py
 app/schemas/feature.py
 app/schemas/health_check.py
 app/schemas/plan.py
+app/schemas/setting.py
 app/schemas/speciality.py
 app/schemas/subject.py
 app/schemas/teacher.py
+app/schemas/timeline.py
 app/schemas/user.py
 app/security.py
 app/static/robots.txt
@@ -96,6 +102,7 @@ benchmark.py
 Caddyfile
 DEV_GUIDE.md
 Dockerfile
+GEMINI.md
 pyproject.toml
 README.md
 requirements.txt
@@ -373,16 +380,75 @@ User-agent: * Disallow: /
 </urlset>
 </file>
 
-<file path=".repomixignore">
-# Стандартные кэши и окружение
-__pycache__/
-.pytest_cache/
-.ruff_cache/
-venv/
-.venv/
-repomix-output.xml
-repomix-output.txt
-.env.local
+<file path="GEMINI.md">
+# IT BGITU Remake - Project Context
+
+## Project Overview
+
+This is a Python-based backend application built using the **FastAPI** framework. It appears to be a remake of an IT-related service (IT BGITU), providing web endpoints, static files serving, and an administrative interface.
+
+**Key Technologies:**
+*   **Web Framework:** FastAPI
+*   **ASGI Server:** Uvicorn
+*   **Database ORM:** SQLAlchemy (with `asyncpg` for PostgreSQL async support)
+*   **Database Migrations:** Alembic
+*   **Data Validation:** Pydantic
+*   **Templating:** Jinja2
+*   **Admin Panel:** sqladmin
+*   **Security/Auth:** passlib, python-jose
+
+## Architecture and Structure
+
+The project follows a standard FastAPI project structure:
+
+*   `app/`: The main application package.
+    *   `app/main.py`: The entry point of the application, configuring FastAPI, middleware (including custom performance monitoring), static files, and routing.
+    *   `app/models/`: SQLAlchemy database models (e.g., `user.py`, `subject.py`, `teacher.py`).
+    *   `app/schemas/`: Pydantic models for request/response validation.
+    *   `app/routers/`: FastAPI route handlers (`public`, `auth`, `cms`).
+    *   `app/core/`, `app/dependencies.py`, `app/security.py`: Core logic, auth, and dependency injection.
+    *   `app/admin.py`: Configuration for the `sqladmin` interface.
+    *   `app/static/` & `app/templates/`: Static assets and Jinja2 templates for frontend rendering.
+*   `alembic/`: Contains database migration scripts.
+*   `tests/`: Contains test suite using `pytest`.
+*   `pyproject.toml`: Configuration for development tools like `ruff` and `pytest`.
+*   `requirements.txt`: Project dependencies.
+
+## Building and Running
+
+**Prerequisites:**
+*   Python 3.12 (as specified in `pyproject.toml`)
+*   A running PostgreSQL database.
+
+**Setup:**
+1.  Create and activate a virtual environment: `python -m venv venv` and `source venv/bin/activate` (or `venv\Scripts\activate` on Windows).
+2.  Install dependencies: `pip install -r requirements.txt`.
+
+**Running the Application:**
+You can run the application directly using the `main.py` script, which uses `uvicorn`:
+```bash
+python app/main.py
+```
+Or by running Uvicorn directly:
+```bash
+uvicorn app.main:app --reload
+```
+
+**Database Migrations:**
+To apply database changes:
+```bash
+alembic upgrade head
+```
+
+## Development Conventions
+
+*   **Linting and Formatting:** The project uses **Ruff** for fast linting and formatting. Configuration in `pyproject.toml` specifies a `line-length` of 100, target version Python 3.12, and specific rules (select = `["E", "F", "W", "I"]`).
+*   **Testing:** **Pytest** with `pytest-asyncio` is used for testing. Tests are located in the `tests/` directory. Run tests using:
+    ```bash
+    pytest
+    ```
+*   **Asynchronous Code:** The application makes heavy use of asynchronous Python (`async`/`await`), utilizing `asyncpg` for non-blocking database operations.
+*   **Performance Monitoring:** The application includes a custom `PerformanceMiddleware` in `main.py` that logs execution times for endpoints (excluding static files).
 </file>
 
 <file path="alembic/env.py">
@@ -926,6 +992,7 @@ def get_password_hash(password: str) -> str:
 # deploy_testing
 test
 test2
+test3 (отредактировано Gemini)
 </file>
 
 <file path="tests/test_api.py">
@@ -954,6 +1021,119 @@ async def test_get_directions_with_disciplines(client):
     response = await client.get("/directions-with-disciplines")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
+</file>
+
+<file path=".repomixignore">
+# Стандартные кэши и окружение
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+venv/
+.venv/
+repomix-output.xml
+repomix-output.txt
+.env.local
+</file>
+
+<file path="alembic/versions/1c363b695405_add_settings_and_timeline.py">
+"""add_settings_and_timeline
+
+Revision ID: 1c363b695405
+Revises: c9cbfedf1dff
+Create Date: 2026-03-01 18:55:28.891208
+
+"""
+from typing import Sequence, Union
+
+import sqlalchemy as sa
+
+from alembic import op
+
+# revision identifiers, used by Alembic.
+revision: str = '1c363b695405'
+down_revision: Union[str, Sequence[str], None] = 'c9cbfedf1dff'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('settings',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('key', sa.String(), nullable=False),
+    sa.Column('value', sa.Text(), nullable=False),
+    sa.Column('description', sa.String(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_settings_id'), 'settings', ['id'], unique=False)
+    op.create_index(op.f('ix_settings_key'), 'settings', ['key'], unique=True)
+    op.create_table('timeline_steps',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('order', sa.Integer(), nullable=False),
+    sa.Column('term', sa.String(), nullable=False),
+    sa.Column('title', sa.String(), nullable=False),
+    sa.Column('description', sa.Text(), nullable=False),
+    sa.Column('color_class', sa.String(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_timeline_steps_id'), 'timeline_steps', ['id'], unique=False)
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_timeline_steps_id'), table_name='timeline_steps')
+    op.drop_table('timeline_steps')
+    op.drop_index(op.f('ix_settings_key'), table_name='settings')
+    op.drop_index(op.f('ix_settings_id'), table_name='settings')
+    op.drop_table('settings')
+    # ### end Alembic commands ###
+</file>
+
+<file path="alembic/versions/c9cbfedf1dff_add_faqs_table.py">
+"""add_faqs_table
+
+Revision ID: c9cbfedf1dff
+Revises: fc9d144e2075
+Create Date: 2026-02-28 16:29:30.466385
+
+"""
+from typing import Sequence, Union
+
+import sqlalchemy as sa
+
+from alembic import op
+
+# revision identifiers, used by Alembic.
+revision: str = 'c9cbfedf1dff'
+down_revision: Union[str, Sequence[str], None] = 'fc9d144e2075'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('faqs',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('question', sa.String(), nullable=False),
+    sa.Column('answer', sa.Text(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_faqs_id'), 'faqs', ['id'], unique=False)
+    op.create_index(op.f('ix_faqs_question'), 'faqs', ['question'], unique=False)
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_faqs_question'), table_name='faqs')
+    op.drop_index(op.f('ix_faqs_id'), table_name='faqs')
+    op.drop_table('faqs')
+    # ### end Alembic commands ###
 </file>
 
 <file path="alembic/versions/dfd32316669c_add_group_to_disciplines.py">
@@ -1087,6 +1267,38 @@ class Faq(Base):
     id = Column(Integer, primary_key=True, index=True)
     question = Column(String, index=True, nullable=False)
     answer = Column(Text, nullable=False)
+</file>
+
+<file path="app/models/setting.py">
+from sqlalchemy import Column, Integer, String, Text
+
+from app.models import Base
+
+
+class Setting(Base):
+    __tablename__ = 'settings'
+
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String, unique=True, index=True, nullable=False)
+    value = Column(Text, nullable=False)
+    description = Column(String, nullable=False)
+</file>
+
+<file path="app/models/timeline.py">
+from sqlalchemy import Column, Integer, String, Text
+
+from app.models import Base
+
+
+class TimelineStep(Base):
+    __tablename__ = 'timeline_steps'
+
+    id = Column(Integer, primary_key=True, index=True)
+    order = Column(Integer, default=0, nullable=False)
+    term = Column(String, nullable=False)
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    color_class = Column(String, nullable=False, default="bg-pastel-sky")
 </file>
 
 <file path="app/performance.py">
@@ -1247,6 +1459,20 @@ class Feature(FeatureBase):
     id: int = Field(..., gt=0)
 </file>
 
+<file path="app/schemas/setting.py">
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class SettingBase(BaseModel):
+    key: str = Field(..., min_length=1, max_length=100)
+    value: str = Field(..., min_length=1)
+    description: str = Field(..., min_length=1)
+
+class Setting(SettingBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int = Field(..., gt=0)
+</file>
+
 <file path="app/schemas/speciality.py">
 from typing import List
 
@@ -1278,6 +1504,49 @@ class Speciality(SpecialityBase):
 
 class Speciality_Features(Speciality):
     features: List[Feature] = []
+</file>
+
+<file path="app/schemas/timeline.py">
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class TimelineStepBase(BaseModel):
+    order: int = Field(..., ge=0)
+    term: str = Field(..., min_length=1, max_length=100)
+    title: str = Field(..., min_length=1, max_length=225)
+    description: str = Field(..., min_length=1)
+    color_class: str = Field(..., min_length=1, max_length=50)
+
+class TimelineStep(TimelineStepBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int = Field(..., gt=0)
+</file>
+
+<file path="Dockerfile">
+FROM python:3.11-slim
+
+WORKDIR /code 
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ... (начало файла без изменений)
+COPY . .
+
+# --- ИСПРАВЛЕНИЕ НАЧАЛО ---
+# Явно создаем папку для загрузок
+RUN mkdir -p /code/app/uploads
+
+# Раздаем права пользователю appuser на всю папку проекта
+RUN adduser --disabled-password --gecos "" appuser && chown -R appuser:appuser /code
+# --- ИСПРАВЛЕНИЕ КОНЕЦ ---
+
+USER appuser
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 </file>
 
 <file path="app/models/achievement.py">
@@ -1425,33 +1694,6 @@ if __name__ == "__main__":
     asyncio.run(run_benchmark())
 </file>
 
-<file path="Dockerfile">
-FROM python:3.11-slim
-
-WORKDIR /code 
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# ... (начало файла без изменений)
-COPY . .
-
-# --- ИСПРАВЛЕНИЕ НАЧАЛО ---
-# Явно создаем папку для загрузок
-RUN mkdir -p /code/app/uploads
-
-# Раздаем права пользователю appuser на всю папку проекта
-RUN adduser --disabled-password --gecos "" appuser && chown -R appuser:appuser /code
-# --- ИСПРАВЛЕНИЕ КОНЕЦ ---
-
-USER appuser
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-</file>
-
 <file path="pyproject.toml">
 [tool.ruff]
 # Базовые настройки форматера и линтера
@@ -1593,50 +1835,6 @@ async def get_db():
 #     }
 </file>
 
-<file path="app/schemas/__init__.py">
-from .achievement import Achievement, AchievementBase
-from .faq import Faq, FaqBase
-from .feature import Feature, FeatureBase
-from .health_check import HealthCheck
-from .plan import Direction, Direction_Disciplines, DirectionBase, Discipline, DisciplineBase
-from .speciality import Speciality, Speciality_Features, SpecialityBase
-from .subject import Subject, SubjectBase
-from .teacher import Teacher, TeacherBase
-from .user import User, UserBase
-
-__all__ = [
-    # Feature
-    'FeatureBase', 'Feature',
-
-    # Plan
-    'DirectionBase', 'Direction',
-    'DisciplineBase', 'Discipline',
-    'Direction_Disciplines',
-
-    # Speciality
-    'SpecialityBase', 'Speciality',
-    'Speciality_Features',
-
-    # Subject
-    'SubjectBase', 'Subject',
-
-    # Teacher
-    'TeacherBase', 'Teacher',
-
-    # User
-    'UserBase', 'User',
-
-    # Achievement
-    'AchievementBase', 'Achievement',
-
-    # Faq
-    'FaqBase', 'Faq',
-
-    # Health Check
-    'HealthCheck',
-]
-</file>
-
 <file path="app/schemas/auth.py">
 # # app/schemas/auth.py
 # from pydantic import BaseModel, EmailStr, Field
@@ -1698,457 +1896,6 @@ class Discipline(DisciplineBase):
 
 class Direction_Disciplines(Direction):
     disciplines: List[Discipline] = []
-</file>
-
-<file path="app/models/__init__.py">
-from sqlalchemy.orm import declarative_base
-
-Base = declarative_base()
-
-from app.models.achievement import Achievement  # noqa: E402
-from app.models.faq import Faq  # noqa: E402
-from app.models.feature import Feature  # noqa: E402
-from app.models.plan import Direction, Discipline  # noqa: E402
-from app.models.speciality import Speciality  # noqa: E402
-from app.models.subject import Subject  # noqa: E402
-from app.models.teacher import Teacher  # noqa: E402
-from app.models.user import User  # noqa: E402
-
-__all__ = [
-    "Base",
-    "User",
-    "Speciality",
-    "Feature",
-    "Direction",
-    "Discipline",
-    "Teacher",
-    "Subject",
-    "Achievement",
-    "Faq",
-]
-</file>
-
-<file path="app/schemas/teacher.py">
-from typing import List
-
-from pydantic import BaseModel, ConfigDict, Field
-
-
-class TeacherBase(BaseModel):
-    fio: str = Field(..., min_length=1, max_length=100)
-    post: str = Field(..., min_length=1, max_length=100)
-    subjects: List[str] = Field(..., min_length=1, max_length=100)
-    image_url: str = Field(...)
-
-# class TeacherCreate(TeacherBase):
-#     pass
-
-# class TeacherUpdate(BaseModel):
-#     fio: Optional[str] = Field(None, min_length=5, max_length=100)
-#     post: Optional[str] = Field(None, min_length=3, max_length=100)
-#     subjects: Optional[List[str]] = Field(None, min_items=1, max_items=100)
-#     image_url: Optional[str] = Field(None)
-
-class Teacher(TeacherBase):
-    model_config = ConfigDict(from_attributes=True)
-    id: int = Field(..., gt=0)
-</file>
-
-<file path="app/static/styles.css">
-/* БГИТУ IT-Институт — Final Fixed Styles + Lenis Support */
-
-:root {
-  --background: hsl(40, 20%, 98%);
-  --foreground: hsl(30, 10%, 15%);
-
-  --card: hsl(40, 30%, 97%);
-  --card-foreground: hsl(30, 10%, 15%);
-
-  --primary: hsl(30, 10%, 20%);
-  --primary-foreground: hsl(40, 20%, 98%);
-
-  --secondary: hsl(40, 15%, 94%);
-  --secondary-foreground: hsl(30, 10%, 20%);
-
-  --muted: hsl(40, 10%, 92%);
-  --muted-foreground: hsl(30, 8%, 45%);
-
-  --accent: hsl(40, 25%, 90%);
-  --border: hsl(40, 15%, 88%);
-
-  --radius: 0.75rem;
-  --transition: 0.3s ease;
-
-  --pastel-sky: hsl(200, 60%, 75%);
-  --pastel-mint: hsl(160, 45%, 70%);
-  --pastel-peach: hsl(25, 70%, 80%);
-  --pastel-lavender: hsl(270, 40%, 78%);
-  --pastel-coral: hsl(10, 65%, 75%);
-  --pastel-sage: hsl(140, 30%, 72%);
-}
-
-/* ================= LENIS (ИНЕРЦИЯ) ================= */
-html.lenis, html.lenis body { height: auto; }
-.lenis.lenis-smooth { scroll-behavior: auto !important; }
-.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
-.lenis.lenis-stopped { overflow: hidden; }
-.lenis.lenis-scrolling iframe { pointer-events: none; }
-
-/* ================= БАЗА ================= */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html {
-}
-
-body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: var(--background);
-  color: var(--foreground);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-}
-
-a { color: inherit; text-decoration: none; transition: color 0.2s ease; }
-ul { list-style: none; }
-button { font-family: inherit; cursor: pointer; border: none; background: none; }
-
-/* ================= УТИЛИТЫ ================= */
-.container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
-
-.section { padding: 6rem 0; }
-.section-alt { background-color: hsl(40, 15%, 94%, 0.3); }
-
-.text-muted-foreground { color: var(--muted-foreground); }
-.text-foreground { color: var(--foreground); }
-
-.bg-pastel-sky { background-color: var(--pastel-sky); }
-.bg-pastel-mint { background-color: var(--pastel-mint); }
-.bg-pastel-peach { background-color: var(--pastel-peach); }
-.bg-pastel-lavender { background-color: var(--pastel-lavender); }
-.bg-pastel-coral { background-color: var(--pastel-coral); }
-.bg-pastel-sage { background-color: var(--pastel-sage); }
-.bg-secondary { background-color: var(--secondary); }
-
-.section-header { text-align: center; margin-bottom: 4rem; }
-.section-title { font-size: clamp(1.875rem, 4vw, 2.25rem); font-weight: 700; margin-bottom: 1rem; }
-.section-description { font-size: 1.125rem; color: var(--muted-foreground); max-width: 42rem; margin: 0 auto; }
-
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-  font-size: 0.875rem; font-weight: 500; padding: 0.5rem 1rem;
-  border-radius: var(--radius); transition: all 0.2s ease; white-space: nowrap;
-}
-.btn-primary { background-color: var(--primary); color: var(--primary-foreground); }
-.btn-primary:hover { opacity: 0.9; }
-.btn-outline { border: 1px solid var(--border); color: var(--foreground); }
-.btn-outline:hover { background-color: var(--accent); }
-.btn-sm { padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
-.btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; }
-.btn-full { width: 100%; }
-
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-
-.reveal { opacity: 0; }
-.reveal.visible { animation: fadeInUp 0.6s ease-out forwards; }
-.hover-lift { transition: all var(--transition); }
-.hover-lift:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
-
-/* Карточки и Иконки (абстракция) */
-.direction-card, .discipline-card, .feature-card, .faculty-card, .achievement-card, .faq-item, .timeline-content, .apply-form {
-  background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
-}
-.direction-attr-icon, .discipline-icon, .feature-icon, .tooltip-icon, .footer-square {
-  display: flex; align-items: center; justify-content: center; border-radius: var(--radius); flex-shrink: 0;
-}
-
-/* ================= HEADER ================= */
-#header { position: fixed; top: 0; left: 0; right: 0; z-index: 50; padding: 1rem 0; transition: all var(--transition); }
-#header.scrolled { background-color: rgba(250, 250, 248, 0.95); backdrop-filter: blur(8px); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-.header-nav { display: flex; align-items: center; justify-content: space-between; }
-.logo { font-size: 1.25rem; font-weight: 600; }
-.logo-accent { color: var(--muted-foreground); font-weight: 400; }
-.nav-links { display: none; align-items: center; gap: 2rem; }
-@media (min-width: 768px) { .nav-links { display: flex; } }
-.nav-link { font-size: 0.875rem; color: var(--muted-foreground); position: relative; }
-.nav-link::after {
-  content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px;
-  background-color: #737373; transition: width var(--transition);
-}
-.nav-link:hover, .nav-link.active { color: var(--foreground); }
-.nav-link:hover::after { width: 100%; }
-.header-cta { display: none; }
-@media (min-width: 640px) { .header-cta { display: inline-flex; } }
-
-/* ================= HERO ================= */
-.hero { min-height: 100vh; display: flex; align-items: center; padding-top: 5rem; padding-bottom: 4rem; }
-.hero-grid { display: grid; gap: 3rem; align-items: center; }
-@media (min-width: 1024px) { .hero-grid { grid-template-columns: 1fr 1fr; } }
-.hero-content { display: flex; flex-direction: column; gap: 1.5rem; }
-.hero-title { font-size: clamp(2.5rem, 6vw, 3.75rem); font-weight: 700; line-height: 1.1; }
-.hero-description { font-size: clamp(1.125rem, 2vw, 1.25rem); color: var(--muted-foreground); max-width: 32rem; }
-.hero-buttons { display: flex; flex-wrap: wrap; gap: 1rem; padding-top: 1rem; }
-.hero-visual { display: none; justify-content: center; align-items: center; }
-@media (min-width: 1024px) { .hero-visual { display: flex; } }
-
-.squares-composition { position: relative; width: 24rem; height: 24rem; animation: float 6s ease-in-out infinite; }
-.square { position: absolute; animation: scaleIn 0.4s ease-out forwards; opacity: 0; }
-.square-1 { top: 0; right: 0; width: 12rem; height: 12rem; border-radius: 1rem; animation-delay: 0.2s; }
-.square-2 { top: 6rem; left: 2rem; width: 8rem; height: 8rem; border-radius: 0.75rem; animation-delay: 0.4s; }
-.square-3 { bottom: 2rem; right: 4rem; width: 9rem; height: 9rem; border-radius: 0.75rem; animation-delay: 0.3s; }
-.square-4 { top: 12rem; right: 1rem; width: 5rem; height: 5rem; border-radius: 0.5rem; animation-delay: 0.5s; }
-.square-5 { bottom: 6rem; left: 0; width: 6rem; height: 6rem; border-radius: 0.5rem; animation-delay: 0.6s; }
-.square-6 { top: 2rem; left: 6rem; width: 3rem; height: 3rem; border-radius: 0.375rem; animation-delay: 0.7s; }
-.square-7 { bottom: 0; right: 12rem; width: 4rem; height: 4rem; border-radius: 0.375rem; animation-delay: 0.8s; }
-
-/* ================= НАПРАВЛЕНИЯ (Carousel) ================= */
-.directions-carousel { position: relative; max-width: 56rem; margin: 0 auto; overflow: hidden; } 
-.directions-track-wrap { position: relative; padding: 0 3rem; }
-.directions-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); will-change: transform; }
-.direction-slide { display: block; min-width: 100%; flex-shrink: 0; padding: 0 0.5rem; }
-.direction-card { padding: 1.75rem; box-shadow: 0 4px 20px rgba(0,0,0,0.06); height: 100%; }
-
-.directions-arrow, .faculty-arrow {
-  position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
-  width: 2.5rem; height: 2.5rem; border-radius: 50%;
-  background-color: var(--card); color: var(--foreground); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s ease; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.directions-arrow:hover, .faculty-arrow:hover {
-  background-color: var(--primary); color: var(--primary-foreground); border-color: var(--primary);
-  transform: translateY(-50%) scale(1.1);
-}
-.directions-prev, .faculty-prev { left: 0; }
-.directions-next, .faculty-next { right: 0; }
-
-.direction-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
-.direction-title { font-size: 1.375rem; font-weight: 700; line-height: 1.3; }
-.direction-attrs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem 1.5rem; margin-bottom: 1.25rem; }
-.direction-attr { display: flex; align-items: flex-start; gap: 0.75rem; }
-.direction-attr-icon { width: 2.25rem; height: 2.25rem; border-radius: 0.5rem; background-color: var(--muted); color: var(--primary); }
-.direction-attr-label { display: block; font-size: 0.75rem; color: var(--muted-foreground); margin-bottom: 0.15rem; }
-.direction-attr-value { display: block; font-size: 0.875rem; font-weight: 600; line-height: 1.3; }
-.direction-description { font-size: 0.9375rem; color: var(--muted-foreground); margin: 0; }
-
-.directions-dots { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem; margin-bottom: 0.5rem; }
-.directions-dot {
-  width: 8px; height: 8px; border-radius: 50%; background-color: var(--muted);
-  transition: all 0.3s ease; cursor: pointer;
-}
-.directions-dot:hover { background-color: var(--muted-foreground); }
-.directions-dot.is-active { background-color: var(--primary); transform: scale(1.3); }
-
-/* ================= ДИСЦИПЛИНЫ И ПРЕИМУЩЕСТВА ================= */
-.disciplines-grid, .features-grid { display: grid; gap: 2rem; }
-@media (min-width: 640px) { .disciplines-grid, .features-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1024px) { .disciplines-grid, .features-grid { grid-template-columns: repeat(3, 1fr); } }
-
-.discipline-card { padding: 1.5rem; border-color: hsl(40, 15%, 88%, 0.5); }
-.discipline-icon { width: 4rem; height: 4rem; margin-bottom: 1.25rem; font-size: 1.75rem; }
-.discipline-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
-.discipline-description { font-size: 0.875rem; color: var(--muted-foreground); }
-
-.feature-card { display: flex; gap: 1.25rem; padding: 1.5rem; border-color: hsl(40, 15%, 88%, 0.5); }
-.feature-icon { width: 3.5rem; height: 3.5rem; }
-.feature-icon svg { width: 1.5rem; height: 1.5rem; color: hsl(30, 10%, 15%, 0.7); }
-.feature-title { font-size: 1.125rem; font-weight: 600; }
-.feature-description { font-size: 0.875rem; color: var(--muted-foreground); }
-
-/* ================= ПРЕПОДАВАТЕЛИ ================= */
-.faculty-tape { position: relative; padding: 0 3rem; }
-.faculty-track { padding: 0.5rem 0; cursor: grab; width: 100%; user-select: none; overflow: hidden; border-radius: var(--radius); }
-.faculty-track:active { cursor: grabbing; }
-.faculty-track-inner { display: flex; gap: 1.5rem; width: max-content; will-change: transform; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
-.faculty-track.faculty-dragging .faculty-track-inner,
-.faculty-track.faculty-inertia .faculty-track-inner { transition: none; }
-.faculty-card { flex: 0 0 auto; width: 360px; max-width: 85vw; box-shadow: 0 4px 20px rgba(0,0,0,0.06); pointer-events: auto; }
-/* app/static/styles.css */
-
-.faculty-photo-placeholder { 
-  width: 100%; 
-  aspect-ratio: 1 / 1; /* Было 4/3. Ставим 1/1 (квадрат) или 3/4 (портрет) */
-  min-height: 180px; 
-  background-color: #c53030; /* Цвет заглушки, можно поменять на var(--muted) */
-}
-.faculty-info { padding: 1.25rem; text-align: left; }
-.faculty-name { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem; }
-.faculty-company { font-size: 0.875rem; color: var(--primary); font-weight: 500; margin-bottom: 0.75rem; }
-.faculty-disciplines-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
-.faculty-disciplines { font-size: 0.8125rem; color: var(--muted-foreground); }
-.faculty-disciplines li { padding: 0.125rem 0; }
-.faculty-disciplines li::before { content: '• '; color: var(--primary); }
-
-/* ================= ROADMAP ================= */
-/* ================= ROADMAP ================= */
-.roadmap-wrapper { overflow-x: auto; padding-bottom: 2rem; }
-.roadmap-container { min-width: 900px; }
-
-/* Сетка: Первая колонка 160px (заголовок группы), остальные 8 равные (семестры) */
-.roadmap-headers, .roadmap-row { 
-    display: grid; 
-    grid-template-columns: 160px repeat(8, 1fr); 
-    gap: 0.5rem; 
-}
-
-.roadmap-headers { margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
-
-/* Отступ для заголовков семестров */
-.semester-header { 
-    text-align: center; font-size: 0.875rem; font-weight: 500; color: var(--muted-foreground); padding: 0.5rem; 
-}
-.semester-header-empty { grid-column: 1 / 2; }
-
-.roadmap-group-title {
-    display: flex;
-    align-items: center;
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: var(--primary);
-    padding-right: 1rem;
-    line-height: 1.2;
-}
-
-.roadmap-rows { display: flex; flex-direction: column; gap: 0.5rem; }
-
-.roadmap-cell { 
-    height: 3rem; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    transition: all var(--transition); 
-    cursor: pointer; 
-    position: relative;
-    font-size: 0.75rem; /* Размер шрифта 12px */
-    font-weight: 600;   /* Жирность чуть больше для читаемости */
-    color: hsl(30, 10%, 15%, 0.8);
-    overflow: hidden;
-    
-    /* --- ИЗМЕНЕНИЯ --- */
-    white-space: normal;       /* Разрешаем перенос строк */
-    text-align: center;        /* Центрируем текст */
-    line-height: 1.1;          /* Уменьшаем межстрочный интервал для компактности */
-    padding: 0 0.25rem;        /* Небольшой отступ по бокам */
-    /* ----------------- */
-}
-
-.roadmap-cell.inactive { background-color: transparent; }
-
-.roadmap-cell.active { 
-    opacity: 1; 
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-.roadmap-cell.active:hover { opacity: 0.9; transform: scale(1.02); z-index: 2; }
-
-/* Скругления */
-.roadmap-cell.start { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; margin-left: 2px; }
-.roadmap-cell.end { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; margin-right: 2px; }
-.roadmap-cell.start.end { border-radius: 0.5rem; }
-
-/* Маркеры годов обучения */
-.year-markers { 
-    display: grid; 
-    grid-template-columns: 160px repeat(4, 1fr); 
-    gap: 1rem; 
-    margin-top: 1.5rem; 
-    padding-top: 1rem; 
-    border-top: 1px solid var(--border); 
-}
-.year-marker { text-align: center; font-size: 0.875rem; color: var(--muted-foreground); }
-.year-marker:nth-child(2) { grid-column: 2 / 4; }
-.year-marker:nth-child(3) { grid-column: 4 / 6; }
-.year-marker:nth-child(4) { grid-column: 6 / 8; }
-.year-marker:nth-child(5) { grid-column: 8 / 10; }
-
-.course-tooltip { display: none; position: fixed; top: 1rem; right: 1rem; z-index: 50; padding: 1rem; background-color: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); max-width: 18rem; animation: scaleIn 0.2s ease-out; pointer-events: none;}
-.year-markers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-.year-marker { text-align: center; font-size: 0.875rem; color: var(--muted-foreground); }
-
-.course-tooltip { display: none; position: fixed; top: 1rem; right: 1rem; z-index: 50; padding: 1rem; background-color: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); max-width: 18rem; animation: scaleIn 0.2s ease-out; }
-.tooltip-icon { width: 2rem; height: 2rem; border-radius: 0.5rem; margin-bottom: 0.75rem; }
-.tooltip-title { font-weight: 600; margin-bottom: 0.25rem; }
-.tooltip-description { font-size: 0.875rem; color: var(--muted-foreground); margin-bottom: 0.5rem; line-height: 1.5; }
-.tooltip-meta { font-size: 0.75rem; color: var(--muted-foreground); }
-
-/* ================= TIMELINE ================= */
-.timeline-wrapper { position: relative; max-width: 800px; margin: 0 auto; padding: 1rem 0; }
-.timeline-line { position: absolute; left: 24px; top: 0; bottom: 0; width: 2px; background-color: var(--border); z-index: 0; }
-.timeline-item { position: relative; padding-left: 80px; margin-bottom: 3rem; z-index: 1; }
-.timeline-item:last-child { margin-bottom: 0; }
-.timeline-marker {
-  position: absolute; left: 0; top: 0; width: 48px; height: 48px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 1.125rem;
-  border: 4px solid var(--background); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  transition: transform var(--transition);
-}
-.timeline-item:hover .timeline-marker { transform: scale(1.1); }
-.timeline-content { padding: 1.5rem; position: relative; }
-.timeline-content::before {
-  content: ''; position: absolute; left: -6px; top: 20px; width: 10px; height: 10px;
-  background-color: var(--card); border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);
-  transform: rotate(45deg);
-}
-.timeline-term { display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
-.timeline-heading { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
-.timeline-desc { font-size: 0.9375rem; color: var(--muted-foreground); }
-
-@media (max-width: 640px) {
-  .timeline-line { left: 16px; }
-  .timeline-marker { width: 32px; height: 32px; font-size: 0.875rem; border-width: 3px; }
-  .timeline-item { padding-left: 50px; }
-}
-
-/* ================= ДОСТИЖЕНИЯ ================= */
-.achievements-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-.achievement-card { padding: 1.5rem; position: relative; border-top-width: 4px; }
-.achievement-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
-.achievement-tag { font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; }
-.achievement-title { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.3; }
-.achievement-desc { font-size: 0.875rem; color: var(--muted-foreground); }
-.border-sky { border-top-color: var(--pastel-sky); }
-.border-mint { border-top-color: var(--pastel-mint); }
-.border-peach { border-top-color: var(--pastel-peach); }
-.border-lavender { border-top-color: var(--pastel-lavender); }
-
-/* ================= FAQ & FORM ================= */
-.apply-grid { display: grid; gap: 3rem; }
-@media (min-width: 900px) { .apply-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
-.faq-column { display: flex; flex-direction: column; gap: 1rem; }
-.faq-question { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1.25rem; text-align: left; font-size: 1rem; font-weight: 600; transition: color 0.2s ease; }
-.faq-question:hover { color: var(--primary); }
-.faq-icon { font-weight: 400; font-size: 1.5rem; color: var(--muted-foreground); transition: transform var(--transition); }
-.faq-item.active .faq-icon { transform: rotate(45deg); color: var(--primary); }
-.faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; background-color: rgba(255,255,255,0.5); }
-.faq-answer p { padding: 0 1.25rem 1.25rem; font-size: 0.9375rem; color: var(--muted-foreground); }
-
-.apply-form { padding: 2rem; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
-.form-header { margin-bottom: 1.5rem; }
-.form-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; }
-.form-subtitle { font-size: 0.875rem; color: var(--muted-foreground); }
-.form-group { margin-bottom: 1rem; }
-.form-input, .form-select { width: 100%; padding: 0.75rem 1rem; font-size: 0.9375rem; font-family: inherit; background-color: var(--background); border: 1px solid var(--border); border-radius: var(--radius); outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-.form-input:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
-.form-success { margin-top: 1rem; padding: 1rem; background-color: var(--pastel-mint); border-radius: var(--radius); display: flex; align-items: center; gap: 0.75rem; color: #064e3b; font-weight: 500; font-size: 0.9375rem; animation: fadeInUp 0.4s ease; }
-
-.footer { padding: 4rem 0; background-color: var(--card); border-top: 1px solid var(--border); }
-.footer-grid { display: grid; gap: 3rem; }
-@media (min-width: 768px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1024px) { .footer-grid { grid-template-columns: repeat(4, 1fr); } }
-.footer-section { display: flex; flex-direction: column; gap: 1rem; }
-.footer-brand { font-size: 1.25rem; font-weight: 600; }
-.footer-description { font-size: 0.875rem; color: var(--muted-foreground); }
-.footer-cta { margin-top: 0.5rem; align-self: flex-start; }
-.footer-heading { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-.footer-contacts, .footer-links { display: flex; flex-direction: column; gap: 0.75rem; }
-.footer-links { gap: 0.5rem; }
-.footer-contact, .footer-links a, .footer-social { display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem; color: var(--muted-foreground); transition: color 0.2s ease; }
-.footer-contact a:hover, .footer-links a:hover, .footer-social:hover { color: var(--foreground); }
-.footer-squares { display: flex; gap: 0.5rem; padding-top: 1rem; }
-.footer-square { width: 2rem; height: 2rem; }
-.footer-bottom { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center; }
-.footer-copyright { font-size: 0.875rem; color: var(--muted-foreground); }
 </file>
 
 <file path="app/routers/cms.py">
@@ -3073,6 +2820,501 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 #     return teacher
 </file>
 
+<file path="app/schemas/teacher.py">
+from typing import List
+
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class TeacherBase(BaseModel):
+    fio: str = Field(..., min_length=1, max_length=100)
+    post: str = Field(..., min_length=1, max_length=100)
+    subjects: List[str] = Field(..., min_length=1, max_length=100)
+    image_url: str = Field(...)
+
+# class TeacherCreate(TeacherBase):
+#     pass
+
+# class TeacherUpdate(BaseModel):
+#     fio: Optional[str] = Field(None, min_length=5, max_length=100)
+#     post: Optional[str] = Field(None, min_length=3, max_length=100)
+#     subjects: Optional[List[str]] = Field(None, min_items=1, max_items=100)
+#     image_url: Optional[str] = Field(None)
+
+class Teacher(TeacherBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int = Field(..., gt=0)
+</file>
+
+<file path="app/static/styles.css">
+/* БГИТУ IT-Институт — Final Fixed Styles + Lenis Support */
+
+:root {
+  --background: hsl(40, 20%, 98%);
+  --foreground: hsl(30, 10%, 15%);
+
+  --card: hsl(40, 30%, 97%);
+  --card-foreground: hsl(30, 10%, 15%);
+
+  --primary: hsl(30, 10%, 20%);
+  --primary-foreground: hsl(40, 20%, 98%);
+
+  --secondary: hsl(40, 15%, 94%);
+  --secondary-foreground: hsl(30, 10%, 20%);
+
+  --muted: hsl(40, 10%, 92%);
+  --muted-foreground: hsl(30, 8%, 45%);
+
+  --accent: hsl(40, 25%, 90%);
+  --border: hsl(40, 15%, 88%);
+
+  --radius: 0.75rem;
+  --transition: 0.3s ease;
+
+  --pastel-sky: hsl(200, 60%, 75%);
+  --pastel-mint: hsl(160, 45%, 70%);
+  --pastel-peach: hsl(25, 70%, 80%);
+  --pastel-lavender: hsl(270, 40%, 78%);
+  --pastel-coral: hsl(10, 65%, 75%);
+  --pastel-sage: hsl(140, 30%, 72%);
+}
+
+/* ================= LENIS (ИНЕРЦИЯ) ================= */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-scrolling iframe { pointer-events: none; }
+
+/* ================= БАЗА ================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; transition: color 0.2s ease; }
+ul { list-style: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+/* ================= УТИЛИТЫ ================= */
+.container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
+
+.section { padding: 6rem 0; }
+.section-alt { background-color: hsl(40, 15%, 94%, 0.3); }
+
+.text-muted-foreground { color: var(--muted-foreground); }
+.text-foreground { color: var(--foreground); }
+
+.bg-pastel-sky { background-color: var(--pastel-sky); }
+.bg-pastel-mint { background-color: var(--pastel-mint); }
+.bg-pastel-peach { background-color: var(--pastel-peach); }
+.bg-pastel-lavender { background-color: var(--pastel-lavender); }
+.bg-pastel-coral { background-color: var(--pastel-coral); }
+.bg-pastel-sage { background-color: var(--pastel-sage); }
+.bg-secondary { background-color: var(--secondary); }
+
+.section-header { text-align: center; margin-bottom: 4rem; }
+.section-title { font-size: clamp(1.875rem, 4vw, 2.25rem); font-weight: 700; margin-bottom: 1rem; }
+.section-description { font-size: 1.125rem; color: var(--muted-foreground); max-width: 42rem; margin: 0 auto; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-size: 0.875rem; font-weight: 500; padding: 0.5rem 1rem;
+  border-radius: var(--radius); transition: all 0.2s ease; white-space: nowrap;
+}
+.btn-primary { background-color: var(--primary); color: var(--primary-foreground); }
+.btn-primary:hover { opacity: 0.9; }
+.btn-outline { border: 1px solid var(--border); color: var(--foreground); }
+.btn-outline:hover { background-color: var(--accent); }
+.btn-sm { padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
+.btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; }
+.btn-full { width: 100%; }
+
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+.reveal { opacity: 0; }
+.reveal.visible { animation: fadeInUp 0.6s ease-out forwards; }
+.hover-lift { transition: all var(--transition); }
+.hover-lift:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+
+/* Карточки и Иконки (абстракция) */
+.direction-card, .discipline-card, .feature-card, .faculty-card, .achievement-card, .faq-item, .timeline-content, .apply-form {
+  background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+}
+.direction-attr-icon, .discipline-icon, .feature-icon, .tooltip-icon, .footer-square {
+  display: flex; align-items: center; justify-content: center; border-radius: var(--radius); flex-shrink: 0;
+}
+
+/* ================= HEADER ================= */
+#header { position: fixed; top: 0; left: 0; right: 0; z-index: 50; padding: 1rem 0; transition: all var(--transition); }
+#header.scrolled { background-color: rgba(250, 250, 248, 0.95); backdrop-filter: blur(8px); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.header-nav { display: flex; align-items: center; justify-content: space-between; }
+.logo { font-size: 1.25rem; font-weight: 600; }
+.logo-accent { color: var(--muted-foreground); font-weight: 400; }
+.nav-links { display: none; align-items: center; gap: 2rem; }
+@media (min-width: 768px) { .nav-links { display: flex; } }
+.nav-link { font-size: 0.875rem; color: var(--muted-foreground); position: relative; }
+.nav-link::after {
+  content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px;
+  background-color: #737373; transition: width var(--transition);
+}
+.nav-link:hover, .nav-link.active { color: var(--foreground); }
+.nav-link:hover::after { width: 100%; }
+.header-cta { display: none; }
+@media (min-width: 640px) { .header-cta { display: inline-flex; } }
+
+/* ================= HERO ================= */
+.hero { min-height: 100vh; display: flex; align-items: center; padding-top: 5rem; padding-bottom: 4rem; }
+.hero-grid { display: grid; gap: 3rem; align-items: center; }
+@media (min-width: 1024px) { .hero-grid { grid-template-columns: 1fr 1fr; } }
+.hero-content { display: flex; flex-direction: column; gap: 1.5rem; }
+.hero-title { font-size: clamp(2.5rem, 6vw, 3.75rem); font-weight: 700; line-height: 1.1; }
+.hero-description { font-size: clamp(1.125rem, 2vw, 1.25rem); color: var(--muted-foreground); max-width: 32rem; }
+.hero-buttons { display: flex; flex-wrap: wrap; gap: 1rem; padding-top: 1rem; }
+.hero-visual { display: none; justify-content: center; align-items: center; }
+@media (min-width: 1024px) { .hero-visual { display: flex; } }
+
+.squares-composition { position: relative; width: 24rem; height: 24rem; animation: float 6s ease-in-out infinite; }
+.square { position: absolute; animation: scaleIn 0.4s ease-out forwards; opacity: 0; }
+.square-1 { top: 0; right: 0; width: 12rem; height: 12rem; border-radius: 1rem; animation-delay: 0.2s; }
+.square-2 { top: 6rem; left: 2rem; width: 8rem; height: 8rem; border-radius: 0.75rem; animation-delay: 0.4s; }
+.square-3 { bottom: 2rem; right: 4rem; width: 9rem; height: 9rem; border-radius: 0.75rem; animation-delay: 0.3s; }
+.square-4 { top: 12rem; right: 1rem; width: 5rem; height: 5rem; border-radius: 0.5rem; animation-delay: 0.5s; }
+.square-5 { bottom: 6rem; left: 0; width: 6rem; height: 6rem; border-radius: 0.5rem; animation-delay: 0.6s; }
+.square-6 { top: 2rem; left: 6rem; width: 3rem; height: 3rem; border-radius: 0.375rem; animation-delay: 0.7s; }
+.square-7 { bottom: 0; right: 12rem; width: 4rem; height: 4rem; border-radius: 0.375rem; animation-delay: 0.8s; }
+
+/* ================= НАПРАВЛЕНИЯ (Carousel) ================= */
+.directions-carousel { position: relative; max-width: 56rem; margin: 0 auto; overflow: hidden; } 
+.directions-track-wrap { position: relative; padding: 0 3rem; }
+.directions-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); will-change: transform; }
+.direction-slide { display: block; min-width: 100%; flex-shrink: 0; padding: 0 0.5rem; }
+.direction-card { padding: 1.75rem; box-shadow: 0 4px 20px rgba(0,0,0,0.06); height: 100%; }
+
+.directions-arrow, .faculty-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
+  width: 2.5rem; height: 2.5rem; border-radius: 50%;
+  background-color: var(--card); color: var(--foreground); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s ease; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.directions-arrow:hover, .faculty-arrow:hover {
+  background-color: var(--primary); color: var(--primary-foreground); border-color: var(--primary);
+  transform: translateY(-50%) scale(1.1);
+}
+.directions-prev, .faculty-prev { left: 0; }
+.directions-next, .faculty-next { right: 0; }
+
+.direction-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+.direction-title { font-size: 1.375rem; font-weight: 700; line-height: 1.3; }
+.direction-attrs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem 1.5rem; margin-bottom: 1.25rem; }
+.direction-attr { display: flex; align-items: flex-start; gap: 0.75rem; }
+.direction-attr-icon { width: 2.25rem; height: 2.25rem; border-radius: 0.5rem; background-color: var(--muted); color: var(--primary); }
+.direction-attr-label { display: block; font-size: 0.75rem; color: var(--muted-foreground); margin-bottom: 0.15rem; }
+.direction-attr-value { display: block; font-size: 0.875rem; font-weight: 600; line-height: 1.3; }
+.direction-description { font-size: 0.9375rem; color: var(--muted-foreground); margin: 0; }
+
+.directions-dots { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+.directions-dot {
+  width: 8px; height: 8px; border-radius: 50%; background-color: var(--muted);
+  transition: all 0.3s ease; cursor: pointer;
+}
+.directions-dot:hover { background-color: var(--muted-foreground); }
+.directions-dot.is-active { background-color: var(--primary); transform: scale(1.3); }
+
+/* ================= ДИСЦИПЛИНЫ И ПРЕИМУЩЕСТВА ================= */
+.disciplines-grid, .features-grid { display: grid; gap: 2rem; }
+@media (min-width: 640px) { .disciplines-grid, .features-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .disciplines-grid, .features-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.discipline-card { padding: 1.5rem; border-color: hsl(40, 15%, 88%, 0.5); }
+.discipline-icon { width: 4rem; height: 4rem; margin-bottom: 1.25rem; font-size: 1.75rem; }
+.discipline-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+.discipline-description { font-size: 0.875rem; color: var(--muted-foreground); }
+
+.feature-card { display: flex; gap: 1.25rem; padding: 1.5rem; border-color: hsl(40, 15%, 88%, 0.5); }
+.feature-icon { width: 3.5rem; height: 3.5rem; }
+.feature-icon svg { width: 1.5rem; height: 1.5rem; color: hsl(30, 10%, 15%, 0.7); }
+.feature-title { font-size: 1.125rem; font-weight: 600; }
+.feature-description { font-size: 0.875rem; color: var(--muted-foreground); }
+
+/* ================= ПРЕПОДАВАТЕЛИ ================= */
+.faculty-tape { position: relative; padding: 0 3rem; }
+.faculty-track { padding: 0.5rem 0; cursor: grab; width: 100%; user-select: none; overflow: hidden; border-radius: var(--radius); }
+.faculty-track:active { cursor: grabbing; }
+.faculty-track-inner { display: flex; gap: 1.5rem; width: max-content; will-change: transform; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+.faculty-track.faculty-dragging .faculty-track-inner,
+.faculty-track.faculty-inertia .faculty-track-inner { transition: none; }
+.faculty-card { flex: 0 0 auto; width: 360px; max-width: 85vw; box-shadow: 0 4px 20px rgba(0,0,0,0.06); pointer-events: auto; }
+/* app/static/styles.css */
+
+.faculty-photo-placeholder { 
+  width: 100%; 
+  aspect-ratio: 1 / 1; /* Было 4/3. Ставим 1/1 (квадрат) или 3/4 (портрет) */
+  min-height: 180px; 
+  background-color: #c53030; /* Цвет заглушки, можно поменять на var(--muted) */
+}
+.faculty-info { padding: 1.25rem; text-align: left; }
+.faculty-name { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem; }
+.faculty-company { font-size: 0.875rem; color: var(--primary); font-weight: 500; margin-bottom: 0.75rem; }
+.faculty-disciplines-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
+.faculty-disciplines { font-size: 0.8125rem; color: var(--muted-foreground); }
+.faculty-disciplines li { padding: 0.125rem 0; }
+.faculty-disciplines li::before { content: '• '; color: var(--primary); }
+
+/* ================= ROADMAP ================= */
+/* ================= ROADMAP ================= */
+.roadmap-wrapper { overflow-x: auto; padding-bottom: 2rem; }
+.roadmap-container { min-width: 900px; }
+
+/* Сетка: Первая колонка 160px (заголовок группы), остальные 8 равные (семестры) */
+.roadmap-headers, .roadmap-row { 
+    display: grid; 
+    grid-template-columns: 160px repeat(8, 1fr); 
+    gap: 0.5rem; 
+}
+
+.roadmap-headers { margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+
+/* Отступ для заголовков семестров */
+.semester-header { 
+    text-align: center; font-size: 0.875rem; font-weight: 500; color: var(--muted-foreground); padding: 0.5rem; 
+}
+.semester-header-empty { grid-column: 1 / 2; }
+
+.roadmap-group-title {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--primary);
+    padding-right: 1rem;
+    line-height: 1.2;
+}
+
+.roadmap-rows { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.roadmap-cell { 
+    height: 3rem; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    transition: all var(--transition); 
+    cursor: pointer; 
+    position: relative;
+    font-size: 0.75rem; /* Размер шрифта 12px */
+    font-weight: 600;   /* Жирность чуть больше для читаемости */
+    color: hsl(30, 10%, 15%, 0.8);
+    overflow: hidden;
+    
+    /* --- ИЗМЕНЕНИЯ --- */
+    white-space: normal;       /* Разрешаем перенос строк */
+    text-align: center;        /* Центрируем текст */
+    line-height: 1.1;          /* Уменьшаем межстрочный интервал для компактности */
+    padding: 0 0.25rem;        /* Небольшой отступ по бокам */
+    /* ----------------- */
+}
+
+.roadmap-cell.inactive { background-color: transparent; }
+
+.roadmap-cell.active { 
+    opacity: 1; 
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.roadmap-cell.active:hover { opacity: 0.9; transform: scale(1.02); z-index: 2; }
+
+/* Скругления */
+.roadmap-cell.start { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; margin-left: 2px; }
+.roadmap-cell.end { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; margin-right: 2px; }
+.roadmap-cell.start.end { border-radius: 0.5rem; }
+
+/* Маркеры годов обучения */
+.year-markers { 
+    display: grid; 
+    grid-template-columns: 160px repeat(4, 1fr); 
+    gap: 1rem; 
+    margin-top: 1.5rem; 
+    padding-top: 1rem; 
+    border-top: 1px solid var(--border); 
+}
+.year-marker { text-align: center; font-size: 0.875rem; color: var(--muted-foreground); }
+.year-marker:nth-child(2) { grid-column: 2 / 4; }
+.year-marker:nth-child(3) { grid-column: 4 / 6; }
+.year-marker:nth-child(4) { grid-column: 6 / 8; }
+.year-marker:nth-child(5) { grid-column: 8 / 10; }
+
+.course-tooltip { display: none; position: fixed; top: 1rem; right: 1rem; z-index: 50; padding: 1rem; background-color: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); max-width: 18rem; animation: scaleIn 0.2s ease-out; pointer-events: none;}
+.year-markers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.year-marker { text-align: center; font-size: 0.875rem; color: var(--muted-foreground); }
+
+.course-tooltip { display: none; position: fixed; top: 1rem; right: 1rem; z-index: 50; padding: 1rem; background-color: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); max-width: 18rem; animation: scaleIn 0.2s ease-out; }
+.tooltip-icon { width: 2rem; height: 2rem; border-radius: 0.5rem; margin-bottom: 0.75rem; }
+.tooltip-title { font-weight: 600; margin-bottom: 0.25rem; }
+.tooltip-description { font-size: 0.875rem; color: var(--muted-foreground); margin-bottom: 0.5rem; line-height: 1.5; }
+.tooltip-meta { font-size: 0.75rem; color: var(--muted-foreground); }
+
+/* ================= TIMELINE ================= */
+.timeline-wrapper { position: relative; max-width: 800px; margin: 0 auto; padding: 1rem 0; }
+.timeline-line { position: absolute; left: 24px; top: 0; bottom: 0; width: 2px; background-color: var(--border); z-index: 0; }
+.timeline-item { position: relative; padding-left: 80px; margin-bottom: 3rem; z-index: 1; }
+.timeline-item:last-child { margin-bottom: 0; }
+.timeline-marker {
+  position: absolute; left: 0; top: 0; width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1.125rem;
+  border: 4px solid var(--background); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform var(--transition);
+}
+.timeline-item:hover .timeline-marker { transform: scale(1.1); }
+.timeline-content { padding: 1.5rem; position: relative; }
+.timeline-content::before {
+  content: ''; position: absolute; left: -6px; top: 20px; width: 10px; height: 10px;
+  background-color: var(--card); border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  transform: rotate(45deg);
+}
+.timeline-term { display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+.timeline-heading { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
+.timeline-desc { font-size: 0.9375rem; color: var(--muted-foreground); }
+
+@media (max-width: 640px) {
+  .timeline-line { left: 16px; }
+  .timeline-marker { width: 32px; height: 32px; font-size: 0.875rem; border-width: 3px; }
+  .timeline-item { padding-left: 50px; }
+}
+
+/* ================= ДОСТИЖЕНИЯ ================= */
+.achievements-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.achievement-card { padding: 1.5rem; position: relative; border-top-width: 4px; }
+.achievement-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+.achievement-tag { font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; }
+.achievement-title { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.3; }
+.achievement-desc { font-size: 0.875rem; color: var(--muted-foreground); }
+.border-sky { border-top-color: var(--pastel-sky); }
+.border-mint { border-top-color: var(--pastel-mint); }
+.border-peach { border-top-color: var(--pastel-peach); }
+.border-lavender { border-top-color: var(--pastel-lavender); }
+
+/* ================= FAQ & FORM ================= */
+.apply-grid { display: grid; gap: 3rem; }
+@media (min-width: 900px) { .apply-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+.faq-column { display: flex; flex-direction: column; gap: 1rem; }
+.faq-question { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1.25rem; text-align: left; font-size: 1rem; font-weight: 600; transition: color 0.2s ease; }
+.faq-question:hover { color: var(--primary); }
+.faq-icon { font-weight: 400; font-size: 1.5rem; color: var(--muted-foreground); transition: transform var(--transition); }
+.faq-item.active .faq-icon { transform: rotate(45deg); color: var(--primary); }
+.faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; background-color: rgba(255,255,255,0.5); }
+.faq-answer p { padding: 0 1.25rem 1.25rem; font-size: 0.9375rem; color: var(--muted-foreground); }
+
+.apply-form { padding: 2rem; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
+.form-header { margin-bottom: 1.5rem; }
+.form-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; }
+.form-subtitle { font-size: 0.875rem; color: var(--muted-foreground); }
+.form-group { margin-bottom: 1rem; }
+.form-input, .form-select { width: 100%; padding: 0.75rem 1rem; font-size: 0.9375rem; font-family: inherit; background-color: var(--background); border: 1px solid var(--border); border-radius: var(--radius); outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+.form-input:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+.form-success { margin-top: 1rem; padding: 1rem; background-color: var(--pastel-mint); border-radius: var(--radius); display: flex; align-items: center; gap: 0.75rem; color: #064e3b; font-weight: 500; font-size: 0.9375rem; animation: fadeInUp 0.4s ease; }
+
+.footer { padding: 4rem 0; background-color: var(--card); border-top: 1px solid var(--border); }
+.footer-grid { display: grid; gap: 3rem; }
+@media (min-width: 768px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .footer-grid { grid-template-columns: repeat(4, 1fr); } }
+.footer-section { display: flex; flex-direction: column; gap: 1rem; }
+.footer-brand { font-size: 1.25rem; font-weight: 600; }
+.footer-description { font-size: 0.875rem; color: var(--muted-foreground); }
+.footer-cta { margin-top: 0.5rem; align-self: flex-start; }
+.footer-heading { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.footer-contacts, .footer-links { display: flex; flex-direction: column; gap: 0.75rem; }
+.footer-links { gap: 0.5rem; }
+.footer-contact, .footer-links a, .footer-social { display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem; color: var(--muted-foreground); transition: color 0.2s ease; }
+.footer-contact a:hover, .footer-links a:hover, .footer-social:hover { color: var(--foreground); }
+.footer-squares { display: flex; gap: 0.5rem; padding-top: 1rem; }
+.footer-square { width: 2rem; height: 2rem; }
+.footer-bottom { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center; }
+.footer-copyright { font-size: 0.875rem; color: var(--muted-foreground); }
+</file>
+
+<file path="app/schemas/__init__.py">
+from .achievement import Achievement, AchievementBase
+from .faq import Faq, FaqBase
+from .feature import Feature, FeatureBase
+from .health_check import HealthCheck
+from .plan import Direction, Direction_Disciplines, DirectionBase, Discipline, DisciplineBase
+from .setting import Setting, SettingBase
+from .speciality import Speciality, Speciality_Features, SpecialityBase
+from .subject import Subject, SubjectBase
+from .teacher import Teacher, TeacherBase
+from .timeline import TimelineStep, TimelineStepBase
+from .user import User, UserBase
+
+__all__ = [
+    # Feature
+    'FeatureBase', 'Feature',
+
+    # Plan
+    'DirectionBase', 'Direction',
+    'DisciplineBase', 'Discipline',
+    'Direction_Disciplines',
+
+    # Speciality
+    'SpecialityBase', 'Speciality',
+    'Speciality_Features',
+
+    # Subject
+    'SubjectBase', 'Subject',
+
+    # Teacher
+    'TeacherBase', 'Teacher',
+
+    # User
+    'UserBase', 'User',
+
+    # Achievement
+    'AchievementBase', 'Achievement',
+
+    # Faq
+    'FaqBase', 'Faq',
+
+    # Health Check
+    'HealthCheck',
+
+    # Setting & Timeline
+    'SettingBase', 'Setting',
+    'TimelineStepBase', 'TimelineStep',
+]
+</file>
+
+<file path="Caddyfile">
+www.vinogradovnikita.ru {
+    redir https://vinogradovnikita.ru{uri}
+}
+
+vinogradovnikita.ru {
+    reverse_proxy app:8000
+}
+
+admin.vinogradovnikita.ru {
+    reverse_proxy app:8000
+}
+
+pgadmin.vinogradovnikita.ru {
+
+    basicauth {
+        admin $2a$04$B1lIu6YvkDK23uUAV4Zb.u1UIqG/fAdnp4mYyMtpQZQCBu9WLRf1W
+    }
+    reverse_proxy pgadmin:80
+}
+</file>
+
 <file path="tests/conftest.py">
 import asyncio
 import os
@@ -3132,6 +3374,38 @@ async def client():
     """Асинхронный HTTP-клиент для тестирования эндпоинтов."""
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
+</file>
+
+<file path="app/models/__init__.py">
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
+
+from app.models.achievement import Achievement  # noqa: E402
+from app.models.faq import Faq  # noqa: E402
+from app.models.feature import Feature  # noqa: E402
+from app.models.plan import Direction, Discipline  # noqa: E402
+from app.models.setting import Setting  # noqa: E402
+from app.models.speciality import Speciality  # noqa: E402
+from app.models.subject import Subject  # noqa: E402
+from app.models.teacher import Teacher  # noqa: E402
+from app.models.timeline import TimelineStep  # noqa: E402
+from app.models.user import User  # noqa: E402
+
+__all__ = [
+    "Base",
+    "User",
+    "Speciality",
+    "Feature",
+    "Direction",
+    "Discipline",
+    "Teacher",
+    "Subject",
+    "Achievement",
+    "Faq",
+    "Setting",
+    "TimelineStep",
+]
 </file>
 
 <file path="app/models/plan.py">
@@ -3220,14 +3494,16 @@ class Discipline(Base):
   async function loadData() {
     try {
       // Запрашиваем все данные параллельно
-      const [specialities, subjects, features, teachers, achievements, directions, faqs] = await Promise.all([
+      const [specialities, subjects, features, teachers, achievements, directions, faqs, settings, timeline] = await Promise.all([
         fetch('/speciality').then(r => r.json()),
         fetch('/subjects').then(r => r.json()),
         fetch('/features').then(r => r.json()),
         fetch('/teachers').then(r => r.json()),
         fetch('/achievements').then(r => r.json()),
         fetch('/directions-with-disciplines').then(r => r.json()),
-        fetch('/faqs').then(r => r.json())
+        fetch('/faqs').then(r => r.json()),
+        fetch('/settings').then(r => r.json()),
+        fetch('/timeline').then(r => r.json())
       ]);
 
       renderSpecialities(specialities);
@@ -3237,6 +3513,11 @@ class Discipline(Base):
       renderAchievements(achievements);
       initRoadmap(directions);
       renderFaqs(faqs);
+      
+      // Новые функции
+      applySettings(settings);
+      renderTimeline(timeline);
+      populateApplySelect(directions);
 
       initObservers();
 
@@ -3377,6 +3658,47 @@ class Discipline(Base):
         </div>
       </div>
     `).join('');
+  }
+
+  // --- НОВЫЕ ФУНКЦИИ ДЛЯ CMS ---
+  function applySettings(data) {
+    data.forEach(setting => {
+      const el = getById(`setting_${setting.key}`);
+      if (el) {
+        // Умная проверка: если ключ заканчивается на _link и это тег <a>, меняем ссылку (href)
+        if (setting.key.endsWith('_link') && el.hasAttribute('href')) {
+          el.href = setting.value;
+        } else {
+          el.innerHTML = setting.value; // Иначе меняем сам текст
+        }
+      }
+    });
+  }
+
+  function renderTimeline(data) {
+    const wrapper = document.querySelector('.timeline-wrapper');
+    if (!wrapper || !data.length) return;
+    
+    wrapper.innerHTML = '<div class="timeline-line"></div>' + data.map((step, i) => `
+      <div class="timeline-item reveal">
+        <div class="timeline-marker ${esc(step.color_class)}">${i + 1}</div>
+        <div class="timeline-content hover-lift">
+          <span class="timeline-term">${esc(step.term)}</span>
+          <h3 class="timeline-heading">${esc(step.title)}</h3>
+          <p class="timeline-desc">${esc(step.description)}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function populateApplySelect(directions) {
+    const select = getById('leadDirection');
+    if (!select || !directions.length) return;
+    
+    const firstOption = select.options[0].outerHTML; // Оставляем плейсхолдер
+    select.innerHTML = firstOption + directions.map(d => 
+      `<option value="${esc(d.name)}">${esc(d.name)}</option>`
+    ).join('');
   }
 
   // --- Roadmap Logic (План с группировкой и упаковкой) ---
@@ -3648,28 +3970,6 @@ class Discipline(Base):
 })();
 </file>
 
-<file path="Caddyfile">
-www.vinogradovnikita.ru {
-    redir https://vinogradovnikita.ru{uri}
-}
-
-vinogradovnikita.ru {
-    reverse_proxy app:8000
-}
-
-admin.vinogradovnikita.ru {
-    reverse_proxy app:8000
-}
-
-pgadmin.vinogradovnikita.ru {
-
-    basicauth {
-        admin $2a$04$B1lIu6YvkDK23uUAV4Zb.u1UIqG/fAdnp4mYyMtpQZQCBu9WLRf1W
-    }
-    reverse_proxy pgadmin:80
-}
-</file>
-
 <file path="app/templates/index.html">
 <head>
   <meta charset="UTF-8">
@@ -3695,7 +3995,7 @@ pgadmin.vinogradovnikita.ru {
   <header id="header">
     <div class="container">
       <nav class="header-nav">
-        <a href="#" class="logo">БГИТУ <span class="text-muted-foreground font-normal">IT-Институт</span></a>
+        <a href="#" class="logo" id="setting_nav_logo">БГИТУ <span class="text-muted-foreground font-normal">IT-Институт</span></a>
         
         <ul class="nav-links">
           <li><button class="nav-link" data-target="directions">Направления</button></li>
@@ -3705,7 +4005,7 @@ pgadmin.vinogradovnikita.ru {
           <li><button class="nav-link" data-target="roadmap">План</button></li>
         </ul>
         
-        <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary btn-sm header-cta">Подать заявление</a>
+        <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary btn-sm header-cta" id="setting_nav_btn_link"><span id="setting_nav_btn_text">Подать заявление</span></a>
       </nav>
     </div>
   </header>
@@ -3715,11 +4015,11 @@ pgadmin.vinogradovnikita.ru {
       <div class="container">
         <div class="hero-grid">
           <div class="hero-content reveal">
-            <h1 class="hero-title">Вкатись в IT <br><span class="text-muted-foreground">с БГИТУ</span></h1>
-            <p class="hero-description">Пройди путь от первой строчки кода до офера в топовой компании. Оплачиваемая практика с 3 курса, военный билет и государственное портфолио проектов.</p>
+            <h1 class="hero-title" id="setting_hero_title">Вкатись в IT <br><span class="text-muted-foreground">с БГИТУ</span></h1>
+            <p class="hero-description" id="setting_hero_desc">Пройди путь от первой строчки кода до офера в топовой компании. Оплачиваемая практика с 3 курса, военный билет и государственное портфолио проектов.</p>
             <div class="hero-buttons">
-              <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary btn-lg">Подать заявление</a>
-              <a href="#directions" class="btn btn-outline btn-lg">Узнать больше</a>
+              <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary btn-lg" id="setting_hero_btn1_link"><span id="setting_hero_btn1_text">Подать заявление</span></a>
+              <a href="#directions" class="btn btn-outline btn-lg" id="setting_hero_btn2_link"><span id="setting_hero_btn2_text">Узнать больше</span></a>
             </div>
           </div>
           
@@ -3741,8 +4041,8 @@ pgadmin.vinogradovnikita.ru {
     <section id="directions" class="section section-alt">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Направления обучения</h2>
-          <p class="section-description">Выберите программу, соответствующую вашим интересам</p>
+          <h2 class="section-title" id="setting_directions_title">Направления обучения</h2>
+          <p class="section-description" id="setting_directions_desc">Выберите программу, соответствующую вашим интересам</p>
         </div>
         <div class="directions-carousel reveal">
           <div class="directions-track-wrap">
@@ -3763,8 +4063,8 @@ pgadmin.vinogradovnikita.ru {
     <section id="disciplines" class="section section-alt">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Ключевые дисциплины</h2>
-          <p class="section-description">Актуальный технологический стек</p>
+          <h2 class="section-title" id="setting_disciplines_title">Ключевые дисциплины</h2>
+          <p class="section-description" id="setting_disciplines_desc">Актуальный технологический стек</p>
         </div>
         
         <div class="disciplines-grid" id="subjectsGrid">
@@ -3775,8 +4075,8 @@ pgadmin.vinogradovnikita.ru {
     <section id="features" class="section section-alt">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Почему выбирают нас</h2>
-          <p class="section-description">Фокус на карьере и личной траектории студента</p>
+          <h2 class="section-title" id="setting_features_title">Почему выбирают нас</h2>
+          <p class="section-description" id="setting_features_desc">Фокус на карьере и личной траектории студента</p>
         </div>
         
         <div class="features-grid" id="featuresGrid">
@@ -3787,8 +4087,8 @@ pgadmin.vinogradovnikita.ru {
     <section id="faculty" class="section">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Преподаватели</h2>
-          <p class="section-description">Практикующие специалисты ведущих IT-компаний</p>
+          <h2 class="section-title" id="setting_faculty_title">Преподаватели</h2>
+          <p class="section-description" id="setting_faculty_desc">Практикующие специалисты ведущих IT-компаний</p>
         </div>
         <div class="faculty-tape">
           <button class="faculty-arrow faculty-prev" id="facultyPrev"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -3802,8 +4102,8 @@ pgadmin.vinogradovnikita.ru {
     <section id="roadmap" class="section section-alt">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Учебный план</h2>
-          <p class="section-description">8 семестров интенсивного обучения</p>
+          <h2 class="section-title" id="setting_roadmap_title">Учебный план</h2>
+          <p class="section-description" id="setting_roadmap_desc">8 семестров интенсивного обучения</p>
           <div style="text-align: center; margin-bottom: 1rem;">
               <select id="roadmapSelect" class="form-select" style="max-width: 300px; display: inline-block;">
                   <option value="" disabled selected>Загрузка планов...</option>
@@ -3829,47 +4129,12 @@ pgadmin.vinogradovnikita.ru {
     <section id="curriculum-timeline" class="section">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Путь студента</h2>
-          <p class="section-description">Пошаговое развитие от новичка до инженера</p>
+          <h2 class="section-title" id="setting_timeline_title">Путь студента</h2>
+          <p class="section-description" id="setting_timeline_desc">Пошаговое развитие от новичка до инженера</p>
         </div>
         <div class="timeline-wrapper">
-          <div class="timeline-line"></div>
-          
-          <div class="timeline-item reveal">
-            <div class="timeline-marker bg-pastel-sky">1</div>
-            <div class="timeline-content hover-lift">
-              <span class="timeline-term">1–2 семестры</span>
-              <h3 class="timeline-heading">Шаг 1. Фундаментальные знания</h3>
-              <p class="timeline-desc">Информатика, алгоритмизация и программирование (C++/C#), базы данных, математика и физика.</p>
-            </div>
-          </div>
-
-          <div class="timeline-item reveal">
-            <div class="timeline-marker bg-pastel-mint">2</div>
-            <div class="timeline-content hover-lift">
-              <span class="timeline-term">3–4 семестры</span>
-              <h3 class="timeline-heading">Шаг 2. Проекты и практики</h3>
-              <p class="timeline-desc">Совместная работа над проектом, учебная практика (ознакомительная, технологическая), первые командные задачи.</p>
-            </div>
-          </div>
-
-          <div class="timeline-item reveal">
-            <div class="timeline-marker bg-pastel-peach">3</div>
-            <div class="timeline-content hover-lift">
-              <span class="timeline-term">5–7 семестры</span>
-              <h3 class="timeline-heading">Шаг 3. Специализация и стажировки</h3>
-              <p class="timeline-desc">Frontend, Backend, 1C, мобильная разработка, системное администрирование, ML/AI, тестирование ПО.</p>
-            </div>
-          </div>
-
-          <div class="timeline-item reveal">
-            <div class="timeline-marker bg-pastel-lavender">4</div>
-            <div class="timeline-content hover-lift">
-              <span class="timeline-term">8 семестр</span>
-              <h3 class="timeline-heading">Шаг 4. Целевой диплом и трудоустройство</h3>
-              <p class="timeline-desc">Дипломный проект, связанный с реальными задачами предприятий. Выход на позиции Junior/Middle разработчика.</p>
-            </div>
-          </div>
+            <div class="timeline-line"></div>
+        </div>
 
         </div>
       </div>
@@ -3878,8 +4143,8 @@ pgadmin.vinogradovnikita.ru {
     <section id="achievements" class="section">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Достижения</h2>
-          <p class="section-description">Хакатоны, гранты и карьеры студентов</p>
+          <h2 class="section-title" id="setting_achievements_title">Достижения</h2>
+          <p class="section-description" id="setting_achievements_desc">Хакатоны, гранты и карьеры студентов</p>
         </div>
         <div class="achievements-grid" id="achievementsGrid">
             </div>
@@ -3889,8 +4154,8 @@ pgadmin.vinogradovnikita.ru {
     <section id="apply" class="section section-alt">
       <div class="container">
         <div class="section-header reveal">
-          <h2 class="section-title">Абитуриенту</h2>
-          <p class="section-description">Все, что нужно знать для поступления</p>
+          <h2 class="section-title" id="setting_apply_title">Абитуриенту</h2>
+          <p class="section-description" id="setting_apply_desc">Все, что нужно знать для поступления</p>
         </div>
         <div class="apply-grid">
           <div class="faq-column reveal" id="faqContainer">
@@ -3922,15 +4187,15 @@ pgadmin.vinogradovnikita.ru {
     <div class="container">
       <div class="footer-grid">
         <div class="footer-section">
-          <h3 class="footer-brand">БГИТУ <span class="logo-accent">IT</span></h3>
-          <p style="font-size: 0.9rem; margin-bottom: 1rem; opacity: 0.8;">Твой карьерный лифт в ИТ-индустрию Брянска и России.</p>
-          <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary footer-cta">Подать документы</a>
+          <h3 class="footer-brand" id="setting_footer_brand">БГИТУ <span class="logo-accent">IT</span></h3>
+          <p style="font-size: 0.9rem; margin-bottom: 1rem; opacity: 0.8;" id="setting_footer_desc">Твой карьерный лифт в ИТ-индустрию Брянска и России.</p>
+          <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary footer-cta" id="setting_footer_btn_link"><span id="setting_footer_btn_text">Подать документы</span></a>
         </div>
         <div class="footer-section">
           <h4 class="footer-heading">Контакты</h4>
           <ul class="footer-contacts">
-            <li class="footer-contact"><a href="mailto:it@bgitu.ru">it@bgitu.ru</a></li>
-            <li class="footer-contact"><span>Приемная комиссия: +7 (4832) 64-99-12</span></li>
+            <li class="footer-contact"><a href="mailto:it@bgitu.ru" id="setting_footer_email">it@bgitu.ru</a></li>
+            <li class="footer-contact"><span id="setting_footer_phone">Приемная комиссия: +7 (4832) 64-99-12</span></li>
           </ul>
         </div>
         <div class="footer-section">
@@ -3942,7 +4207,7 @@ pgadmin.vinogradovnikita.ru {
         </div>
         <div class="footer-section">
           <h4 class="footer-heading">Мы в сети</h4>
-          <a href="https://vk.com/it_bgitu" target="_blank" class="footer-social">VK: IT-Институт БГИТУ</a>
+          <a href="https://vk.com/it_bgitu" target="_blank" class="footer-social" id="setting_footer_vk_link"><span id="setting_footer_vk_text">VK: IT-Институт БГИТУ</span></a>
         </div>
       </div>
       
@@ -3975,6 +4240,133 @@ ruff==0.3.2
 pytest==8.1.1
 pytest-asyncio==0.23.5
 httpx==0.27.0
+</file>
+
+<file path="app/routers/public.py">
+import os
+from typing import List
+
+from fastapi import APIRouter, Depends
+from fastapi.responses import FileResponse
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
+
+from app.database import get_db
+from app.models.achievement import Achievement
+from app.models.faq import Faq
+from app.models.feature import Feature
+from app.models.plan import Direction
+from app.models.setting import Setting
+from app.models.speciality import Speciality
+from app.models.subject import Subject
+from app.models.teacher import Teacher
+from app.models.timeline import TimelineStep
+
+# [PERF] Импорт нашего таймера
+from app.performance import PerfTimer
+from app.schemas.achievement import Achievement as AchievementSchema
+from app.schemas.faq import Faq as FaqSchema
+from app.schemas.feature import Feature as FeatureSchema
+from app.schemas.setting import Setting as SettingSchema
+from app.schemas.speciality import Speciality as SpecialitySchema
+from app.schemas.subject import Subject as SubjectSchema
+from app.schemas.teacher import Teacher as TeacherSchema
+from app.schemas.timeline import TimelineStep as TimelineStepSchema
+
+router = APIRouter(tags=["Landing"])
+
+@router.get("/")
+async def read_root():
+    file_path = os.path.join("app", "templates", "index.html")
+    return FileResponse(file_path)
+
+@router.get("/robots.txt", include_in_schema=False)
+async def robots():
+    return FileResponse(os.path.join("app", "static", "robots.txt"))
+
+@router.get("/sitemap.xml", include_in_schema=False)
+async def sitemap():
+    return FileResponse(os.path.join("app", "static", "sitemap.xml"))
+
+@router.get("/api/health")
+async def health_check(db: AsyncSession = Depends(get_db)):
+    try:
+        result = await db.execute(text("SELECT 100 + 55"))
+        value = result.scalar()
+        return {"db_status": True, "math_result": value}
+    except Exception as e:
+        # Логируем реальную ошибку в консоль/логгер сервера
+        print(f"Healthcheck DB Error: {e}")
+        # Пользователю отдаем безопасное сообщение
+        return {"db_status": False, "error": "Database connection failed"}
+
+
+@router.get("/achievements", response_model=List[AchievementSchema])
+async def get_all_achievements(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Achievement).order_by(Achievement.id))
+    return result.scalars().all()
+
+@router.get("/faqs", response_model=List[FaqSchema])
+async def get_all_faqs(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Faq).order_by(Faq.id))
+    return result.scalars().all()
+
+@router.get("/features", response_model=List[FeatureSchema])
+async def get_all_features(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Feature).order_by(Feature.id))
+    return result.scalars().all()
+
+
+@router.get("/directions-with-disciplines")
+async def get_all_directions_with_disciplines(db: AsyncSession = Depends(get_db)):
+    # SQL-запрос замеряется автоматически через события SQLAlchemy
+    result = await db.execute(select(Direction).options(selectinload(Direction.disciplines)).order_by(Direction.id))
+    directions = result.scalars().all()
+
+    # [PERF] Замеряем время упаковки данных в JSON (чистый CPU time)
+    with PerfTimer("Упаковка JSON Roadmap"):
+        response_data = [{
+            "id": d.id,
+            "name": d.name,
+            "disciplines": [{
+                "id": disc.id,
+                "name": disc.name,
+                "start_term": disc.start_term,
+                "end_term": disc.end_term,
+                "group": disc.group,
+                "direction_id": disc.direction_id
+            } for disc in d.disciplines]
+        } for d in directions]
+
+    return response_data
+
+
+@router.get("/speciality", response_model=List[SpecialitySchema])
+async def get_all_speciality(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Speciality).order_by(Speciality.id))
+    return result.scalars().all()
+
+@router.get("/subjects", response_model=List[SubjectSchema])
+async def get_all_subjects(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Subject).order_by(Subject.id))
+    return result.scalars().all()
+
+@router.get("/teachers", response_model=List[TeacherSchema])
+async def get_all_teachers(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Teacher).order_by(Teacher.fio))
+    return result.scalars().all()
+
+@router.get("/settings", response_model=List[SettingSchema])
+async def get_all_settings(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Setting))
+    return result.scalars().all()
+
+@router.get("/timeline", response_model=List[TimelineStepSchema])
+async def get_timeline(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(TimelineStep).order_by(TimelineStep.order))
+    return result.scalars().all()
 </file>
 
 <file path=".github/workflows/ci.yml">
@@ -4083,129 +4475,13 @@ jobs:
             docker compose pull
             docker compose up -d --remove-orphans
             
-            # 3. Накатываем миграции
+            # Применяем миграции
             sleep 5
-            
-            # Амнезия для Alembic: удаляем старую таблицу с историей напрямую через PostgreSQL
-            docker compose exec -T -e PGPASSWORD="${{ secrets.DB_PASS }}" db psql -U "${{ secrets.DB_USER }}" -d "${{ secrets.DB_NAME }}" -c "DROP TABLE IF EXISTS alembic_version;"
-            
-            # Теперь база чиста от старых хешей. Ставим актуальную метку миграций.
-            docker compose exec -T app alembic stamp head
             docker compose exec -T app alembic upgrade head
             
-            # 4. Чистим старые образы, чтобы не забивать память сервера
-            docker image prune -f
-</file>
-
-<file path="app/routers/public.py">
-import os
-from typing import List
-
-from fastapi import APIRouter, Depends
-from fastapi.responses import FileResponse
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
-
-from app.database import get_db
-from app.models.achievement import Achievement
-from app.models.faq import Faq
-from app.models.feature import Feature
-from app.models.plan import Direction
-from app.models.speciality import Speciality
-from app.models.subject import Subject
-from app.models.teacher import Teacher
-
-# [PERF] Импорт нашего таймера
-from app.performance import PerfTimer
-from app.schemas.achievement import Achievement as AchievementSchema
-from app.schemas.faq import Faq as FaqSchema
-from app.schemas.feature import Feature as FeatureSchema
-from app.schemas.speciality import Speciality as SpecialitySchema
-from app.schemas.subject import Subject as SubjectSchema
-from app.schemas.teacher import Teacher as TeacherSchema
-
-router = APIRouter(tags=["Landing"])
-
-@router.get("/")
-async def read_root():
-    file_path = os.path.join("app", "templates", "index.html")
-    return FileResponse(file_path)
-
-@router.get("/robots.txt", include_in_schema=False)
-async def robots():
-    return FileResponse(os.path.join("app", "static", "robots.txt"))
-
-@router.get("/sitemap.xml", include_in_schema=False)
-async def sitemap():
-    return FileResponse(os.path.join("app", "static", "sitemap.xml"))
-
-@router.get("/api/health")
-async def health_check(db: AsyncSession = Depends(get_db)):
-    try:
-        result = await db.execute(text("SELECT 100 + 55"))
-        value = result.scalar()
-        return {"db_status": True, "math_result": value}
-    except Exception as e:
-        print(f"DB Error: {e}")
-        return {"db_status": False, "error": str(e)}
-
-
-@router.get("/achievements", response_model=List[AchievementSchema])
-async def get_all_achievements(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Achievement).order_by(Achievement.id))
-    return result.scalars().all()
-
-@router.get("/faqs", response_model=List[FaqSchema])
-async def get_all_faqs(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Faq).order_by(Faq.id))
-    return result.scalars().all()
-
-@router.get("/features", response_model=List[FeatureSchema])
-async def get_all_features(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Feature).order_by(Feature.id))
-    return result.scalars().all()
-
-
-@router.get("/directions-with-disciplines")
-async def get_all_directions_with_disciplines(db: AsyncSession = Depends(get_db)):
-    # SQL-запрос замеряется автоматически через события SQLAlchemy
-    result = await db.execute(select(Direction).options(selectinload(Direction.disciplines)).order_by(Direction.id))
-    directions = result.scalars().all()
-
-    # [PERF] Замеряем время упаковки данных в JSON (чистый CPU time)
-    with PerfTimer("Упаковка JSON Roadmap"):
-        response_data = [{
-            "id": d.id,
-            "name": d.name,
-            "disciplines": [{
-                "id": disc.id,
-                "name": disc.name,
-                "start_term": disc.start_term,
-                "end_term": disc.end_term,
-                "group": disc.group,
-                "direction_id": disc.direction_id
-            } for disc in d.disciplines]
-        } for d in directions]
-
-    return response_data
-
-
-@router.get("/speciality", response_model=List[SpecialitySchema])
-async def get_all_speciality(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Speciality).order_by(Speciality.id))
-    return result.scalars().all()
-
-@router.get("/subjects", response_model=List[SubjectSchema])
-async def get_all_subjects(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Subject).order_by(Subject.id))
-    return result.scalars().all()
-
-@router.get("/teachers", response_model=List[TeacherSchema])
-async def get_all_teachers(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Teacher).order_by(Teacher.fio))
-    return result.scalars().all()
+                        # 4. Чистим старые образы, чтобы не забивать память сервера
+            
+                        docker image prune -f
 </file>
 
 <file path="app/main.py">
@@ -4265,12 +4541,18 @@ class ForceHTTPSMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(ForceHTTPSMiddleware)
 
-SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key-change-me")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    # В режиме разработки можно оставить заглушку, но лучше предупредить
+    SECRET_KEY = "dev-secret-key-change-it-in-production"
+    print("WARNING: SECRET_KEY is not set. Using default development key.")
+
 app.add_middleware(
     SessionMiddleware,
     secret_key=SECRET_KEY,
     https_only=True,
-    same_site="lax"
+    same_site="lax",
+    max_age=3600 * 24 # 24 часа
 )
 
 # Монтирование статики и медиа
@@ -4322,9 +4604,11 @@ from app.models import (
     Discipline,
     Faq,
     Feature,
+    Setting,
     Speciality,
     Subject,
     Teacher,
+    TimelineStep,
     User,
 )
 from app.security import get_password_hash, verify_password
@@ -4353,7 +4637,8 @@ class AdminAuth(AuthenticationBackend):
     async def authenticate(self, request: Request) -> bool:
         return "token" in request.session
 
-authentication_backend = AdminAuth(secret_key=os.getenv("SECRET_KEY", "supersecret"))
+admin_secret_key = os.getenv("SECRET_KEY", "dev-admin-secret-key")
+authentication_backend = AdminAuth(secret_key=admin_secret_key)
 
 # --- VIEWS ---
 
@@ -4452,8 +4737,25 @@ class TeacherAdmin(ModelView, model=Teacher):
     async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
         input_file = data.get("image_url")
         if input_file and hasattr(input_file, "filename") and input_file.filename:
-            # Читаем файл в память асинхронно
-            image_bytes = await input_file.read()
+            # --- ЗАЩИТА ОТ ДЕКОМПРЕССИОННЫХ БОМБ И OOM (Limit 5MB) ---
+            # Читаем максимум 5МБ + 1 байт для проверки
+            max_size = 5 * 1024 * 1024
+            image_bytes = await input_file.read(max_size + 1)
+            
+            if len(image_bytes) > max_size:
+                raise ValueError("Файл слишком большой! Максимальный размер — 5МБ.")
+
+            # --- УДАЛЕНИЕ СТАРОГО ФАЙЛА ПРИ ОБНОВЛЕНИИ ---
+            if not is_created and model.image_url:
+                # Превращаем URL /media/name.webp в путь app/uploads/name.webp
+                old_relative_path = model.image_url.lstrip("/")
+                if old_relative_path.startswith("media/"):
+                    old_file_path = Path("app/uploads") / old_relative_path.replace("media/", "", 1)
+                    if old_file_path.exists():
+                        try:
+                            old_file_path.unlink()
+                        except Exception:
+                            pass # Логируем ошибку, если нужно, но не прерываем процесс
 
             # Открываем изображение через Pillow
             img = Image.open(io.BytesIO(image_bytes))
@@ -4485,6 +4787,18 @@ class TeacherAdmin(ModelView, model=Teacher):
         if isinstance(subjects_input, str):
             clean_text = subjects_input.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
             data["subjects"] = [s.strip() for s in clean_text.split(",") if s.strip()]
+
+    async def on_model_delete(self, model: Any, request: Request) -> None:
+        """Удаляет файл с диска при удалении записи преподавателя"""
+        if model.image_url:
+            relative_path = model.image_url.lstrip("/")
+            if relative_path.startswith("media/"):
+                file_path = Path("app/uploads") / relative_path.replace("media/", "", 1)
+                if file_path.exists():
+                    try:
+                        file_path.unlink()
+                    except Exception:
+                        pass
 
 class DisciplineInline(ModelView, model=Discipline):
     column_list = [Discipline.name, Discipline.group, Discipline.start_term, Discipline.end_term]
@@ -4577,6 +4891,36 @@ class FaqAdmin(ModelView, model=Faq):
     form_overrides = {"answer": TextAreaField}
 
 
+class SettingAdmin(ModelView, model=Setting):
+    name = "Текст сайта (Настройки)"
+    name_plural = "Тексты сайта (Настройки)"
+    icon = "fa-solid fa-gear"
+
+    column_list = [Setting.key, Setting.description, Setting.value]
+    column_labels = {Setting.key: "Ключ (обязательно на англ, напр: hero_title)", Setting.value: "Значение (Текст)", Setting.description: "Описание для вас"}
+    form_overrides = {"value": TextAreaField}
+    column_searchable_list = [Setting.key, Setting.description]
+
+class TimelineStepAdmin(ModelView, model=TimelineStep):
+    name = "Этап обучения (Timeline)"
+    name_plural = "Этапы обучения (Timeline)"
+    icon = "fa-solid fa-stream"
+
+    column_list = [TimelineStep.order, TimelineStep.term, TimelineStep.title]
+    column_labels = {
+        TimelineStep.order: "Порядок (1, 2, 3...)",
+        TimelineStep.term: "Семестры",
+        TimelineStep.title: "Заголовок",
+        TimelineStep.description: "Описание",
+        TimelineStep.color_class: "Цвет"
+    }
+    form_overrides = {"description": TextAreaField}
+    form_args = {
+        "color_class": {"label": "CSS класс цвета (bg-pastel-sky, bg-pastel-mint, bg-pastel-peach, bg-pastel-lavender)"}
+    }
+    column_sortable_list = [TimelineStep.order]
+
+
 # --- SETUP ---
 
 def setup_admin(app):
@@ -4598,6 +4942,8 @@ def setup_admin(app):
     admin.add_view(SubjectAdmin)
     admin.add_view(AchievementAdmin)
     admin.add_view(FaqAdmin)
+    admin.add_view(TimelineStepAdmin)
+    admin.add_view(SettingAdmin)
 </file>
 
 </files>

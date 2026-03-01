@@ -52,8 +52,10 @@ async def health_check(db: AsyncSession = Depends(get_db)):
         value = result.scalar()
         return {"db_status": True, "math_result": value}
     except Exception as e:
-        print(f"DB Error: {e}")
-        return {"db_status": False, "error": str(e)}
+        # Логируем реальную ошибку в консоль/логгер сервера
+        print(f"Healthcheck DB Error: {e}")
+        # Пользователю отдаем безопасное сообщение
+        return {"db_status": False, "error": "Database connection failed"}
 
 
 @router.get("/achievements", response_model=List[AchievementSchema])

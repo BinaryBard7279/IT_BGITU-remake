@@ -14,7 +14,7 @@ from sqladmin.authentication import AuthenticationBackend
 from sqlalchemy import select
 from wtforms import FileField, PasswordField, StringField, TextAreaField
 
-from app.database import engine
+from app.database import AsyncSessionLocal, engine
 from app.models import (
     Achievement,
     Direction,
@@ -37,10 +37,10 @@ class AdminAuth(AuthenticationBackend):
         form = await request.form()
         email, password = form.get("username"), form.get("password")
 
-        async with engine.connect() as conn:
+        async with AsyncSessionLocal() as session:
             stmt = select(User).where(User.email == email)
-            result = await conn.execute(stmt)
-            user = result.fetchone()
+            result = await session.execute(stmt)
+            user = result.scalar_one_or_none()
 
         if user and verify_password(password, user.hashed_password):
             request.session.update({"token": str(user.id)})
@@ -54,7 +54,8 @@ class AdminAuth(AuthenticationBackend):
     async def authenticate(self, request: Request) -> bool:
         return "token" in request.session
 
-authentication_backend = AdminAuth(secret_key=os.getenv("SECRET_KEY", "supersecret"))
+admin_secret_key = os.getenv("SECRET_KEY", "dev-admin-secret-key")
+authentication_backend = AdminAuth(secret_key=admin_secret_key)
 
 # --- VIEWS ---
 
@@ -153,8 +154,25 @@ class TeacherAdmin(ModelView, model=Teacher):
     async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
         input_file = data.get("image_url")
         if input_file and hasattr(input_file, "filename") and input_file.filename:
-            # Читаем файл в память асинхронно
-            image_bytes = await input_file.read()
+            # --- ЗАЩИТА ОТ ДЕКОМПРЕССИОННЫХ БОМБ И OOM (Limit 5MB) ---
+            # Читаем максимум 5МБ + 1 байт для проверки
+            max_size = 5 * 1024 * 1024
+            image_bytes = await input_file.read(max_size + 1)
+
+            if len(image_bytes) > max_size:
+                raise ValueError("Файл слишком большой! Максимальный размер — 5МБ.")
+
+            # --- УДАЛЕНИЕ СТАРОГО ФАЙЛА ПРИ ОБНОВЛЕНИИ ---
+            if not is_created and model.image_url:
+                # Превращаем URL /media/name.webp в путь app/uploads/name.webp
+                old_relative_path = model.image_url.lstrip("/")
+                if old_relative_path.startswith("media/"):
+                    old_file_path = Path("app/uploads") / old_relative_path.replace("media/", "", 1)
+                    if old_file_path.exists():
+                        try:
+                            old_file_path.unlink()
+                        except Exception:
+                            pass # Логируем ошибку, если нужно, но не прерываем процесс
 
             # Открываем изображение через Pillow
             img = Image.open(io.BytesIO(image_bytes))
@@ -186,6 +204,18 @@ class TeacherAdmin(ModelView, model=Teacher):
         if isinstance(subjects_input, str):
             clean_text = subjects_input.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
             data["subjects"] = [s.strip() for s in clean_text.split(",") if s.strip()]
+
+    async def on_model_delete(self, model: Any, request: Request) -> None:
+        """Удаляет файл с диска при удалении записи преподавателя"""
+        if model.image_url:
+            relative_path = model.image_url.lstrip("/")
+            if relative_path.startswith("media/"):
+                file_path = Path("app/uploads") / relative_path.replace("media/", "", 1)
+                if file_path.exists():
+                    try:
+                        file_path.unlink()
+                    except Exception:
+                        pass
 
 class DisciplineInline(ModelView, model=Discipline):
     column_list = [Discipline.name, Discipline.group, Discipline.start_term, Discipline.end_term]
