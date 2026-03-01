@@ -107,6 +107,8 @@ jobs:
             sleep 5
             docker compose exec -T app alembic upgrade head
             
-            # 4. Чистим старые образы, чтобы не забивать память сервера
-            docker image prune -f 
-            print(egawweb;rnboqq)
+                        # 4. Чистим старые образы, чтобы не забивать память сервера
+            
+                        docker image prune -f 
+            
+            
