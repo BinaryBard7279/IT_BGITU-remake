@@ -45,6 +45,8 @@
   };
 
   // ================= 2. FETCH DATA =================
+  let allSpecialities = [];
+
   async function loadData() {
     try {
       // Запрашиваем все данные параллельно
@@ -60,7 +62,23 @@
         fetch('/timeline').then(r => r.json())
       ]);
 
-      renderSpecialities(specialities);
+      allSpecialities = specialities;
+      
+      // Инициализация фильтра
+      const qualInputs = document.querySelectorAll('input[name="qualification"]');
+      qualInputs.forEach(input => {
+        input.addEventListener('change', () => {
+          const filtered = allSpecialities.filter(s => 
+            s.qualification.toLowerCase() === input.value.toLowerCase()
+          );
+          renderSpecialities(filtered);
+        });
+      });
+
+      // Первый рендер (по умолчанию выбрано "Бакалавриат")
+      const activeQual = document.querySelector('input[name="qualification"]:checked')?.value || 'Бакалавриат';
+      renderSpecialities(allSpecialities.filter(s => s.qualification.toLowerCase() === activeQual.toLowerCase()));
+
       renderSubjects(subjects);
       renderFeatures(features);
       renderTeachers(teachers);
@@ -82,10 +100,17 @@
 
   // ================= 3. RENDER FUNCTIONS =================
 
+  let specIdx = 0; // Состояние слайдера специальностей
   function renderSpecialities(data) {
     const dTrack = getById('directionsTrack');
     const dDots = getById('directionsDots');
-    if (!dTrack || !data.length) return;
+    if (!dTrack || !dDots) return;
+
+    if (!data.length) {
+      dTrack.innerHTML = '<div class="direction-slide"><p style="text-align:center; padding:2rem; color:var(--muted-foreground);">В данной категории пока нет программ.</p></div>';
+      dDots.innerHTML = '';
+      return;
+    }
 
     dTrack.innerHTML = data.map(d => `
       <div class="direction-slide">
@@ -104,15 +129,32 @@
 
     const dots = dDots.children;
     const count = data.length;
-    let idx = 0;
+    specIdx = 0; // Сброс при переключении категории
+    
     const set = i => {
-      idx = (i + count) % count;
-      dTrack.style.transform = `translateX(-${idx * 100}%)`;
-      [...dots].forEach((d, n) => d.classList.toggle('is-active', n === idx));
+      specIdx = (i + count) % count;
+      dTrack.style.transform = `translateX(-${specIdx * 100}%)`;
+      [...dots].forEach((d, n) => d.classList.toggle('is-active', n === specIdx));
     };
-    dDots.addEventListener('click', e => e.target.classList.contains('directions-dot') && set([...dots].indexOf(e.target)));
-    getById('directionsPrev')?.addEventListener('click', () => set(idx - 1));
-    getById('directionsNext')?.addEventListener('click', () => set(idx + 1));
+
+    // Очистка старых слушателей через замену элементов
+    const prevBtn = getById('directionsPrev');
+    const nextBtn = getById('directionsNext');
+    
+    if (prevBtn && nextBtn) {
+      const newPrev = prevBtn.cloneNode(true);
+      const newNext = nextBtn.cloneNode(true);
+      
+      prevBtn.parentNode.replaceChild(newPrev, prevBtn);
+      nextBtn.parentNode.replaceChild(newNext, nextBtn);
+
+      newPrev.onclick = () => set(specIdx - 1);
+      newNext.onclick = () => set(specIdx + 1);
+    }
+
+    dDots.onclick = e => e.target.classList.contains('directions-dot') && set([...dots].indexOf(e.target));
+
+    set(0); // Изначальная позиция
   }
 
   // --- Дисциплины (FontAwesome) ---

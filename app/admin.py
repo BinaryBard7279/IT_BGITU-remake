@@ -12,7 +12,7 @@ from PIL import Image
 from sqladmin import Admin, ModelView
 from sqladmin.authentication import AuthenticationBackend
 from sqlalchemy import select
-from wtforms import FileField, PasswordField, StringField, TextAreaField
+from wtforms import FileField, PasswordField, SelectField, StringField, TextAreaField
 
 from app.database import AsyncSessionLocal, engine
 from app.models import (
@@ -97,7 +97,16 @@ class SpecialityAdmin(ModelView, model=Speciality):
         Speciality.description: "Описание"
     }
     form_columns = [Speciality.name, Speciality.qualification, Speciality.term, Speciality.direction, Speciality.description]
-    form_overrides = {"description": TextAreaField}
+    form_overrides = {
+        "description": TextAreaField,
+        "qualification": SelectField
+    }
+    form_args = {
+        "qualification": {
+            "choices": [("Бакалавриат", "Бакалавриат"), ("Магистратура", "Магистратура")],
+            "label": "Квалификация"
+        }
+    }
 
 class FeatureAdmin(ModelView, model=Feature):
     name = "Преимущество"
