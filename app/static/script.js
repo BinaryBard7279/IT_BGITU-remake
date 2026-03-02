@@ -560,6 +560,27 @@
     }
   });
 
+  // Mobile Menu Logic
+  const menuToggle = getById('menuToggle');
+  const navLinks = getById('navLinks');
+  
+  if (menuToggle && navLinks) {
+    menuToggle.addEventListener('click', () => {
+      menuToggle.classList.toggle('active');
+      navLinks.classList.toggle('active');
+      document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+    });
+
+    // Close menu when clicking a link
+    navLinks.addEventListener('click', (e) => {
+      if (e.target.closest('.nav-link')) {
+        menuToggle.classList.remove('active');
+        navLinks.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+
   // ЗАПУСК ЗАГРУЗКИ ДАННЫХ
   loadData();
 

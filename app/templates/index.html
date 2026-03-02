@@ -24,7 +24,7 @@
       <nav class="header-nav">
         <a href="#" class="logo" id="setting_nav_logo">БГИТУ <span class="text-muted-foreground font-normal">IT-Институт</span></a>
         
-        <ul class="nav-links">
+        <ul class="nav-links" id="navLinks">
           <li><button class="nav-link" data-target="directions">Направления</button></li>
           <li><button class="nav-link" data-target="disciplines">Дисциплины</button></li>
           <li><button class="nav-link" data-target="features">Преимущества</button></li>
@@ -32,7 +32,14 @@
           <li><button class="nav-link" data-target="roadmap">План</button></li>
         </ul>
         
-        <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary btn-sm header-cta" id="setting_nav_btn_link"><span id="setting_nav_btn_text">Подать заявление</span></a>
+        <div class="header-actions">
+          <a href="https://priem.bgitu.ru" target="_blank" class="btn btn-primary btn-sm header-cta" id="setting_nav_btn_link"><span id="setting_nav_btn_text">Подать заявление</span></a>
+          <button class="mobile-menu-toggle" id="menuToggle" aria-label="Открыть меню">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </button>
+        </div>
       </nav>
     </div>
   </header>
