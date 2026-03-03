@@ -21,13 +21,13 @@ from app.models import (
     Discipline,
     Faq,
     Feature,
+    LifeEvent,
     Setting,
     Speciality,
     Subject,
     Teacher,
     TimelineStep,
     User,
-    LifeEvent,
 )
 from app.security import get_password_hash, verify_password
 

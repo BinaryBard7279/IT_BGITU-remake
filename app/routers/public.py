@@ -12,25 +12,25 @@ from app.database import get_db
 from app.models.achievement import Achievement
 from app.models.faq import Faq
 from app.models.feature import Feature
+from app.models.life_event import LifeEvent
 from app.models.plan import Direction
 from app.models.setting import Setting
 from app.models.speciality import Speciality
 from app.models.subject import Subject
 from app.models.teacher import Teacher
 from app.models.timeline import TimelineStep
-from app.models.life_event import LifeEvent
 
 # [PERF] Импорт нашего таймера
 from app.performance import PerfTimer
 from app.schemas.achievement import Achievement as AchievementSchema
 from app.schemas.faq import Faq as FaqSchema
 from app.schemas.feature import Feature as FeatureSchema
+from app.schemas.life_event import LifeEvent as LifeEventSchema
 from app.schemas.setting import Setting as SettingSchema
 from app.schemas.speciality import Speciality as SpecialitySchema
 from app.schemas.subject import Subject as SubjectSchema
 from app.schemas.teacher import Teacher as TeacherSchema
 from app.schemas.timeline import TimelineStep as TimelineStepSchema
-from app.schemas.life_event import LifeEvent as LifeEventSchema
 
 router = APIRouter(tags=["Landing"])
 
