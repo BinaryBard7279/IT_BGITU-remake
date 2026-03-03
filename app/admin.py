@@ -27,6 +27,7 @@ from app.models import (
     Teacher,
     TimelineStep,
     User,
+    LifeEvent,
 )
 from app.security import get_password_hash, verify_password
 
@@ -347,6 +348,91 @@ class TimelineStepAdmin(ModelView, model=TimelineStep):
     column_sortable_list = [TimelineStep.order]
 
 
+class LifeEventAdmin(ModelView, model=LifeEvent):
+    name = "Событие (Жизнь)"
+    name_plural = "Жизнь института"
+    icon = "fa-solid fa-camera-retro"
+
+    column_list = [LifeEvent.image_url, LifeEvent.title, LifeEvent.tag, LifeEvent.is_main]
+    column_labels = {
+        LifeEvent.image_url: "Фото",
+        LifeEvent.title: "Заголовок",
+        LifeEvent.tag: "Тема (тег)",
+        LifeEvent.is_main: "На главную (Bento)",
+        LifeEvent.order: "Порядок"
+    }
+
+    form_columns = [LifeEvent.title, LifeEvent.tag, LifeEvent.image_url, LifeEvent.is_main, LifeEvent.order]
+
+    form_overrides = {
+        "image_url": FileField
+    }
+
+    form_args = {
+        "image_url": {
+            "label": "Фотография",
+            "render_kw": {"accept": "image/*"}
+        }
+    }
+
+    column_formatters = {
+        LifeEvent.image_url: lambda m, a: f'<img src="{m.image_url}" width="100" style="border-radius: 5px; object-fit: cover;">' if m.image_url else "Нет фото"
+    }
+
+    async def on_model_change(self, data: dict, model: Any, is_created: bool, request: Request) -> None:
+        input_file = data.get("image_url")
+        if input_file and hasattr(input_file, "filename") and input_file.filename:
+            # --- ЗАЩИТА ОТ ДЕКОМПРЕССИОННЫХ БОМБ И OOM (Limit 5MB) ---
+            max_size = 5 * 1024 * 1024
+            image_bytes = await input_file.read(max_size + 1)
+
+            if len(image_bytes) > max_size:
+                raise ValueError("Файл слишком большой! Максимальный размер — 5МБ.")
+
+            # --- УДАЛЕНИЕ СТАРОГО ФАЙЛА ПРИ ОБНОВЛЕНИИ ---
+            if not is_created and model.image_url:
+                old_relative_path = model.image_url.lstrip("/")
+                if old_relative_path.startswith("media/"):
+                    old_file_path = Path("app/uploads") / old_relative_path.replace("media/", "", 1)
+                    if old_file_path.exists():
+                        try:
+                            old_file_path.unlink()
+                        except Exception:
+                            pass
+
+            img = Image.open(io.BytesIO(image_bytes))
+            if img.mode in ("RGBA", "P"):
+                img = img.convert("RGB")
+
+            # Ресайз до 1200 для качества
+            img.thumbnail((1200, 1200), Image.Resampling.LANCZOS)
+
+            unique_filename = f"life_{uuid.uuid4()}.webp"
+            save_directory = Path("app/uploads")
+            save_directory.mkdir(parents=True, exist_ok=True)
+            save_path = save_directory / unique_filename
+
+            img.save(save_path, format="WEBP", quality=80, method=6)
+            data["image_url"] = f"/media/{unique_filename}"
+        else:
+            if is_created:
+                data["image_url"] = ""
+            elif "image_url" in data:
+                del data["image_url"]
+
+    async def on_model_delete(self, model: Any, request: Request) -> None:
+        """Удаляет файл с диска при удалении записи"""
+        if model.image_url:
+            relative_path = model.image_url.lstrip("/")
+            if relative_path.startswith("media/"):
+                file_path = Path("app/uploads") / relative_path.replace("media/", "", 1)
+                if file_path.exists():
+                    try:
+                        file_path.unlink()
+                    except Exception:
+                        pass
+
+
 # --- SETUP ---
 
 def setup_admin(app):
@@ -369,4 +455,5 @@ def setup_admin(app):
     admin.add_view(AchievementAdmin)
     admin.add_view(FaqAdmin)
     admin.add_view(TimelineStepAdmin)
+    admin.add_view(LifeEventAdmin)
     admin.add_view(SettingAdmin)

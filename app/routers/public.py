@@ -18,6 +18,7 @@ from app.models.speciality import Speciality
 from app.models.subject import Subject
 from app.models.teacher import Teacher
 from app.models.timeline import TimelineStep
+from app.models.life_event import LifeEvent
 
 # [PERF] Импорт нашего таймера
 from app.performance import PerfTimer
@@ -29,6 +30,7 @@ from app.schemas.speciality import Speciality as SpecialitySchema
 from app.schemas.subject import Subject as SubjectSchema
 from app.schemas.teacher import Teacher as TeacherSchema
 from app.schemas.timeline import TimelineStep as TimelineStepSchema
+from app.schemas.life_event import LifeEvent as LifeEventSchema
 
 router = APIRouter(tags=["Landing"])
 
@@ -121,4 +123,10 @@ async def get_all_settings(db: AsyncSession = Depends(get_db)):
 @router.get("/timeline", response_model=List[TimelineStepSchema])
 async def get_timeline(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(TimelineStep).order_by(TimelineStep.order))
+    return result.scalars().all()
+
+
+@router.get("/life-events", response_model=List[LifeEventSchema])
+async def get_life_events(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(LifeEvent).order_by(LifeEvent.order, LifeEvent.id.desc()))
     return result.scalars().all()

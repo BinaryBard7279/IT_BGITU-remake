@@ -50,7 +50,7 @@
   async function loadData() {
     try {
       // Запрашиваем все данные параллельно
-      const [specialities, subjects, features, teachers, achievements, directions, faqs, settings, timeline] = await Promise.all([
+      const [specialities, subjects, features, teachers, achievements, directions, faqs, settings, timeline, lifeEvents] = await Promise.all([
         fetch('/speciality').then(r => r.json()),
         fetch('/subjects').then(r => r.json()),
         fetch('/features').then(r => r.json()),
@@ -59,7 +59,8 @@
         fetch('/directions-with-disciplines').then(r => r.json()),
         fetch('/faqs').then(r => r.json()),
         fetch('/settings').then(r => r.json()),
-        fetch('/timeline').then(r => r.json())
+        fetch('/timeline').then(r => r.json()),
+        fetch('/life-events').then(r => r.json())
       ]);
 
       allSpecialities = specialities;
@@ -85,6 +86,7 @@
       renderAchievements(achievements);
       initRoadmap(directions);
       renderFaqs(faqs);
+      renderLife(lifeEvents);
       
       // Новые функции
       applySettings(settings);
@@ -254,6 +256,51 @@
         </div>
       </div>
     `).join('');
+  }
+
+  function renderLife(data) {
+    const bGrid = getById('bentoGrid');
+    const lArchive = getById('lifeArchive');
+    const tBtn = getById('toggleLifeArchive');
+    if (!bGrid || !lArchive) return;
+
+    if (!data.length) {
+      getById('institute-life').style.display = 'none';
+      return;
+    }
+
+    // Bento (is_main === true, max 4)
+    const highlights = data.filter(d => d.is_main).slice(0, 4);
+    const archive = data.filter(d => !highlights.includes(d));
+
+    const cardHtml = (d, i, isArchive = false) => `
+      <div class="photo-card reveal ${isArchive ? 'archive-card' : `bento-${i+1}`}" data-stagger>
+        <img src="${esc(d.image_url)}" alt="${esc(d.title)}" loading="lazy">
+        <div class="card-content">
+          <span class="card-tag">${esc(d.tag)}</span>
+          <h3 class="card-title">${esc(d.title)}</h3>
+        </div>
+      </div>`;
+
+    bGrid.innerHTML = highlights.map((d, i) => cardHtml(d, i)).join('');
+    lArchive.innerHTML = archive.map((d, i) => cardHtml(d, i, true)).join('');
+
+    if (archive.length > 0) {
+      tBtn.style.display = 'inline-block';
+      tBtn.textContent = `Показать еще ${archive.length} фото`;
+      tBtn.onclick = () => {
+        if (lArchive.classList.contains('visible')) {
+          lArchive.classList.remove('visible');
+          tBtn.textContent = `Показать еще ${archive.length} фото`;
+          lenis?.scrollTo(getById('institute-life'));
+        } else {
+          lArchive.classList.add('visible');
+          tBtn.textContent = 'Свернуть архив';
+        }
+      };
+    } else {
+      tBtn.style.display = 'none';
+    }
   }
 
   // --- НОВЫЕ ФУНКЦИИ ДЛЯ CMS ---
@@ -491,8 +538,8 @@
     const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}}), {threshold:0.1, rootMargin:'0px 0px -50px 0px'});
     document.querySelectorAll('.reveal').forEach(e => obs.observe(e));
     
-    document.querySelectorAll('.disciplines-grid, .features-grid, .faculty-track-inner').forEach(container => {
-        const children = container.querySelectorAll('[data-stagger], .faculty-card');
+    document.querySelectorAll('.disciplines-grid, .features-grid, .faculty-track-inner, .bento-grid, #lifeArchive').forEach(container => {
+        const children = container.querySelectorAll('[data-stagger], .faculty-card, .photo-card');
         children.forEach((el, i) => {
           const delay = container.classList.contains('faculty-track-inner') ? 0.05 : 0.1;
           el.style.animationDelay = `${delay * (i + 1)}s`;
@@ -513,7 +560,7 @@
   window.addEventListener('scroll', () => {
     if(!tick) {
       window.requestAnimationFrame(() => {
-        const curr = ['roadmap','faculty','features','disciplines','directions'].find(id => {
+        const curr = ['apply','achievements','institute-life','roadmap','faculty','features','disciplines','directions'].find(id => {
            const el = getById(id); return el && window.scrollY >= el.offsetTop - 300;
         });
         links.forEach(l => l.classList.toggle('active', l.dataset.target === curr));
