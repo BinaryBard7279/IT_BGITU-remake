@@ -184,6 +184,21 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .hero-description { font-size: clamp(1.125rem, 2vw, 1.25rem); color: var(--muted-foreground); max-width: 32rem; }
 .hero-buttons { display: flex; flex-wrap: wrap; gap: 1rem; padding-top: 1rem; }
 @media (max-width: 640px) { .hero-buttons { flex-direction: column; width: 100%; } .hero-buttons .btn { width: 100%; } }
+/* АНИМАЦИЯ КВАДРАТОВ (Квантовый дрейф) */
+.square-1 { animation: drift1 12s ease-in-out infinite; }
+.square-2 { animation: drift2 9s ease-in-out infinite; }
+.square-3 { animation: drift3 15s ease-in-out infinite; }
+.square-4 { animation: drift4 8s ease-in-out infinite; }
+.square-5 { animation: drift5 10s ease-in-out infinite; }
+.square-6 { animation: drift1 7s ease-in-out infinite reverse; }
+.square-7 { animation: drift2 11s ease-in-out infinite; }
+
+@keyframes drift1 { 0%, 100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(15px, -10px) rotate(3deg); } }
+@keyframes drift2 { 0%, 100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-20px, 15px) rotate(-5deg); } }
+@keyframes drift3 { 0%, 100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(10px, 20px) rotate(4deg); } }
+@keyframes drift4 { 0%, 100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-10px, -15px) rotate(-8deg); } }
+@keyframes drift5 { 0%, 100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(15px, 10px) rotate(6deg); } }
+
 .hero-visual { display: flex; justify-content: center; align-items: center; }
 @media (max-width: 1023px) { .hero-visual { order: -1; transform: scale(0.8); height: 280px; } }
 
@@ -514,12 +529,105 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 .btn-toggle-life:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
 
-@media (max-width: 1024px) {
-  .bento-grid, #lifeArchive { grid-template-columns: repeat(2, 1fr); grid-template-rows: auto; }
-  .photo-card { height: 300px; }
-  .bento-1 { grid-column: span 2; grid-row: span 1; }
+/* ================= MOBILE OPTIMIZATION (COMPACT) ================= */
+@media (max-width: 768px) {
+  :root { --radius: 0.5rem; }
+  .section { padding: 2.5rem 0; }
+  .section-header { margin-bottom: 1.5rem; }
+  .section-title { font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .section-description { font-size: 0.9rem; }
+
+  /* Hero Compact */
+  .hero { min-height: auto; padding-top: 5rem; padding-bottom: 1rem; }
+  .hero-title { font-size: 1.8rem; margin-bottom: 0.8rem; }
+  .hero-description { font-size: 0.95rem; margin-bottom: 1.2rem; padding: 0 1rem; }
+  
+  /* Квадраты как изящный логотип */
+  .hero-visual { 
+    height: 160px; 
+    margin-top: 0; 
+    margin-bottom: 1rem;
+  }
+  .squares-composition { 
+    transform: scale(0.5); /* Уменьшаем "логотип" из квадратов */
+    filter: blur(0.5px);
+  }
+
+  /* Faculty Slider: Native & Fast */
+  .faculty-track {
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 1rem 1.5rem 1rem !important;
+    display: flex !important;
+  }
+  .faculty-track-inner {
+    display: flex !important;
+    transform: none !important; /* Отключаем JS на мобилках */
+    width: auto !important;
+  }
+  .faculty-card {
+    scroll-snap-align: center;
+    width: 260px !important;
+    flex-shrink: 0 !important;
+    margin-right: 1rem;
+  }
+  .faculty-arrow { display: none !important; }
+
+  /* 2-Column Grids for everything */
+  .disciplines-grid, .features-grid, .achievements-grid, #lifeArchive, .bento-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+    grid-template-rows: auto !important;
+  }
+
+  /* Compact Cards */
+  .discipline-card, .feature-card, .achievement-card, .photo-card {
+    padding: 1rem !important;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    height: auto !important;
+    min-height: 140px;
+  }
+
+  .discipline-icon, .feature-icon {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    font-size: 1.25rem !important;
+    margin-bottom: 0.5rem !important;
+    margin-right: 0 !important;
+  }
+
+  .discipline-title, .feature-title, .achievement-title, .card-title {
+    font-size: 0.85rem !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Hide long descriptions on mobile to save space */
+  .discipline-description, .feature-description, .achievement-desc {
+    display: none;
+  }
+
+  /* Bento Mobile Overrides */
+  .bento-1, .bento-2 { grid-column: span 1 !important; grid-row: span 1 !important; }
+  .photo-card { height: 160px !important; }
+  .card-content { padding: 0.75rem !important; }
+  .card-tag { font-size: 0.55rem !important; padding: 2px 6px !important; margin-bottom: 0.4rem !important; }
+
+  /* Timeline Compact */
+  .timeline-item { padding-left: 45px; margin-bottom: 1.5rem; }
+  .timeline-content { padding: 1rem; }
+  .timeline-heading { font-size: 1rem; }
+  .timeline-desc { font-size: 0.8rem; }
+
+  /* Faculty Slider */
+  .faculty-card { width: 240px; }
+  .faculty-info { padding: 1rem; }
+  .faculty-name { font-size: 0.95rem; }
 }
-@media (max-width: 640px) {
-  .bento-grid, #lifeArchive { grid-template-columns: 1fr; }
-  .bento-1, .bento-2 { grid-column: span 1; }
+
+@media (max-width: 480px) {
+  .hero-buttons { flex-direction: column; width: 100%; }
+  .btn { width: 100%; }
 }
