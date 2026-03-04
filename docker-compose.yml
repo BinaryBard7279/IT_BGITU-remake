@@ -1,6 +1,6 @@
 services:
   app:
-    build: .
+    image: binarybard7279/it-bgitu:latest
     restart: always
     expose:
       - "8000"
