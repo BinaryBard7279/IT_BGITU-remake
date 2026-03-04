@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 # from app.routers import auth, cms
 from app.admin import setup_admin
@@ -42,6 +43,8 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(PerformanceMiddleware)
 # -------------------------------------------
+
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 # Сжатие ответов (ускоряет передачу больших JSON)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
