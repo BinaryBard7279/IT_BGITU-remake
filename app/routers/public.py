@@ -21,8 +21,8 @@ from app.models.subject import Subject
 from app.models.teacher import Teacher
 from app.models.timeline import TimelineStep
 
-# [PERF] Импорт нашего таймера
-from app.performance import PerfTimer
+# [PERF] Импорт нашего таймера и логгера
+from app.performance import PerfTimer, perf_logger
 from app.schemas.achievement import Achievement as AchievementSchema
 from app.schemas.faq import Faq as FaqSchema
 from app.schemas.feature import Feature as FeatureSchema
@@ -33,7 +33,7 @@ from app.schemas.subject import Subject as SubjectSchema
 from app.schemas.teacher import Teacher as TeacherSchema
 from app.schemas.timeline import TimelineStep as TimelineStepSchema
 
-# Кэш на 5 минут (300 секунд), храним максимум 1 результат для каждого типа данных
+# Кэш на 5 минут (300 секунд)
 teachers_cache = TTLCache(maxsize=1, ttl=300)
 settings_cache = TTLCache(maxsize=1, ttl=300)
 roadmap_cache = TTLCache(maxsize=1, ttl=300)
@@ -61,9 +61,7 @@ async def health_check(db: AsyncSession = Depends(get_db)):
         value = result.scalar()
         return {"db_status": True, "math_result": value}
     except Exception as e:
-        # Логируем реальную ошибку в консоль/логгер сервера
-        print(f"Healthcheck DB Error: {e}")
-        # Пользователю отдаем безопасное сообщение
+        perf_logger.error(f"HEALTH | Database connection failed: {e}")
         return {"db_status": False, "error": "Database connection failed"}
 
 
@@ -86,13 +84,13 @@ async def get_all_features(db: AsyncSession = Depends(get_db)):
 @router.get("/directions-with-disciplines")
 async def get_all_directions_with_disciplines(db: AsyncSession = Depends(get_db)):
     if "data" in roadmap_cache:
+        perf_logger.info("CACHE    | HIT      | GET /directions-with-disciplines")
         return roadmap_cache["data"]
 
-    # SQL-запрос замеряется автоматически через события SQLAlchemy
+    perf_logger.info("CACHE    | MISS     | GET /directions-with-disciplines")
     result = await db.execute(select(Direction).options(selectinload(Direction.disciplines)).order_by(Direction.id))
     directions = result.scalars().all()
 
-    # [PERF] Замеряем время упаковки данных в JSON (чистый CPU time)
     with PerfTimer("Упаковка JSON Roadmap"):
         response_data = [{
             "id": d.id,
@@ -114,8 +112,10 @@ async def get_all_directions_with_disciplines(db: AsyncSession = Depends(get_db)
 @router.get("/speciality", response_model=List[SpecialitySchema])
 async def get_all_speciality(db: AsyncSession = Depends(get_db)):
     if "data" in speciality_cache:
+        perf_logger.info("CACHE    | HIT      | GET /speciality")
         return speciality_cache["data"]
 
+    perf_logger.info("CACHE    | MISS     | GET /speciality")
     result = await db.execute(select(Speciality).order_by(Speciality.id))
     data = result.scalars().all()
     speciality_cache["data"] = data
@@ -129,8 +129,10 @@ async def get_all_subjects(db: AsyncSession = Depends(get_db)):
 @router.get("/teachers", response_model=List[TeacherSchema])
 async def get_all_teachers(db: AsyncSession = Depends(get_db)):
     if "data" in teachers_cache:
+        perf_logger.info("CACHE    | HIT      | GET /teachers")
         return teachers_cache["data"]
 
+    perf_logger.info("CACHE    | MISS     | GET /teachers")
     result = await db.execute(select(Teacher).order_by(Teacher.fio))
     data = result.scalars().all()
     teachers_cache["data"] = data
@@ -139,8 +141,10 @@ async def get_all_teachers(db: AsyncSession = Depends(get_db)):
 @router.get("/settings", response_model=List[SettingSchema])
 async def get_all_settings(db: AsyncSession = Depends(get_db)):
     if "data" in settings_cache:
+        perf_logger.info("CACHE    | HIT      | GET /settings")
         return settings_cache["data"]
 
+    perf_logger.info("CACHE    | MISS     | GET /settings")
     result = await db.execute(select(Setting))
     data = result.scalars().all()
     settings_cache["data"] = data

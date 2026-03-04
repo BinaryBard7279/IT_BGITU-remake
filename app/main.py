@@ -34,7 +34,9 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
         path = request.url.path
         # Игнорируем запросы за статикой
         if not path.startswith(("/static", "/media")):
-            perf_logger.info(f"ENDPOINT | {process_time:>8.2f} ms | {request.method} {path}")
+            # Получаем реальный IP из заголовка или напрямую
+            ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
+            perf_logger.info(f"ENDPOINT | {process_time:>8.2f} ms | {response.status_code} | {request.method} {path} | IP: {ip}")
 
         # Заголовок для вкладки Network в браузере
         response.headers["Server-Timing"] = f"app;desc=\"FastAPI Server\";dur={process_time:.2f}"
