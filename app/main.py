@@ -3,11 +3,11 @@ import time
 
 import uvicorn
 from fastapi import FastAPI, Request
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 # from app.routers import auth, cms
 from app.admin import setup_admin
@@ -43,16 +43,8 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
 app.add_middleware(PerformanceMiddleware)
 # -------------------------------------------
 
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
-
-class ForceHTTPSMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        proto = request.headers.get("x-forwarded-proto")
-        if proto == "https":
-            request.scope["scheme"] = "https"
-        return await call_next(request)
-
-app.add_middleware(ForceHTTPSMiddleware)
+# Сжатие ответов (ускоряет передачу больших JSON)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:

@@ -1,6 +1,7 @@
 import os
 from typing import List
 
+from cachetools import TTLCache
 from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy import text
@@ -31,6 +32,12 @@ from app.schemas.speciality import Speciality as SpecialitySchema
 from app.schemas.subject import Subject as SubjectSchema
 from app.schemas.teacher import Teacher as TeacherSchema
 from app.schemas.timeline import TimelineStep as TimelineStepSchema
+
+# Кэш на 5 минут (300 секунд), храним максимум 1 результат для каждого типа данных
+teachers_cache = TTLCache(maxsize=1, ttl=300)
+settings_cache = TTLCache(maxsize=1, ttl=300)
+roadmap_cache = TTLCache(maxsize=1, ttl=300)
+speciality_cache = TTLCache(maxsize=1, ttl=300)
 
 router = APIRouter(tags=["Landing"])
 
@@ -78,6 +85,9 @@ async def get_all_features(db: AsyncSession = Depends(get_db)):
 
 @router.get("/directions-with-disciplines")
 async def get_all_directions_with_disciplines(db: AsyncSession = Depends(get_db)):
+    if "data" in roadmap_cache:
+        return roadmap_cache["data"]
+
     # SQL-запрос замеряется автоматически через события SQLAlchemy
     result = await db.execute(select(Direction).options(selectinload(Direction.disciplines)).order_by(Direction.id))
     directions = result.scalars().all()
@@ -97,13 +107,19 @@ async def get_all_directions_with_disciplines(db: AsyncSession = Depends(get_db)
             } for disc in d.disciplines]
         } for d in directions]
 
+    roadmap_cache["data"] = response_data
     return response_data
 
 
 @router.get("/speciality", response_model=List[SpecialitySchema])
 async def get_all_speciality(db: AsyncSession = Depends(get_db)):
+    if "data" in speciality_cache:
+        return speciality_cache["data"]
+
     result = await db.execute(select(Speciality).order_by(Speciality.id))
-    return result.scalars().all()
+    data = result.scalars().all()
+    speciality_cache["data"] = data
+    return data
 
 @router.get("/subjects", response_model=List[SubjectSchema])
 async def get_all_subjects(db: AsyncSession = Depends(get_db)):
@@ -112,13 +128,23 @@ async def get_all_subjects(db: AsyncSession = Depends(get_db)):
 
 @router.get("/teachers", response_model=List[TeacherSchema])
 async def get_all_teachers(db: AsyncSession = Depends(get_db)):
+    if "data" in teachers_cache:
+        return teachers_cache["data"]
+
     result = await db.execute(select(Teacher).order_by(Teacher.fio))
-    return result.scalars().all()
+    data = result.scalars().all()
+    teachers_cache["data"] = data
+    return data
 
 @router.get("/settings", response_model=List[SettingSchema])
 async def get_all_settings(db: AsyncSession = Depends(get_db)):
+    if "data" in settings_cache:
+        return settings_cache["data"]
+
     result = await db.execute(select(Setting))
-    return result.scalars().all()
+    data = result.scalars().all()
+    settings_cache["data"] = data
+    return data
 
 @router.get("/timeline", response_model=List[TimelineStepSchema])
 async def get_timeline(db: AsyncSession = Depends(get_db)):

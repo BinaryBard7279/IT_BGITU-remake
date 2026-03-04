@@ -27,3 +27,14 @@ env/
 # Environment variables
 .env
 .env.local
+
+# Gemini CLI
+GEMINI.md
+.gemini/
+
+# Project Specific
+server_dump.sql
+Caddyfile.new
+benchmark.py
+check_url.py
+repomix-output.xml
