@@ -1,0 +1,13 @@
+# Для локальной разработки без HTTPS
+localhost:80 {
+    reverse_proxy app:8000
+}
+
+# production (раскомментируйте и замените домен)
+# www.yourdomain.com {
+#     redir https://yourdomain.com{uri}
+# }
+#
+# yourdomain.com {
+#     reverse_proxy app:8000
+# }
